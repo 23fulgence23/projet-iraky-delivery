@@ -1,0 +1,159 @@
+/* ========================================
+   IRAKY Delivery — Responsive Global CSS
+   Appliqué sur toutes les pages
+   ======================================== */
+
+/* ── NAVBAR ── */
+@media (max-width: 991px) {
+  .navbar .container {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding: 10px 15px !important;
+  }
+
+  /* Menu liens — caché sur mobile, affiché en colonne */
+  .navbar .d-flex.align-items-center.gap-4 {
+    display: none !important;
+  }
+
+  /* Boutons connexion/inscription */
+  .navbar .d-flex.gap-2 {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar .d-flex.gap-2 .btn {
+    padding: 5px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Logo texte plus petit */
+  .navbar-brand span {
+    font-size: 16px !important;
+  }
+
+  .navbar-brand img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+}
+
+/* ── SECTION ACCUEIL ── */
+@media (max-width: 991px) {
+  /* Titre */
+  #accueil h1 {
+    font-size: 36px !important;
+  }
+
+  #accueil p {
+    font-size: 15px !important;
+  }
+
+  /* Carousel image */
+  #accueil .col-lg-6 > div[style*="600px"] {
+    width: 100% !important;
+    height: 260px !important;
+  }
+
+  /* Boutons côte à côte centrés */
+  #accueil .d-flex.gap-3 {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 576px) {
+  #accueil {
+    padding-top: 100px !important;
+    padding-bottom: 40px !important;
+  }
+
+  #accueil h1 {
+    font-size: 28px !important;
+  }
+
+  #accueil .col-lg-6 > div[style*="600px"] {
+    height: 220px !important;
+  }
+}
+
+/* ── SECTIONS GÉNÉRALES (apropos, services, contact) ── */
+@media (max-width: 768px) {
+  section {
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+  }
+
+  .container {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  h2 {
+    font-size: 26px !important;
+  }
+
+  h3 {
+    font-size: 20px !important;
+  }
+}
+
+/* ── CARDS / GRILLES ── */
+@media (max-width: 768px) {
+  .row.g-4 > [class*="col-"],
+  .row.g-3 > [class*="col-"] {
+    margin-bottom: 16px;
+  }
+}
+
+/* ── FORMULAIRES (Inscription / Connexion) ── */
+@media (max-width: 576px) {
+  .col-md-6 {
+    width: 100% !important;
+  }
+
+  input.form-control,
+  select.form-select {
+    font-size: 14px !important;
+  }
+
+  button.btn.w-100 {
+    font-size: 15px !important;
+  }
+}
+
+/* ── DASHBOARD ── */
+@media (max-width: 768px) {
+  /* Sidebar cachée par défaut */
+  .sidebar {
+    display: none !important;
+  }
+
+  .dashboard-content {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
+
+/* ── FOOTER ── */
+@media (max-width: 576px) {
+  footer .col-md-4 {
+    text-align: center !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* ── UTILITAIRES GLOBAUX ── */
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}

@@ -14,9 +14,14 @@ return new class extends Migration
             $table->string('prenom');
             $table->string('email')->unique();
             $table->string('telephone');
+            $table->string('adresse');
             $table->string('password');
-            $table->enum('role', ['client', 'coursier', 'admin']);
+            $table->enum('role', ['client', 'coursier', 'admin'])->default('client');
             $table->enum('statut', ['actif', 'inactif'])->default('actif');
+            $table->string('cin')->nullable();
+            $table->string('photo_identite')->nullable();
+            $table->string('mvola_transaction')->nullable();
+            $table->timestamp('abonnement_expire')->nullable();
             $table->timestamps();
         });
     }

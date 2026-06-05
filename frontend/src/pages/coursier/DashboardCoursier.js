@@ -1,0 +1,1067 @@
+import { useState, useEffect } from "react";
+import logo from "../../images/logo.png";
+import { FaStar, FaRegStar } from "react-icons/fa";
+import {
+  MdDashboard, MdLocationOn, MdListAlt, MdPerson, MdHelp,
+  MdLogout, MdNotifications, MdDeliveryDining, MdCheckCircle,
+  MdChat, MdSend, MdBarChart, MdAccessTime, MdAttachMoney,
+  MdLocalShipping, MdCampaign, MdThumbUp, MdClose,
+  MdDirectionsBike, MdStar, MdStarBorder, MdWork,
+  MdPhone, MdEmail, MdBadge, MdVerified,
+} from "react-icons/md";
+
+// ══════════════════════════════════════════════
+//  MOCK DATA
+// ══════════════════════════════════════════════
+const MOCK_PUBLICATIONS = [
+  {
+    id: 1, service: "Facture JIRAMA", moyen: "Moto", tarif: 8000,
+    statut: "en_attente", heure_publication: "08:15",
+    heure_debut: "08:30", heure_livraison: "09:15",
+    detail: "Payer facture JIRAMA Tsararano, montant environ 45 000 Ar",
+    adresse_pickup: "Rue de l'Église, Toliara centre",
+    date: "2026-06-04", client: "Tony R.", client_id: 1,
+    color: "#f59e0b",
+  },
+  {
+    id: 2, service: "Banque BFV", moyen: "Voiture", tarif: 12000,
+    statut: "en_attente", heure_publication: "09:45",
+    heure_debut: "10:00", heure_livraison: "11:00",
+    detail: "Retrait BNI Toliara centre, montant 200 000 Ar",
+    adresse_pickup: "Avenue Gallieni, Toliara",
+    date: "2026-06-04", client: "Marie S.", client_id: 2,
+    color: "#3b82f6",
+  },
+  {
+    id: 3, service: "Achat SACMA", moyen: "Piéton", tarif: 5000,
+    statut: "en_attente", heure_publication: "11:00",
+    heure_debut: "11:30", heure_livraison: "12:30",
+    detail: "Acheter riz 10kg + huile 2L + savon",
+    adresse_pickup: "Quartier Mahavatse, Toliara",
+    date: "2026-06-04", client: "Jean P.", client_id: 3,
+    color: "#10b981",
+  },
+  {
+    id: 4, service: "Légalisation CIN", moyen: "Moto", tarif: 8000,
+    statut: "en_attente", heure_publication: "13:00",
+    heure_debut: "13:30", heure_livraison: "15:00",
+    detail: "Légaliser CIN à la commune, 3 exemplaires",
+    adresse_pickup: "Rue Docteur Berge, Toliara",
+    date: "2026-06-04", client: "Hery M.", client_id: 4,
+    color: "#06b6d4",
+  },
+];
+
+const MOCK_MESSAGES = [
+  { id: 1, from: "client", texte: "Bonjour, êtes-vous disponible ?", time: "08:20" },
+  { id: 2, from: "coursier", texte: "Oui, je suis disponible !", time: "08:21" },
+  { id: 3, from: "client", texte: "Parfait, pouvez-vous partir à 08h30 ?", time: "08:22" },
+];
+
+const STATUT_CONFIG = {
+  en_attente: { label: "En attente",     color: "#f59e0b", bg: "#f59e0b18", icon: <MdAccessTime/> },
+  negociable: { label: "En négociation", color: "#3b82f6", bg: "#3b82f618", icon: <MdChat/> },
+  accepte:    { label: "Accepté",        color: "#10b981", bg: "#10b98118", icon: <MdCheckCircle/> },
+  refuse:     { label: "Refusé",         color: "#ef4444", bg: "#ef444418", icon: <MdClose/> },
+  termine:    { label: "Terminé",        color: "#8b5cf6", bg: "#8b5cf618", icon: <MdStar/> },
+};
+
+// ══════════════════════════════════════════════
+//  ÉTOILES
+// ══════════════════════════════════════════════
+function Etoiles({ value }) {
+  return (
+    <div style={{ display: "flex", gap: 3 }}>
+      {[1,2,3,4,5].map(i => (
+        i <= value
+          ? <MdStar key={i} style={{ color: "#FFD700", fontSize: 18 }}/>
+          : <MdStarBorder key={i} style={{ color: "#444", fontSize: 18 }}/>
+      ))}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  BADGE STATUT
+// ══════════════════════════════════════════════
+function StatutBadge({ statut }) {
+  const s = STATUT_CONFIG[statut];
+  if (!s) return null;
+  return (
+    <span style={{
+      backgroundColor: s.bg, color: s.color,
+      borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700,
+      border: `1px solid ${s.color}44`,
+      display: "inline-flex", alignItems: "center", gap: 5,
+    }}>
+      {s.icon} {s.label}
+    </span>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════
+function Modal({ children, onClose, size = "md" }) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+  return (
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0, zIndex: 400,
+      backgroundColor: "rgba(0,0,0,0.78)", backdropFilter: "blur(4px)",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        backgroundColor: "#131330", borderRadius: 20, padding: 28,
+        width: "100%", maxWidth: size === "lg" ? 640 : 480,
+        border: "1px solid #FFD70030", boxShadow: "0 24px 60px rgba(0,0,0,0.7)",
+        animation: "modalIn 0.25s ease", maxHeight: "90vh", overflowY: "auto",
+      }}>
+        <button onClick={onClose} style={{
+          float: "right", background: "transparent", border: "none",
+          color: "#666", fontSize: 22, cursor: "pointer",
+        }}
+          onMouseEnter={e => e.target.style.color = "#fff"}
+          onMouseLeave={e => e.target.style.color = "#666"}>✕</button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════════
+function SidebarContent({ onglet, setOnglet, profil, missions }) {
+  const items = [
+    { id: "accueil",    Icon: MdDashboard,      label: "Tableau de bord"    },
+    { id: "missions",   Icon: MdDeliveryDining, label: "Missions disponibles" },
+    { id: "mes_missions", Icon: MdWork,         label: "Mes missions"        },
+    { id: "profil",     Icon: MdPerson,         label: "Mon profil"          },
+    { id: "aide",       Icon: MdHelp,           label: "Aide & Support"      },
+  ];
+  const enCours = missions.filter(m => ["negociable","accepte"].includes(m.statut)).length;
+
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "0 20px 20px", borderBottom: "1px solid #FFD70018", marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 46, height: 46, borderRadius: "50%",
+            background: "linear-gradient(135deg,#FFD700,#ff8c00)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 800, color: "#000", fontSize: 17,
+            boxShadow: "0 0 14px #FFD70044",
+          }}>
+            {profil.prenom?.[0]}{profil.nom?.[0]}
+          </div>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{profil.prenom} {profil.nom}</div>
+            <div style={{ color: "#FFD700", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+              <MdDeliveryDining style={{ fontSize: 13 }}/> Coursier IRAKY
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, paddingTop: 4 }}>
+        {items.map(item => (
+          <div key={item.id} onClick={() => setOnglet(item.id)}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "11px 20px", cursor: "pointer", fontSize: 13.5,
+              backgroundColor: onglet === item.id ? "#FFD70012" : "transparent",
+              borderLeft: onglet === item.id ? "3px solid #FFD700" : "3px solid transparent",
+              color: onglet === item.id ? "#FFD700" : "#8888aa",
+              transition: "all 0.18s", borderRadius: "0 10px 10px 0", marginRight: 8,
+            }}
+            onMouseEnter={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "#ffffff08"; e.currentTarget.style.color = "#fff"; }}}
+            onMouseLeave={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#8888aa"; }}}>
+            <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <item.Icon style={{ fontSize: 18 }}/> {item.label}
+            </span>
+            {item.id === "mes_missions" && enCours > 0 && (
+              <span style={{ background: "#f59e0b", color: "#000", borderRadius: 12,
+                padding: "1px 8px", fontSize: 11, fontWeight: 800 }}>{enCours}</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: 16 }}>
+        <button onClick={() => { localStorage.clear(); window.location.href = "/connexion"; }}
+          style={{
+            width: "100%", padding: "10px", borderRadius: 12,
+            border: "1px solid #ef444430", backgroundColor: "#ef444410",
+            color: "#ef6666", cursor: "pointer", fontWeight: 700, fontSize: 13,
+            transition: "all 0.2s", display: "flex", alignItems: "center",
+            justifyContent: "center", gap: 8,
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#ef444425"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#ef444410"}>
+          <MdLogout style={{ fontSize: 18 }}/> Se déconnecter
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  COMPOSANT PRINCIPAL
+// ══════════════════════════════════════════════
+function DashboardCoursier() {
+  const [onglet, setOnglet]           = useState("accueil");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifOpen, setNotifOpen]     = useState(false);
+  const [toast, setToast]             = useState(null);
+  const [publications, setPublications] = useState(MOCK_PUBLICATIONS);
+  const [missions, setMissions]       = useState([]);
+  const [chatModal, setChatModal]     = useState(null);
+  const [messages, setMessages]       = useState(MOCK_MESSAGES);
+  const [newMsg, setNewMsg]           = useState("");
+  const [detailModal, setDetailModal] = useState(null);
+
+  const [notifs, setNotifs] = useState([
+    { id: 1, texte: "Nouvelle mission disponible : Facture JIRAMA", lu: false, time: "Il y a 2 min" },
+    { id: 2, texte: "Tony R. souhaite négocier avec vous", lu: false, time: "Il y a 10 min" },
+    { id: 3, texte: "Bienvenue sur IRAKY Delivery !", lu: true, time: "Hier" },
+  ]);
+
+// ✅ APRÈS — données réelles depuis le backend
+const [profil, setProfil] = useState({
+  nom: "", prenom: "", email: "", telephone: "",
+  adresse: "", cin: "", photo_identite: null,
+  photo_recto: null, photo_verso: null,
+  note: 0, nb_missions: 0, nb_terminees: 0,
+});
+const [profilLoading, setProfilLoading] = useState(true);
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) { window.location.href = "/connexion"; return; }
+
+  fetch("http://localhost:8000/api/me", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+    .then(res => {
+      if (res.status === 401) { localStorage.clear(); window.location.href = "/connexion"; }
+      return res.json();
+    })
+    .then(data => {
+      setProfil({
+        nom:           data.nom           || "",
+        prenom:        data.prenom        || "",
+        email:         data.email         || "",
+        telephone:     data.telephone     || "",
+        adresse:       data.adresse       || "",
+        cin:           data.cin           || "",
+        photo_identite: data.photo_identite || null,
+        photo_recto:   data.photo_recto   || null,
+        photo_verso:   data.photo_verso   || null,
+        note:          data.note          || 0,
+        nb_missions:   data.nb_missions   || 0,
+        nb_terminees:  data.nb_terminees  || 0,
+      });
+      setProfilLoading(false);
+    })
+    .catch(() => setProfilLoading(false));
+}, []);
+
+  const nbNonLus = notifs.filter(n => !n.lu).length;
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Prendre une mission
+  const prendreMission = (pub) => {
+    const mission = { ...pub, statut: "negociable", pris_le: new Date().toISOString() };
+    setMissions(prev => [mission, ...prev]);
+    setPublications(prev => prev.filter(p => p.id !== pub.id));
+    setNotifs(prev => [{
+      id: Date.now(),
+      texte: `Vous avez pris la mission : ${pub.service} — statut en négociation`,
+      lu: false, time: "À l'instant",
+    }, ...prev]);
+    showToast(`Mission "${pub.service}" prise ! Statut : En négociation`);
+    setOnglet("mes_missions");
+  };
+
+  // Envoyer message
+  const envoyerMessage = () => {
+    if (!newMsg.trim()) return;
+    setMessages(prev => [...prev, {
+      id: Date.now(), from: "coursier", texte: newMsg, time: new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
+    }]);
+    setNewMsg("");
+  };
+
+  const card = { backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24, transition: "all 0.3s ease" };
+  const inp  = { backgroundColor: "#0a0a1e", border: "1px solid #FFD70030", color: "#fff", borderRadius: 12, padding: "11px 16px", width: "100%", fontSize: 14, outline: "none" };
+  const btnY = { background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", border: "none", borderRadius: 25, padding: "11px 28px", fontWeight: 800, cursor: "pointer", fontSize: 15, transition: "all 0.2s", boxShadow: "0 4px 20px #FFD70033" };
+
+  return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#080820", fontFamily: "'Segoe UI', sans-serif", color: "#fff" }}>
+
+      {/* TOAST */}
+      {toast && (
+        <div style={{
+          position: "fixed", top: 20, right: 20, zIndex: 9999,
+          backgroundColor: toast.type === "error" ? "#ef4444" : "#10b981",
+          color: "#fff", padding: "14px 22px", borderRadius: 14,
+          boxShadow: "0 8px 30px rgba(0,0,0,0.4)", fontWeight: 700, fontSize: 14,
+          animation: "slideIn 0.3s ease", display: "flex", alignItems: "center", gap: 10, maxWidth: 340,
+        }}>
+          {toast.type === "error" ? "⚠️" : "✅"} {toast.msg}
+        </div>
+      )}
+
+      {/* NAVBAR */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        backgroundColor: "rgba(8,8,32,0.97)", backdropFilter: "blur(16px)",
+        borderBottom: "1px solid #FFD70020", padding: "0 24px", height: 66,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <button className="d-lg-none" onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{ background: "transparent", border: "1px solid #FFD70044", borderRadius: 10, padding: "7px 10px", cursor: "pointer" }}>
+          {[0,1,2].map(i => (
+            <div key={i} style={{ width: 20, height: 2, backgroundColor: "#FFD700", margin: i < 2 ? "0 0 4px 0" : "0" }}/>
+          ))}
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src={logo} alt="IRAKY" style={{ width: 60, height: 60, borderRadius: "50%" }}/>
+          <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">
+            IRAKY Delivery
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {/* cloche */}
+          <div style={{ position: "relative", cursor: "pointer" }}
+            onClick={() => { setNotifOpen(!notifOpen); setNotifs(p => p.map(n => ({ ...n, lu: true }))); }}>
+            <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: "#FFD70015",
+              border: "1px solid #FFD70030", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <MdNotifications style={{ color: "#FFD700", fontSize: 20 }}/>
+            </div>
+            {nbNonLus > 0 && (
+              <span style={{
+                position: "absolute", top: -2, right: -2,
+                backgroundColor: "#ef4444", color: "#fff", borderRadius: "50%",
+                width: 19, height: 19, fontSize: 10, fontWeight: 800,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                border: "2px solid #080820",
+              }}>{nbNonLus}</span>
+            )}
+          </div>
+          {/* avatar */}
+          <div style={{
+            width: 38, height: 38, borderRadius: "50%",
+            background: "linear-gradient(135deg,#FFD700,#ff8c00)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#000", fontWeight: 800, fontSize: 15, cursor: "pointer",
+            boxShadow: "0 0 12px #FFD70044",
+          }} onClick={() => setOnglet("profil")}>
+            {profil.prenom?.[0]}{profil.nom?.[0]}
+          </div>
+          <span style={{ color: "#ccc", fontSize: 14 }} className="d-none d-md-inline">{profil.prenom}</span>
+        </div>
+      </nav>
+
+      {/* NOTIFS PANEL */}
+      {notifOpen && (
+        <>
+          <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 149 }}/>
+          <div style={{
+            position: "fixed", top: 74, right: 20, zIndex: 150,
+            backgroundColor: "#131330", border: "1px solid #FFD70025",
+            borderRadius: 16, width: 330, boxShadow: "0 16px 48px rgba(0,0,0,0.6)", overflow: "hidden",
+          }}>
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid #FFD70018",
+              display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 14, display:"flex", alignItems:"center", gap:6 }}>
+                <MdNotifications style={{ fontSize:18 }}/> Notifications
+              </span>
+              <span style={{ color: "#666", fontSize: 12 }}>{nbNonLus} non lues</span>
+            </div>
+            {notifs.map(n => (
+              <div key={n.id} style={{ padding: "13px 18px", borderBottom: "1px solid #ffffff08",
+                backgroundColor: n.lu ? "transparent" : "#FFD70008" }}>
+                <p style={{ color: n.lu ? "#888" : "#fff", fontSize: 13, margin: 0, lineHeight: 1.5 }}>{n.texte}</p>
+                <small style={{ color: "#555", fontSize: 11 }}>{n.time}</small>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* LAYOUT */}
+      <div style={{ display: "flex", paddingTop: 66 }}>
+
+        {/* SIDEBAR desktop */}
+        <aside className="d-none d-lg-block" style={{
+          width: 248, minHeight: "calc(100vh - 66px)", backgroundColor: "#0d0d28",
+          borderRight: "1px solid #FFD70015", padding: "28px 0",
+          position: "fixed", top: 66, left: 0, zIndex: 50,
+        }}>
+          <SidebarContent onglet={onglet} setOnglet={setOnglet} profil={profil} missions={missions}/>
+        </aside>
+
+        {/* SIDEBAR mobile */}
+        {sidebarOpen && (
+          <>
+            <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, backgroundColor: "#000a", zIndex: 49 }}/>
+            <aside style={{ width: 248, position: "fixed", top: 66, left: 0, bottom: 0,
+              backgroundColor: "#0d0d28", borderRight: "1px solid #FFD70015",
+              padding: "28px 0", zIndex: 50, overflowY: "auto" }}>
+              <SidebarContent onglet={onglet} setOnglet={o => { setOnglet(o); setSidebarOpen(false); }}
+                profil={profil} missions={missions}/>
+            </aside>
+          </>
+        )}
+
+        {/* MAIN */}
+        <main id="main-content" style={{ flex: 1, padding: "28px 20px", maxWidth: "100%" }}>
+          <div style={{ maxWidth: 920, margin: "0 auto" }}>
+
+            {/* ═══ TABLEAU DE BORD ═══ */}
+            {onglet === "accueil" && (
+              <div>
+                <div style={{ marginBottom: 28 }}>
+                  <h3 style={{ color: "#fff", fontWeight: 800, margin: 0, fontSize: 22 }}>
+                    Bonjour, <span style={{ color: "#FFD700" }}>{profil.prenom}</span> 👋
+                  </h3>
+                  <p style={{ color: "#666", marginTop: 4, fontSize: 14 }}>Bienvenue sur votre espace coursier IRAKY</p>
+                </div>
+
+                {/* stats */}
+                <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
+                  {[
+                    { label: "MISSIONS",   val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
+                    { label: "EN COURS",   val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
+                    { label: "TERMINÉES",  val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
+                    { label: "MA NOTE",    val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+                  ].map(s => (
+                    <div key={s.label} style={{
+                      backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
+                      border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      display: "flex", alignItems: "center", gap: 16,
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 8px 24px ${s.color}30`; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${s.color}15`; }}>
+                      <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: `${s.color}18`,
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <s.Icon style={{ color: s.color, fontSize: 24 }}/>
+                      </div>
+                      <div>
+                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 24, lineHeight: 1 }}>{s.val}</div>
+                        <div style={{ color: "#888", fontWeight: 600, fontSize: 11, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ma note étoiles */}
+                <div style={{ ...card, marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
+                      border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
+                    </div>
+                    <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Ma réputation</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                    <Etoiles value={profil.note}/>
+                    <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
+                    <span style={{ color: "#888", fontSize: 13 }}>basé sur {profil.nb_terminees} missions terminées</span>
+                  </div>
+                </div>
+
+                {/* missions disponibles */}
+                <div style={card}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+                    <h5 style={{ color: "#FFD700", margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                      <MdCampaign style={{ fontSize: 20 }}/> Missions disponibles
+                    </h5>
+                    <button onClick={() => setOnglet("missions")}
+                      style={{ background: "transparent", border: "1px solid #FFD70030", color: "#FFD700",
+                        borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 12 }}>
+                      Voir tout
+                    </button>
+                  </div>
+                  {publications.slice(0, 3).map(pub => (
+                    <div key={pub.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "12px 0", borderBottom: "1px solid #ffffff08", flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{pub.service}</div>
+                        <div style={{ color: "#666", fontSize: 12 }}>{pub.moyen} · {pub.client} · {pub.heure_debut}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ color: "#FFD700", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
+                        <button onClick={() => prendreMission(pub)}
+                          style={{ ...btnY, padding: "6px 14px", fontSize: 12 }}>
+                          <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/>Je prends
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {publications.length === 0 && (
+                    <p style={{ color: "#555", textAlign: "center", padding: "20px 0" }}>Aucune mission disponible</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ MISSIONS DISPONIBLES ═══ */}
+            {onglet === "missions" && (
+              <div>
+                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                  display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
+                    border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <MdCampaign style={{ color: "#FFD700", fontSize: 22 }}/>
+                  </div>
+                  Missions disponibles
+                </h4>
+                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>
+                  {publications.length} mission(s) en attente de coursier
+                </p>
+
+                {publications.length === 0 && (
+                  <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
+                    <MdDeliveryDining style={{ fontSize: 56, color: "#333", marginBottom: 12 }}/>
+                    <p>Aucune mission disponible pour l'instant.</p>
+                  </div>
+                )}
+
+                {publications.map(pub => (
+                  <div key={pub.id} style={{ ...card, marginBottom: 16,
+                    borderLeft: `4px solid ${pub.color}` }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 28px ${pub.color}20`; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
+                          {pub.service}
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                            <MdPerson style={{ color: pub.color }}/> {pub.client}
+                          </span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                            <MdDirectionsBike style={{ color: pub.color }}/> {pub.moyen}
+                          </span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                            <MdAccessTime style={{ color: pub.color }}/> {pub.heure_debut} → {pub.heure_livraison}
+                          </span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                            <MdLocationOn style={{ color: pub.color }}/> {pub.adresse_pickup}
+                          </span>
+                        </div>
+                        <div style={{ color: "#aaa", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+                          {pub.detail}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 20, marginBottom: 6 }}>
+                          {pub.tarif.toLocaleString()} Ar
+                        </div>
+                        <StatutBadge statut={pub.statut}/>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button onClick={() => prendreMission(pub)}
+                        style={{ ...btnY, padding: "10px 22px", fontSize: 14,
+                          display: "flex", alignItems: "center", gap: 8 }}>
+                        <MdThumbUp style={{ fontSize: 18 }}/> Je prends cette mission
+                      </button>
+                      <button onClick={() => setDetailModal(pub)}
+                        style={{ background: "transparent", border: "1px solid #FFD70033",
+                          color: "#FFD700", borderRadius: 25, padding: "10px 22px",
+                          cursor: "pointer", fontWeight: 700, fontSize: 14,
+                          display: "flex", alignItems: "center", gap: 8 }}>
+                        <MdListAlt style={{ fontSize: 18 }}/> Détails
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ═══ MES MISSIONS ═══ */}
+            {onglet === "mes_missions" && (
+              <div>
+                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                  display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#3b82f618",
+                    border: "1px solid #3b82f633", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <MdWork style={{ color: "#3b82f6", fontSize: 22 }}/>
+                  </div>
+                  Mes missions
+                </h4>
+                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>
+                  {missions.length} mission(s) assignée(s)
+                </p>
+
+                {missions.length === 0 && (
+                  <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
+                    <MdWork style={{ fontSize: 56, color: "#333", marginBottom: 12 }}/>
+                    <p>Vous n'avez pas encore pris de mission.</p>
+                    <button onClick={() => setOnglet("missions")} style={{ ...btnY, marginTop: 16, fontSize: 13 }}>
+                      Voir les missions disponibles
+                    </button>
+                  </div>
+                )}
+
+                {missions.map(mission => {
+                  const steps = ["en_attente","negociable","accepte","termine"];
+                  const idx = steps.indexOf(mission.statut);
+                  return (
+                    <div key={mission.id} style={{ ...card, marginBottom: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between",
+                        flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
+                            {mission.service}
+                          </div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                            <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                              <MdPerson style={{ color: "#FFD700" }}/> Client : <strong style={{ color: "#FFD700" }}>{mission.client}</strong>
+                            </span>
+                            <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                              <MdAttachMoney style={{ color: "#10b981" }}/> {mission.tarif.toLocaleString()} Ar
+                            </span>
+                            <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                              <MdAccessTime style={{ color: "#f59e0b" }}/> {mission.heure_debut} → {mission.heure_livraison}
+                            </span>
+                          </div>
+                        </div>
+                        <StatutBadge statut={mission.statut}/>
+                      </div>
+
+                      {/* barre progression */}
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+                        {steps.map((s, i) => {
+                          const done = i <= idx;
+                          return (
+                            <div key={s} style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                              <div style={{
+                                width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                                background: done ? "linear-gradient(135deg,#FFD700,#ff9500)" : "#1a1a35",
+                                border: done ? "none" : "2px solid #ffffff15",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 14, fontWeight: 800, color: done ? "#000" : "#444",
+                                boxShadow: done ? "0 0 12px #FFD70055" : "none", transition: "all 0.4s",
+                              }}>
+                                {done ? "✓" : i + 1}
+                              </div>
+                              {i < 3 && (
+                                <div style={{ flex: 1, height: 4, borderRadius: 2,
+                                  background: i < idx ? "linear-gradient(90deg,#FFD700,#ff9500)" : "#ffffff0f",
+                                  transition: "all 0.4s" }}/>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                        {["En attente","Négociation","Accepté","Terminé"].map((l, i) => (
+                          <span key={l} style={{ fontSize: 10, color: i <= idx ? "#FFD700" : "#444",
+                            flex: 1, textAlign: i === 0 ? "left" : i === 3 ? "right" : "center",
+                            fontWeight: i <= idx ? 600 : 400 }}>{l}</span>
+                        ))}
+                      </div>
+
+                      {/* boutons action */}
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        {/* Chat toujours disponible */}
+                        <button onClick={() => setChatModal(mission)}
+                          style={{ background: "#3b82f618", border: "1px solid #3b82f633",
+                            color: "#3b82f6", borderRadius: 12, padding: "8px 18px",
+                            cursor: "pointer", fontWeight: 700, fontSize: 13,
+                            display: "flex", alignItems: "center", gap: 6 }}>
+                          <MdChat style={{ fontSize: 16 }}/> Message client
+                        </button>
+                      </div>
+
+                      {mission.statut === "termine" && (
+                        <div style={{ marginTop: 14, padding: 14, backgroundColor: "#FFD70011",
+                          borderRadius: 12, border: "1px solid #FFD70025" }}>
+                          <div style={{ color: "#FFD700", fontWeight: 700, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                            <MdStar style={{ fontSize: 18 }}/> Évaluation reçue du client
+                          </div>
+                          <Etoiles value={mission.note || 0}/>
+                          {!mission.note && (
+                            <small style={{ color: "#888", fontSize: 12 }}>En attente d'évaluation...</small>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+{/* ═══ PROFIL ═══ */}
+{onglet === "profil" && (
+  <div>
+    <h4 style={{ color: "#FFD700", marginBottom: 24, fontWeight: 800, fontSize: 20,
+      display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
+        border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <MdPerson style={{ color: "#FFD700", fontSize: 22 }}/>
+      </div>
+      Mon profil
+    </h4>
+
+    <div style={{ backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
+
+      {/* Avatar */}
+      <div style={{ textAlign: "center", marginBottom: 28 }}>
+        <div style={{
+          width: 90, height: 90, borderRadius: "50%",
+          background: "linear-gradient(135deg,#FFD700,#ff8c00)",
+          margin: "0 auto 14px", display: "flex", alignItems: "center",
+          justifyContent: "center", fontSize: 36, fontWeight: 800, color: "#000",
+          boxShadow: "0 0 30px #FFD70044",
+        }}>
+          {profil.prenom?.[0]}{profil.nom?.[0]}
+        </div>
+        <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>
+          {profil.prenom} {profil.nom}
+        </div>
+        <div style={{ marginTop: 8, display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+          <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,
+            padding: "3px 14px", fontSize: 12, border: "1px solid #FFD70033",
+            display: "flex", alignItems: "center", gap: 5 }}>
+            <MdDeliveryDining style={{ fontSize: 14 }}/> Coursier IRAKY
+          </span>
+          <span style={{ backgroundColor: "#10b98118", color: "#10b981", borderRadius: 20,
+            padding: "3px 14px", fontSize: 12, border: "1px solid #10b98133",
+            display: "flex", alignItems: "center", gap: 5 }}>
+            <MdVerified style={{ fontSize: 14 }}/> Vérifié
+          </span>
+        </div>
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
+          <Etoiles value={profil.note}/>
+        </div>
+      </div>
+
+      {/* Contenu chargement ou données */}
+      {profilLoading ? (
+        <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
+          <MdAccessTime style={{ fontSize: 40, marginBottom: 10 }}/>
+          <p>Chargement du profil...</p>
+        </div>
+      ) : (
+        <>
+          {/* Infos personnelles */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14, marginBottom: 24 }}>
+            {[
+              { Icon: MdPerson,     label: "Nom",       val: profil.nom,       color: "#FFD700" },
+              { Icon: MdPerson,     label: "Prénom",    val: profil.prenom,    color: "#3b82f6" },
+              { Icon: MdEmail,      label: "Email",     val: profil.email,     color: "#8b5cf6" },
+              { Icon: MdPhone,      label: "Téléphone", val: profil.telephone, color: "#10b981" },
+              { Icon: MdLocationOn, label: "Adresse",   val: profil.adresse,   color: "#f59e0b" },
+              { Icon: MdBadge,      label: "N° CIN",    val: profil.cin,       color: "#06b6d4" },
+            ].map(({ Icon, label, val, color }) => (
+              <div key={label} style={{ backgroundColor: "#0a0a1e", borderRadius: 12,
+                padding: "14px 18px", border: "1px solid #FFD70018",
+                transition: "all 0.2s", display: "flex", alignItems: "center", gap: 14 }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#FFD70033"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "#FFD70018"}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                  backgroundColor: `${color}18`, border: `1px solid ${color}33`,
+                  display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon style={{ color, fontSize: 20 }}/>
+                </div>
+                <div>
+                  <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{label}</div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Photos CIN */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#06b6d418",
+                border: "1px solid #06b6d433", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <MdBadge style={{ color: "#06b6d4", fontSize: 20 }}/>
+              </div>
+              <span style={{ color: "#06b6d4", fontWeight: 700, fontSize: 15 }}>
+                Photos pièce d'identité (CIN)
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
+
+              {/* Photo identité */}
+              {profil.photo_identite && (
+                <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+                  border: "1px solid #FFD70022", overflow: "hidden" }}>
+                  <div style={{ padding: "10px 14px", borderBottom: "1px solid #FFD70018",
+                    color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                    <MdBadge style={{ color: "#FFD700" }}/> Photo d'identité
+                  </div>
+                  <img src={`http://localhost:8000/storage/${profil.photo_identite}`}
+                    alt="Photo identité"
+                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                </div>
+              )}
+
+              {/* CIN Recto */}
+              <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+                border: "1px solid #06b6d422", overflow: "hidden" }}>
+                <div style={{ padding: "10px 14px", borderBottom: "1px solid #06b6d418",
+                  color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                  <MdBadge style={{ color: "#06b6d4" }}/> CIN Recto
+                </div>
+                {profil.photo_recto ? (
+                  <img src={`http://localhost:8000/storage/${profil.photo_recto}`}
+                    alt="CIN Recto"
+                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                ) : (
+                  <div style={{ height: 180, display: "flex", alignItems: "center",
+                    justifyContent: "center", flexDirection: "column", gap: 8, color: "#555" }}>
+                    <MdBadge style={{ fontSize: 40 }}/>
+                    <span style={{ fontSize: 12 }}>Non fourni</span>
+                  </div>
+                )}
+              </div>
+
+              {/* CIN Verso */}
+              <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+                border: "1px solid #8b5cf622", overflow: "hidden" }}>
+                <div style={{ padding: "10px 14px", borderBottom: "1px solid #8b5cf618",
+                  color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                  <MdBadge style={{ color: "#8b5cf6" }}/> CIN Verso
+                </div>
+                {profil.photo_verso ? (
+                  <img src={`http://localhost:8000/storage/${profil.photo_verso}`}
+                    alt="CIN Verso"
+                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                ) : (
+                  <div style={{ height: 180, display: "flex", alignItems: "center",
+                    justifyContent: "center", flexDirection: "column", gap: 8, color: "#555" }}>
+                    <MdBadge style={{ fontSize: 40 }}/>
+                    <span style={{ fontSize: 12 }}>Non fourni</span>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          {/* Statistiques */}
+          <div style={{ background: "linear-gradient(135deg,#FFD70012,#ff950008)",
+            borderRadius: 14, padding: 20, border: "1px solid #FFD70025" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
+                border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
+              </div>
+              <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Mes statistiques</span>
+            </div>
+            <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+              {[
+                { label: "TOTAL",     val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
+                { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
+                { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
+                { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+              ].map(s => (
+                <div key={s.label} style={{
+                  backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
+                  border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
+                  transition: "transform 0.2s", display: "flex", alignItems: "center", gap: 14 }}
+                  onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
+                  onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: `${s.color}18`,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <s.Icon style={{ color: s.color, fontSize: 22 }}/>
+                  </div>
+                  <div>
+                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
+                    <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+
+            {/* ═══ AIDE ═══ */}
+            {onglet === "aide" && (
+              <div>
+                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                  display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#10b98118",
+                    border: "1px solid #10b98133", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <MdHelp style={{ color: "#10b981", fontSize: 22 }}/>
+                  </div>
+                  Aide & Support
+                </h4>
+                <p style={{ color: "#666", marginBottom: 28, fontSize: 14 }}>Comment pouvons-nous vous aider ?</p>
+
+                <div className="aide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
+                  {[
+                    { Icon: MdPhone,    title: "Nous appeler",   desc: "+261 38 21 266 83",         color: "#10b981", bg: "#10b98115", action: "Appeler maintenant →" },
+                    { Icon: MdChat,     title: "Chat en direct", desc: "Réponse en moins de 5 min", color: "#3b82f6", bg: "#3b82f615", action: "Démarrer le chat →"   },
+                    { Icon: MdEmail,    title: "Email support",  desc: "irakydelivery@gmail.com",   color: "#8b5cf6", bg: "#8b5cf615", action: "Envoyer un email →"    },
+                    { Icon: MdHelp,     title: "Guide coursier", desc: "Tutoriels pas à pas",       color: "#f59e0b", bg: "#f59e0b15", action: "Lire le guide →"       },
+                  ].map((item, i) => (
+                    <div key={i} style={{ backgroundColor: "#131330", borderRadius: 16, padding: "28px 20px",
+                      border: `1px solid ${item.color}30`, cursor: "pointer",
+                      transition: "all 0.3s ease", position: "relative", overflow: "hidden" }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${item.color}30`; e.currentTarget.style.borderColor = `${item.color}66`; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${item.color}30`; }}>
+                      <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80,
+                        borderRadius: "50%", backgroundColor: `${item.color}10` }}/>
+                      <div style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: item.bg,
+                        border: `1px solid ${item.color}33`, display: "flex", alignItems: "center",
+                        justifyContent: "center", marginBottom: 16 }}>
+                        <item.Icon style={{ color: item.color, fontSize: 26 }}/>
+                      </div>
+                      <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{item.title}</div>
+                      <div style={{ color: "#888", fontSize: 12, lineHeight: 1.5, marginBottom: 14 }}>{item.desc}</div>
+                      <div style={{ color: item.color, fontSize: 12, fontWeight: 700 }}>{item.action}</div>
+                      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
+                        background: `linear-gradient(90deg,${item.color},transparent)` }}/>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </main>
+      </div>
+
+      {/* MODAL DÉTAIL MISSION */}
+      {detailModal && (
+        <Modal onClose={() => setDetailModal(null)} size="lg">
+          <h5 style={{ color: "#FFD700", marginBottom: 20, fontWeight: 800, fontSize: 17,
+            display: "flex", alignItems: "center", gap: 10 }}>
+            <MdDeliveryDining style={{ fontSize: 22 }}/> {detailModal.service}
+          </h5>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+            {[
+              ["Client",          detailModal.client],
+              ["Moyen",           detailModal.moyen],
+              ["Tarif",           `${detailModal.tarif?.toLocaleString()} Ar`],
+              ["Date",            detailModal.date],
+              ["Heure début",     detailModal.heure_debut],
+              ["Heure livraison", detailModal.heure_livraison],
+              ["Adresse pickup",  detailModal.adresse_pickup],
+              ["Statut",          STATUT_CONFIG[detailModal.statut]?.label],
+            ].map(([k, v]) => (
+              <div key={k} style={{ padding: "10px 0", borderBottom: "1px solid #ffffff08" }}>
+                <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{k}</div>
+                <div style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, padding: "12px 16px", backgroundColor: "#0a0a1e",
+            borderRadius: 12, border: "1px solid #FFD70018" }}>
+            <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>Description</div>
+            <div style={{ color: "#fff", fontSize: 13, lineHeight: 1.6 }}>{detailModal.detail}</div>
+          </div>
+          <button onClick={() => { prendreMission(detailModal); setDetailModal(null); }}
+            style={{ ...btnY, width: "100%", marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <MdThumbUp style={{ fontSize: 18 }}/> Je prends cette mission
+          </button>
+        </Modal>
+      )}
+
+      {/* MODAL CHAT */}
+      {chatModal && (
+        <Modal onClose={() => setChatModal(null)} size="lg">
+          <h5 style={{ color: "#FFD700", marginBottom: 4, fontWeight: 800, fontSize: 16,
+            display: "flex", alignItems: "center", gap: 8 }}>
+            <MdChat style={{ fontSize: 20 }}/> Message — {chatModal.service}
+          </h5>
+          <p style={{ color: "#666", fontSize: 13, marginBottom: 16 }}>
+            Client : <strong style={{ color: "#fff" }}>{chatModal.client}</strong>
+          </p>
+
+          {/* messages */}
+          <div style={{ backgroundColor: "#0a0a1e", borderRadius: 12, padding: 16,
+            marginBottom: 16, maxHeight: 280, overflowY: "auto",
+            border: "1px solid #FFD70018" }}>
+            {messages.map(m => (
+              <div key={m.id} style={{
+                display: "flex", justifyContent: m.from === "coursier" ? "flex-end" : "flex-start",
+                marginBottom: 12,
+              }}>
+                <div style={{
+                  backgroundColor: m.from === "coursier" ? "#FFD70022" : "#1a1a35",
+                  border: `1px solid ${m.from === "coursier" ? "#FFD70044" : "#ffffff15"}`,
+                  borderRadius: m.from === "coursier" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  padding: "10px 14px", maxWidth: "70%",
+                }}>
+                  <div style={{ color: "#fff", fontSize: 13 }}>{m.texte}</div>
+                  <div style={{ color: "#666", fontSize: 10, marginTop: 4, textAlign: "right" }}>{m.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* input envoyer */}
+          <div style={{ display: "flex", gap: 10 }}>
+            <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && envoyerMessage()}
+              placeholder="Écrire un message..."
+              style={{ ...inp, flex: 1 }}/>
+            <button onClick={envoyerMessage}
+              style={{ ...btnY, padding: "11px 18px", display: "flex", alignItems: "center", gap: 6 }}>
+              <MdSend style={{ fontSize: 18 }}/>
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      <style>{`
+        @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes modalIn { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+        @media(min-width:992px){ #main-content{ margin-left:248px !important; } }
+        @media(max-width:768px){
+          #main-content{ margin-left:0 !important; }
+          .stats-grid{ grid-template-columns:repeat(2,1fr) !important; }
+          .aide-grid { grid-template-columns:repeat(2,1fr) !important; }
+        }
+        @media(max-width:480px){
+          .stats-grid{ grid-template-columns:repeat(2,1fr) !important; }
+          .aide-grid { grid-template-columns:1fr !important; }
+        }
+        * { box-sizing:border-box; }
+        body { overflow-x:hidden; }
+        details summary::-webkit-details-marker { display:none; }
+      `}</style>
+    </div>
+  );
+}
+
+export default DashboardCoursier;
+
