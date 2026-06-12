@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef  } from "react";
 import logo from "../../images/logo.png";
-import { FaStar, FaRegStar } from "react-icons/fa";
 import {
   MdDashboard, MdLocationOn, MdListAlt, MdPerson, MdHelp,
   MdLogout, MdNotifications, MdDeliveryDining, MdCheckCircle,
   MdChat, MdSend, MdBarChart, MdAccessTime, MdAttachMoney,
   MdLocalShipping, MdCampaign, MdThumbUp, MdClose,
   MdDirectionsBike, MdStar, MdStarBorder, MdWork,
-  MdPhone, MdEmail, MdBadge, MdVerified,
+  MdPhone, MdEmail, MdBadge, MdVerified,MdDoneAll,
 } from "react-icons/md";
 
 // ══════════════════════════════════════════════
@@ -53,9 +52,9 @@ const MOCK_PUBLICATIONS = [
 ];
 
 const MOCK_MESSAGES = [
-  { id: 1, from: "client", texte: "Bonjour, êtes-vous disponible ?", time: "08:20" },
-  { id: 2, from: "coursier", texte: "Oui, je suis disponible !", time: "08:21" },
-  { id: 3, from: "client", texte: "Parfait, pouvez-vous partir à 08h30 ?", time: "08:22" },
+  { id: 1, from: "client",   texte: "Bonjour, êtes-vous disponible ?",      time: "08:20" },
+  { id: 2, from: "coursier", texte: "Oui, je suis disponible !",            time: "08:21" },
+  { id: 3, from: "client",   texte: "Parfait, pouvez-vous partir à 08h30 ?", time: "08:22" },
 ];
 
 const STATUT_CONFIG = {
@@ -66,6 +65,8 @@ const STATUT_CONFIG = {
   termine:    { label: "Terminé",        color: "#8b5cf6", bg: "#8b5cf618", icon: <MdStar/> },
 };
 
+const BASE_URL = "http://localhost:8000";
+
 // ══════════════════════════════════════════════
 //  ÉTOILES
 // ══════════════════════════════════════════════
@@ -74,8 +75,8 @@ function Etoiles({ value }) {
     <div style={{ display: "flex", gap: 3 }}>
       {[1,2,3,4,5].map(i => (
         i <= value
-          ? <MdStar key={i} style={{ color: "#FFD700", fontSize: 18 }}/>
-          : <MdStarBorder key={i} style={{ color: "#444", fontSize: 18 }}/>
+          ? <MdStar     key={i} style={{ color: "#FFD700", fontSize: 18 }}/>
+          : <MdStarBorder key={i} style={{ color: "#444",   fontSize: 18 }}/>
       ))}
     </div>
   );
@@ -136,13 +137,16 @@ function Modal({ children, onClose, size = "md" }) {
 // ══════════════════════════════════════════════
 function SidebarContent({ onglet, setOnglet, profil, missions }) {
   const items = [
-    { id: "accueil",    Icon: MdDashboard,      label: "Tableau de bord"    },
-    { id: "missions",   Icon: MdDeliveryDining, label: "Missions disponibles" },
-    { id: "mes_missions", Icon: MdWork,         label: "Mes missions"        },
-    { id: "profil",     Icon: MdPerson,         label: "Mon profil"          },
-    { id: "aide",       Icon: MdHelp,           label: "Aide & Support"      },
+    { id: "accueil",      Icon: MdDashboard,      label: "Tableau de bord"      },
+    { id: "missions",     Icon: MdDeliveryDining, label: "Missions disponibles" },
+    { id: "mes_missions", Icon: MdWork,           label: "Mes missions"         },
+    { id: "messages",     Icon: MdChat,           label: "Messages"             },
+    { id: "profil",       Icon: MdPerson,         label: "Mon profil"           },
+    { id: "aide",         Icon: MdHelp,           label: "Aide & Support"       },
   ];
   const enCours = missions.filter(m => ["negociable","accepte"].includes(m.statut)).length;
+  // ✅ nbMessages DANS le composant
+  const nbMessages = missions.filter(m => m.statut !== "en_attente").length;
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -212,65 +216,139 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
 //  COMPOSANT PRINCIPAL
 // ══════════════════════════════════════════════
 function DashboardCoursier() {
-  const [onglet, setOnglet]           = useState("accueil");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifOpen, setNotifOpen]     = useState(false);
-  const [toast, setToast]             = useState(null);
-  const [publications, setPublications] = useState(MOCK_PUBLICATIONS);
-  const [missions, setMissions]       = useState([]);
-  const [chatModal, setChatModal]     = useState(null);
-  const [messages, setMessages]       = useState(MOCK_MESSAGES);
-  const [newMsg, setNewMsg]           = useState("");
-  const [detailModal, setDetailModal] = useState(null);
+  const [onglet, setOnglet]             = useState("accueil");
+  const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [notifOpen, setNotifOpen]       = useState(false);
+  const [toast, setToast]               = useState(null);
+ const [publications, setPublications] = useState([]);
+  const [missions, setMissions]         = useState([]);
+  const [chatModal, setChatModal]       = useState(null);
+  const [messages, setMessages] = useState([])
+  const [newMsg, setNewMsg]             = useState("");
+  const [detailModal, setDetailModal]   = useState(null);
+  const [notifs, setNotifs] = useState([]);
+  const [selectedMsgs, setSelectedMsgs] = useState(new Set());
+  const [modeSelection, setModeSelection] = useState(false);
+  const [profil, setProfil] = useState({
+    id: null,
+    nom: "", prenom: "", email: "", telephone: "",
+    adresse: "", cin: "",
+    photo_recto: null,
+    photo_verso: null,
+    note: 0, nb_missions: 0, nb_terminees: 0,
+  });
+  const [profilLoading, setProfilLoading] = useState(true);
 
-  const [notifs, setNotifs] = useState([
-    { id: 1, texte: "Nouvelle mission disponible : Facture JIRAMA", lu: false, time: "Il y a 2 min" },
-    { id: 2, texte: "Tony R. souhaite négocier avec vous", lu: false, time: "Il y a 10 min" },
-    { id: 3, texte: "Bienvenue sur IRAKY Delivery !", lu: true, time: "Hier" },
-  ]);
+  // ✅ CORRECTION PRINCIPALE : fetch profil corrigé
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/connexion";
+      return;
+    }
 
-// ✅ APRÈS — données réelles depuis le backend
-const [profil, setProfil] = useState({
-  nom: "", prenom: "", email: "", telephone: "",
-  adresse: "", cin: "", photo_identite: null,
-  photo_recto: null, photo_verso: null,
-  note: 0, nb_missions: 0, nb_terminees: 0,
-});
-const [profilLoading, setProfilLoading] = useState(true);
+    fetch(`${BASE_URL}/api/me`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+    })
+      .then(async res => {
+        // ✅ Gestion 401 correcte — on ne continue pas avec res.json()
+        if (res.status === 401) {
+          localStorage.clear();
+          window.location.href = "/connexion";
+          return null; // ✅ stoppe la chaîne
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data) return; // ✅ si null (cas 401), on sort
 
+        console.log("Profil reçu :", data); // ✅ debug — vérifiez dans la console
+
+        setProfil({
+          id:           data.id            || null,
+          nom:          data.nom          || "",
+          prenom:       data.prenom       || "",
+          email:        data.email        || "",
+          telephone:    data.telephone    || "",
+          adresse:      data.adresse      || "",
+          cin:          data.cin          || "",
+          // ✅ photo_recto et photo_verso uniquement — plus photo_identite
+          photo_recto:  data.photo_recto  || null,
+          photo_verso:  data.photo_verso  || null,
+          note:         data.note         || 0,
+          nb_missions:  data.nb_missions  || 0,
+          nb_terminees: data.nb_terminees || 0,
+        });
+        setProfilLoading(false);
+      })
+      .catch(err => {
+        console.error("Erreur chargement profil :", err);
+        setProfilLoading(false);
+      });
+  }, []);
+
+// ── Polling global toutes les 2s ─────────────────
 useEffect(() => {
   const token = localStorage.getItem("token");
-  if (!token) { window.location.href = "/connexion"; return; }
+  if (!token) return;
 
-  fetch("http://localhost:8000/api/me", {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  })
-    .then(res => {
-      if (res.status === 401) { localStorage.clear(); window.location.href = "/connexion"; }
-      return res.json();
-    })
-    .then(data => {
-      setProfil({
-        nom:           data.nom           || "",
-        prenom:        data.prenom        || "",
-        email:         data.email         || "",
-        telephone:     data.telephone     || "",
-        adresse:       data.adresse       || "",
-        cin:           data.cin           || "",
-        photo_identite: data.photo_identite || null,
-        photo_recto:   data.photo_recto   || null,
-        photo_verso:   data.photo_verso   || null,
-        note:          data.note          || 0,
-        nb_missions:   data.nb_missions   || 0,
-        nb_terminees:  data.nb_terminees  || 0,
-      });
-      setProfilLoading(false);
-    })
-    .catch(() => setProfilLoading(false));
+  const fetchAll = () => {
+    // Notifications
+    fetch(`${BASE_URL}/api/notifications`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setNotifs(data);
+    }).catch(() => {});
+
+    // Publications disponibles
+    fetch(`${BASE_URL}/api/commandes/disponibles`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (!Array.isArray(data)) return;
+      setPublications(data.map(c => ({
+        ...c,
+        client: c.client ? `${c.client.prenom} ${c.client.nom[0]}.` : "Client",
+        color: "#f59e0b",
+      })));
+    }).catch(() => {});
+
+    // Mes missions
+    fetch(`${BASE_URL}/api/commandes/mes-missions`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (!Array.isArray(data)) return;
+      setMissions(data.map(c => ({
+        ...c,
+        client: c.client ? `${c.client.prenom} ${c.client.nom[0]}.` : "Client",
+      })));
+    }).catch(() => {});
+  };
+
+  fetchAll();
+  const interval = setInterval(fetchAll, 2000);
+  return () => clearInterval(interval);
 }, []);
+
+// ── Polling messages chat toutes les 2s ──────────
+useEffect(() => {
+  if (!chatModal) return;
+  const token = localStorage.getItem("token");
+
+  const fetchMessages = () => {
+    fetch(`${BASE_URL}/api/commandes/${chatModal.id}/messages`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setMessages(data);
+    }).catch(() => {});
+  };
+
+  fetchMessages();
+  const interval = setInterval(fetchMessages, 2000);
+  return () => clearInterval(interval);
+}, [chatModal]);
 
   const nbNonLus = notifs.filter(n => !n.lu).length;
 
@@ -279,32 +357,181 @@ useEffect(() => {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Prendre une mission
-  const prendreMission = (pub) => {
-    const mission = { ...pub, statut: "negociable", pris_le: new Date().toISOString() };
-    setMissions(prev => [mission, ...prev]);
-    setPublications(prev => prev.filter(p => p.id !== pub.id));
-    setNotifs(prev => [{
-      id: Date.now(),
-      texte: `Vous avez pris la mission : ${pub.service} — statut en négociation`,
-      lu: false, time: "À l'instant",
-    }, ...prev]);
-    showToast(`Mission "${pub.service}" prise ! Statut : En négociation`);
-    setOnglet("mes_missions");
-  };
+const prendreMission = async (pub) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:8000/api/commandes/${pub.id}/prendre`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      const mission = { ...pub, statut: "negociable", client: pub.client };
+      setMissions(prev => [mission, ...prev]);
+      setPublications(prev => prev.filter(p => p.id !== pub.id));
+      setNotifs(prev => [{
+        id: Date.now(),
+        texte: `Vous avez pris la mission : ${pub.service} — En négociation`,
+        lu: false, time: "À l'instant",
+      }, ...prev]);
+      showToast(`Mission "${pub.service}" prise !`);
+      setOnglet("mes_missions");
+    } else {
+      showToast(data.message || "Erreur", "error");
+    }
+  } catch {
+    showToast("Erreur de connexion", "error");
+  }
+};
 
-  // Envoyer message
-  const envoyerMessage = () => {
-    if (!newMsg.trim()) return;
-    setMessages(prev => [...prev, {
-      id: Date.now(), from: "coursier", texte: newMsg, time: new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
-    }]);
-    setNewMsg("");
-  };
 
+// ✅ Référence pour scroll automatique
+const messagesEndRef = useRef(null);
+
+// ✅ Charger les messages quand on ouvre le chat
+const ouvrirChat = async (mission) => {
+  setChatModal(mission);
+  setMessages([]);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/api/commandes/${mission.id}/messages`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    });
+    const data = await res.json();
+    if (Array.isArray(data)) setMessages(data);
+  } catch (err) {
+    console.error("Erreur chargement messages :", err);
+  }
+};
+
+// ✅ Envoyer message via API
+const envoyerMessage = async () => {
+  if (!newMsg.trim() || !chatModal) return;
+
+  // ✅ Affichage immédiat
+  const msgTemp = {
+    id:          `temp_${Date.now()}`,
+    texte:       newMsg,
+    sender_id:   profil.id,
+    sender_role: "coursier",
+    modifie:     false,
+    lu:          false,
+    time:        new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
+    created_at:  new Date().toISOString(),
+    _sending:    true,
+  };
+  setMessages(prev => [...prev, msgTemp]);
+  const texteEnvoi = newMsg;
+  setNewMsg("");  // ✅ Vide immédiatement
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `${BASE_URL}/api/commandes/${chatModal.id}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ texte: texteEnvoi }),
+      }
+    );
+    const data = await res.json();
+    if (res.ok) {
+      // ✅ Remplace le temporaire
+      setMessages(prev => prev.map(m =>
+        m.id === msgTemp.id
+          ? { ...data.message, sender_id: profil.id }
+          : m
+      ));
+    } else {
+      setMessages(prev => prev.filter(m => m.id !== msgTemp.id));
+      showToast(data.message || "Erreur envoi", "error");
+    }
+  } catch {
+    setMessages(prev => prev.filter(m => m.id !== msgTemp.id));
+    showToast("Erreur de connexion", "error");
+  }
+};
+
+// ✅ Changer statut accord (accepte/refuse)
+
+const changerStatutAccord = async (commandeId, nouveauStatut) => {
+  try {
+    const token = localStorage.getItem("token");
+    const endpoint = nouveauStatut === "accepte"
+      ? `${BASE_URL}/api/commandes/${commandeId}/accepter-coursier`  // ✅ CORRECT
+      : `${BASE_URL}/api/commandes/${commandeId}/refuser`;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setMissions(prev => prev.map(m =>
+        m.id === commandeId
+          ? { ...m, statut: data.commande?.statut || nouveauStatut,
+              accord_coursier: true }
+          : m
+      ));
+      setChatModal(prev => ({
+        ...prev,
+        statut: data.commande?.statut || nouveauStatut,
+        accord_coursier: true,
+      }));
+      showToast(
+        nouveauStatut === "accepte"
+          ? "✅ Accord accepté — client notifié !"
+          : "❌ Mission refusée — client notifié",
+        nouveauStatut === "accepte" ? "success" : "error"
+      );
+    } else {
+      // ✅ Affiche le message d'erreur Laravel (ex: "Le client doit accepter en premier")
+      showToast(data.message || "Erreur", "error");
+    }
+  } catch {
+    showToast("Erreur de connexion", "error");
+  }
+};
   const card = { backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24, transition: "all 0.3s ease" };
   const inp  = { backgroundColor: "#0a0a1e", border: "1px solid #FFD70030", color: "#fff", borderRadius: 12, padding: "11px 16px", width: "100%", fontSize: 14, outline: "none" };
   const btnY = { background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", border: "none", borderRadius: 25, padding: "11px 28px", fontWeight: 800, cursor: "pointer", fontSize: 15, transition: "all 0.2s", boxShadow: "0 4px 20px #FFD70033" };
+
+  // ✅ Composant photo CIN réutilisable
+  const PhotoCIN = ({ chemin, label, couleur }) => (
+    <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+      border: `1px solid ${couleur}22`, overflow: "hidden" }}>
+      <div style={{ padding: "10px 14px", borderBottom: `1px solid ${couleur}18`,
+        color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+        <MdBadge style={{ color: couleur }}/> {label}
+      </div>
+      {chemin ? (
+        <img
+          src={`${BASE_URL}/storage/${chemin}`}
+          alt={label}
+          style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+          onError={e => {
+            // ✅ Si l'image ne charge pas, affiche un message d'erreur
+            e.target.style.display = "none";
+            e.target.nextSibling.style.display = "flex";
+          }}
+        />
+      ) : null}
+      <div style={{
+        height: 180,
+        display: chemin ? "none" : "flex",
+        alignItems: "center", justifyContent: "center",
+        flexDirection: "column", gap: 8, color: "#555",
+      }}>
+        <MdBadge style={{ fontSize: 40 }}/>
+        <span style={{ fontSize: 12 }}>Non fourni</span>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#080820", fontFamily: "'Segoe UI', sans-serif", color: "#fff" }}>
@@ -344,7 +571,6 @@ useEffect(() => {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {/* cloche */}
           <div style={{ position: "relative", cursor: "pointer" }}
             onClick={() => { setNotifOpen(!notifOpen); setNotifs(p => p.map(n => ({ ...n, lu: true }))); }}>
             <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: "#FFD70015",
@@ -361,7 +587,6 @@ useEffect(() => {
               }}>{nbNonLus}</span>
             )}
           </div>
-          {/* avatar */}
           <div style={{
             width: 38, height: 38, borderRadius: "50%",
             background: "linear-gradient(135deg,#FFD700,#ff8c00)",
@@ -376,32 +601,121 @@ useEffect(() => {
       </nav>
 
       {/* NOTIFS PANEL */}
-      {notifOpen && (
-        <>
-          <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 149 }}/>
-          <div style={{
-            position: "fixed", top: 74, right: 20, zIndex: 150,
-            backgroundColor: "#131330", border: "1px solid #FFD70025",
-            borderRadius: 16, width: 330, boxShadow: "0 16px 48px rgba(0,0,0,0.6)", overflow: "hidden",
-          }}>
-            <div style={{ padding: "14px 18px", borderBottom: "1px solid #FFD70018",
-              display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 14, display:"flex", alignItems:"center", gap:6 }}>
-                <MdNotifications style={{ fontSize:18 }}/> Notifications
-              </span>
-              <span style={{ color: "#666", fontSize: 12 }}>{nbNonLus} non lues</span>
-            </div>
-            {notifs.map(n => (
-              <div key={n.id} style={{ padding: "13px 18px", borderBottom: "1px solid #ffffff08",
-                backgroundColor: n.lu ? "transparent" : "#FFD70008" }}>
-                <p style={{ color: n.lu ? "#888" : "#fff", fontSize: 13, margin: 0, lineHeight: 1.5 }}>{n.texte}</p>
-                <small style={{ color: "#555", fontSize: 11 }}>{n.time}</small>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+                  {notifOpen && (
+                    <>
+                      <div onClick={() => setNotifOpen(false)}
+                        style={{ position:"fixed", inset:0, zIndex:149 }}/>
+                      <div style={{
+                        position:"fixed", top:74, right:20, zIndex:150,
+                        backgroundColor:"#131330", border:"1px solid #FFD70025",
+                        borderRadius:16, width:360, maxHeight:480,
+                        boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
+                        display:"flex", flexDirection:"column", overflow:"hidden",
+                      }}>
+                        {/* Header */}
+                        <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
+                          display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0 }}>
+                          <span style={{ color:"#FFD700", fontWeight:700, fontSize:14,
+                            display:"flex", alignItems:"center", gap:6 }}>
+                            <MdNotifications style={{ fontSize:18 }}/> Notifications
+                          </span>
+                          <span style={{ color:"#666", fontSize:12 }}>{nbNonLus} non lues</span>
+                        </div>
 
+                        {/* Liste */}
+                        <div style={{ overflowY:"auto", flex:1 }}>
+                          {notifs.length === 0 && (
+                            <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>
+                              Aucune notification
+                            </div>
+                          )}
+                          {notifs.map(n => (
+                            <div key={n.id} style={{
+                              padding:"12px 18px", borderBottom:"1px solid #ffffff08",
+                              backgroundColor: n.lu ? "transparent" : "#FFD70008",
+                            }}>
+                              <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                                <div style={{ paddingTop:5, flexShrink:0 }}>
+                                  <div style={{ width:8, height:8, borderRadius:"50%",
+                                    backgroundColor: n.lu ? "transparent" : "#FFD700" }}/>
+                                </div>
+                                <div style={{ flex:1 }}>
+                                  <p style={{ color:n.lu?"#888":"#fff", fontSize:13,
+                                    margin:"0 0 4px 0", lineHeight:1.5 }}>{n.texte}</p>
+                                  <small style={{ color:"#555", fontSize:11 }}>{n.time}</small>
+                                </div>
+                              </div>
+                              {/* Actions */}
+                              <div style={{ display:"flex", gap:8, marginTop:8, paddingLeft:18 }}>
+                                {n.commande_id && (
+                                  <button
+                                    onClick={async () => {
+                                      setNotifOpen(false);
+
+                                      // ✅ Cherche la mission correspondante
+                                      const mission = missions.find(m => m.id === n.commande_id)
+                                                  || missions.find(m => m.id === parseInt(n.commande_id));
+
+                                      if (mission) {
+                                        // ✅ Ouvre le chat avec historique
+                                        await ouvrirChat(mission);
+                                        setOnglet("messages");
+                                      }
+
+                                      // Marquer comme lu
+                                      const token = localStorage.getItem("token");
+                                      await fetch(`${BASE_URL}/api/notifications/${n.id}/lu`, {
+                                        method: "POST",
+                                        headers: { "Authorization": `Bearer ${token}` },
+                                      });
+                                      setNotifs(p => p.map(x => x.id === n.id ? {...x, lu:true} : x));
+                                    }}
+                                    style={{ background:"#3b82f618", border:"1px solid #3b82f633",
+                                      color:"#3b82f6", borderRadius:8, padding:"4px 10px",
+                                      cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
+                                    <MdChat style={{ fontSize:14 }}/> Répondre
+                                  </button>
+                                )}
+                                
+                                <button
+                                  onClick={async () => {
+                                    const token = localStorage.getItem("token");
+                                    await fetch(`${BASE_URL}/api/notifications/${n.id}`, {
+                                      method:"DELETE",
+                                      headers:{ "Authorization":`Bearer ${token}` },
+                                    });
+                                    setNotifs(p => p.filter(x => x.id !== n.id));
+                                  }}
+                                  style={{ background:"#ef444415", border:"1px solid #ef444430",
+                                    color:"#ef6666", borderRadius:8, padding:"4px 10px",
+                                    cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
+                                  <MdClose style={{ fontSize:14 }}/> Supprimer
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{ padding:"10px 18px", borderTop:"1px solid #FFD70018",
+                          display:"flex", justifyContent:"center", flexShrink:0 }}>
+                          <span
+                            onClick={async () => {
+                              const token = localStorage.getItem("token");
+                              await fetch(`${BASE_URL}/api/notifications/tous-lus`, {
+                                method:"POST",
+                                headers:{ "Authorization":`Bearer ${token}` },
+                              });
+                              setNotifs(p => p.map(n => ({...n, lu:true})));
+                            }}
+                            style={{ color:"#FFD700", fontSize:12, cursor:"pointer",
+                              display:"inline-flex", alignItems:"center", gap:6 }}>
+                            <MdDoneAll style={{ fontSize:16 }}/> Tout marquer comme lu
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
       {/* LAYOUT */}
       <div style={{ display: "flex", paddingTop: 66 }}>
 
@@ -441,13 +755,12 @@ useEffect(() => {
                   <p style={{ color: "#666", marginTop: 4, fontSize: 14 }}>Bienvenue sur votre espace coursier IRAKY</p>
                 </div>
 
-                {/* stats */}
                 <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
                   {[
-                    { label: "MISSIONS",   val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
-                    { label: "EN COURS",   val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
-                    { label: "TERMINÉES",  val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
-                    { label: "MA NOTE",    val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+                    { label: "MISSIONS",  val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
+                    { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
+                    { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
+                    { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
                   ].map(s => (
                     <div key={s.label} style={{
                       backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
@@ -456,7 +769,7 @@ useEffect(() => {
                       display: "flex", alignItems: "center", gap: 16,
                     }}
                       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 8px 24px ${s.color}30`; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${s.color}15`; }}>
+                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = `0 4px 16px ${s.color}15`; }}>
                       <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: `${s.color}18`,
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <s.Icon style={{ color: s.color, fontSize: 24 }}/>
@@ -469,7 +782,6 @@ useEffect(() => {
                   ))}
                 </div>
 
-                {/* ma note étoiles */}
                 <div style={{ ...card, marginBottom: 20 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
@@ -485,7 +797,6 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* missions disponibles */}
                 <div style={card}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
                     <h5 style={{ color: "#FFD700", margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
@@ -506,9 +817,8 @@ useEffect(() => {
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ color: "#FFD700", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
-                        <button onClick={() => prendreMission(pub)}
-                          style={{ ...btnY, padding: "6px 14px", fontSize: 12 }}>
-                          <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/>Je prends
+                        <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "6px 14px", fontSize: 12 }}>
+                          <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/> Je prends
                         </button>
                       </div>
                     </div>
@@ -543,52 +853,32 @@ useEffect(() => {
                 )}
 
                 {publications.map(pub => (
-                  <div key={pub.id} style={{ ...card, marginBottom: 16,
-                    borderLeft: `4px solid ${pub.color}` }}
+                  <div key={pub.id} style={{ ...card, marginBottom: 16, borderLeft: `4px solid ${pub.color}` }}
                     onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 28px ${pub.color}20`; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-
+                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "none"; }}>
                     <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
-                          {pub.service}
-                        </div>
+                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{pub.service}</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MdPerson style={{ color: pub.color }}/> {pub.client}
-                          </span>
-                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MdDirectionsBike style={{ color: pub.color }}/> {pub.moyen}
-                          </span>
-                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MdAccessTime style={{ color: pub.color }}/> {pub.heure_debut} → {pub.heure_livraison}
-                          </span>
-                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MdLocationOn style={{ color: pub.color }}/> {pub.adresse_pickup}
-                          </span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdPerson style={{ color: pub.color }}/> {pub.client}</span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdDirectionsBike style={{ color: pub.color }}/> {pub.moyen}</span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdAccessTime style={{ color: pub.color }}/> {pub.heure_debut} → {pub.heure_livraison}</span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdLocationOn style={{ color: pub.color }}/> {pub.adresse_pickup}</span>
                         </div>
-                        <div style={{ color: "#aaa", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
-                          {pub.detail}
-                        </div>
+                        <div style={{ color: "#aaa", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{pub.detail}</div>
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 20, marginBottom: 6 }}>
-                          {pub.tarif.toLocaleString()} Ar
-                        </div>
+                        <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 20, marginBottom: 6 }}>{pub.tarif.toLocaleString()} Ar</div>
                         <StatutBadge statut={pub.statut}/>
                       </div>
                     </div>
-
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <button onClick={() => prendreMission(pub)}
-                        style={{ ...btnY, padding: "10px 22px", fontSize: 14,
-                          display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "10px 22px", fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
                         <MdThumbUp style={{ fontSize: 18 }}/> Je prends cette mission
                       </button>
                       <button onClick={() => setDetailModal(pub)}
-                        style={{ background: "transparent", border: "1px solid #FFD70033",
-                          color: "#FFD700", borderRadius: 25, padding: "10px 22px",
-                          cursor: "pointer", fontWeight: 700, fontSize: 14,
+                        style={{ background: "transparent", border: "1px solid #FFD70033", color: "#FFD700",
+                          borderRadius: 25, padding: "10px 22px", cursor: "pointer", fontWeight: 700, fontSize: 14,
                           display: "flex", alignItems: "center", gap: 8 }}>
                         <MdListAlt style={{ fontSize: 18 }}/> Détails
                       </button>
@@ -609,9 +899,7 @@ useEffect(() => {
                   </div>
                   Mes missions
                 </h4>
-                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>
-                  {missions.length} mission(s) assignée(s)
-                </p>
+                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>{missions.length} mission(s) assignée(s)</p>
 
                 {missions.length === 0 && (
                   <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
@@ -625,15 +913,12 @@ useEffect(() => {
 
                 {missions.map(mission => {
                   const steps = ["en_attente","negociable","accepte","termine"];
-                  const idx = steps.indexOf(mission.statut);
+                  const idx   = steps.indexOf(mission.statut);
                   return (
                     <div key={mission.id} style={{ ...card, marginBottom: 20 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between",
-                        flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
                         <div style={{ flex: 1 }}>
-                          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
-                            {mission.service}
-                          </div>
+                          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{mission.service}</div>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
                               <MdPerson style={{ color: "#FFD700" }}/> Client : <strong style={{ color: "#FFD700" }}>{mission.client}</strong>
@@ -649,7 +934,6 @@ useEffect(() => {
                         <StatutBadge statut={mission.statut}/>
                       </div>
 
-                      {/* barre progression */}
                       <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
                         {steps.map((s, i) => {
                           const done = i <= idx;
@@ -682,9 +966,7 @@ useEffect(() => {
                         ))}
                       </div>
 
-                      {/* boutons action */}
                       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                        {/* Chat toujours disponible */}
                         <button onClick={() => setChatModal(mission)}
                           style={{ background: "#3b82f618", border: "1px solid #3b82f633",
                             color: "#3b82f6", borderRadius: 12, padding: "8px 18px",
@@ -701,9 +983,7 @@ useEffect(() => {
                             <MdStar style={{ fontSize: 18 }}/> Évaluation reçue du client
                           </div>
                           <Etoiles value={mission.note || 0}/>
-                          {!mission.note && (
-                            <small style={{ color: "#888", fontSize: 12 }}>En attente d'évaluation...</small>
-                          )}
+                          {!mission.note && <small style={{ color: "#888", fontSize: 12 }}>En attente d'évaluation...</small>}
                         </div>
                       )}
                     </div>
@@ -711,206 +991,457 @@ useEffect(() => {
                 })}
               </div>
             )}
-
-{/* ═══ PROFIL ═══ */}
-{onglet === "profil" && (
-  <div>
-    <h4 style={{ color: "#FFD700", marginBottom: 24, fontWeight: 800, fontSize: 20,
-      display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
-        border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <MdPerson style={{ color: "#FFD700", fontSize: 22 }}/>
-      </div>
-      Mon profil
-    </h4>
-
-    <div style={{ backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
-
-      {/* Avatar */}
-      <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <div style={{
-          width: 90, height: 90, borderRadius: "50%",
-          background: "linear-gradient(135deg,#FFD700,#ff8c00)",
-          margin: "0 auto 14px", display: "flex", alignItems: "center",
-          justifyContent: "center", fontSize: 36, fontWeight: 800, color: "#000",
-          boxShadow: "0 0 30px #FFD70044",
-        }}>
-          {profil.prenom?.[0]}{profil.nom?.[0]}
-        </div>
-        <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>
-          {profil.prenom} {profil.nom}
-        </div>
-        <div style={{ marginTop: 8, display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
-          <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,
-            padding: "3px 14px", fontSize: 12, border: "1px solid #FFD70033",
-            display: "flex", alignItems: "center", gap: 5 }}>
-            <MdDeliveryDining style={{ fontSize: 14 }}/> Coursier IRAKY
-          </span>
-          <span style={{ backgroundColor: "#10b98118", color: "#10b981", borderRadius: 20,
-            padding: "3px 14px", fontSize: 12, border: "1px solid #10b98133",
-            display: "flex", alignItems: "center", gap: 5 }}>
-            <MdVerified style={{ fontSize: 14 }}/> Vérifié
-          </span>
-        </div>
-        <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
-          <Etoiles value={profil.note}/>
-        </div>
-      </div>
-
-      {/* Contenu chargement ou données */}
-      {profilLoading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
-          <MdAccessTime style={{ fontSize: 40, marginBottom: 10 }}/>
-          <p>Chargement du profil...</p>
-        </div>
-      ) : (
-        <>
-          {/* Infos personnelles */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14, marginBottom: 24 }}>
-            {[
-              { Icon: MdPerson,     label: "Nom",       val: profil.nom,       color: "#FFD700" },
-              { Icon: MdPerson,     label: "Prénom",    val: profil.prenom,    color: "#3b82f6" },
-              { Icon: MdEmail,      label: "Email",     val: profil.email,     color: "#8b5cf6" },
-              { Icon: MdPhone,      label: "Téléphone", val: profil.telephone, color: "#10b981" },
-              { Icon: MdLocationOn, label: "Adresse",   val: profil.adresse,   color: "#f59e0b" },
-              { Icon: MdBadge,      label: "N° CIN",    val: profil.cin,       color: "#06b6d4" },
-            ].map(({ Icon, label, val, color }) => (
-              <div key={label} style={{ backgroundColor: "#0a0a1e", borderRadius: 12,
-                padding: "14px 18px", border: "1px solid #FFD70018",
-                transition: "all 0.2s", display: "flex", alignItems: "center", gap: 14 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#FFD70033"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#FFD70018"}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                  backgroundColor: `${color}18`, border: `1px solid ${color}33`,
-                  display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Icon style={{ color, fontSize: 20 }}/>
-                </div>
+              {/* ═══ MESSAGES COURSIER ═══ */}
+              {onglet === "messages" && (
                 <div>
-                  <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{label}</div>
-                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+                    display:"flex", alignItems:"center", gap:12 }}>
+                    <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#3b82f618",
+                      border:"1px solid #3b82f633", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <MdChat style={{ color:"#3b82f6", fontSize:22 }}/>
+                    </div>
+                    Mes messages
+                  </h4>
+                  <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>
+                    Vos conversations avec les clients
+                  </p>
 
-          {/* Photos CIN */}
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#06b6d418",
-                border: "1px solid #06b6d433", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <MdBadge style={{ color: "#06b6d4", fontSize: 20 }}/>
-              </div>
-              <span style={{ color: "#06b6d4", fontWeight: 700, fontSize: 15 }}>
-                Photos pièce d'identité (CIN)
-              </span>
-            </div>
+                  {missions.filter(m => m.statut !== "en_attente").length === 0 ? (
+                    <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
+                      <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
+                      <p>Aucune conversation active.</p>
+                    </div>
+                  ) : (
+                    missions.filter(m => m.statut !== "en_attente").map(mission => (
+                      <div key={mission.id}
+                        onClick={() => { ouvrirChat(mission); }}
+                        style={{ ...card, marginBottom:14, cursor:"pointer",
+                          borderLeft:`4px solid ${STATUT_CONFIG[mission.statut]?.color||"#FFD700"}`,
+                          transition:"all 0.2s" }}
+                        onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                            <div style={{ width:46, height:46, borderRadius:"50%",
+                              background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
+                              display:"flex", alignItems:"center", justifyContent:"center",
+                              fontWeight:800, color:"#fff", fontSize:16, flexShrink:0 }}>
+                              {mission.client?.[0]}
+                            </div>
+                            <div>
+                              <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}>{mission.client}</div>
+                              <div style={{ color:"#888", fontSize:12 }}>{mission.service} · {mission.date}</div>
+                            </div>
+                          </div>
+                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                            <StatutBadge statut={mission.statut}/>
+                            <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
+                              color:"#3b82f6", borderRadius:10, padding:"7px 16px",
+                              fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
+                              <MdChat style={{ fontSize:16 }}/> Ouvrir
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
+                  {/* Fenêtre chat fixe en bas */}
+                  {chatModal && (
+                    <div style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
+                      backgroundColor:"#131330", border:"1px solid #FFD70030",
+                      borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
 
-              {/* Photo identité */}
-              {profil.photo_identite && (
-                <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
-                  border: "1px solid #FFD70022", overflow: "hidden" }}>
-                  <div style={{ padding: "10px 14px", borderBottom: "1px solid #FFD70018",
-                    color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-                    <MdBadge style={{ color: "#FFD700" }}/> Photo d'identité
-                  </div>
-                  <img src={`http://localhost:8000/storage/${profil.photo_identite}`}
-                    alt="Photo identité"
-                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
-                    onError={e => { e.target.style.display = "none"; }}
-                  />
+                      {/* Header */}
+                      <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
+                        display:"flex", justifyContent:"space-between", alignItems:"center",
+                        background:"linear-gradient(135deg,#FFD70015,#ff950008)" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ width:34, height:34, borderRadius:"50%",
+                            background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            fontWeight:800, color:"#fff", fontSize:14 }}>
+                            {chatModal.client?.[0]}
+                          </div>
+                          <div>
+                            <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>{chatModal.client}</div>
+                            <div style={{ color:"#10b981", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>
+                              <div style={{ width:6, height:6, borderRadius:"50%", backgroundColor:"#10b981" }}/>
+                              {chatModal.service}
+                            </div>
+                          </div>
+                        </div>
+                        <button onClick={() => { setChatModal(null); setMessages([]); }}
+                          style={{ background:"transparent", border:"none", color:"#666",
+                            fontSize:20, cursor:"pointer" }}
+                          onMouseEnter={e=>e.target.style.color="#fff"}
+                          onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
+                      </div>
+
+                      {/* Accord coursier */}
+                      <div style={{ padding:"10px 14px", backgroundColor:"#0a0a1e",
+                        borderBottom:"1px solid #FFD70018" }}>
+                        <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>
+                          Accord de service :
+                        </div>
+                        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                          <button
+                            onClick={async () => {
+                              if (!chatModal.accord_client) {
+                                showToast("🔒 Le client doit accepter en premier", "error");
+                                return;
+                              }
+                              const token = localStorage.getItem("token");
+                              const res = await fetch(
+                                `${BASE_URL}/api/commandes/${chatModal.id}/accepter-coursier`,
+                                { method:"POST", headers:{ "Authorization":`Bearer ${token}` } }
+                              );
+                              const data = await res.json();
+                              if (res.ok) {
+                                setChatModal(prev => ({...prev, accord_coursier:true, statut:"accepte"}));
+                                setMissions(prev => prev.map(m =>
+                                  m.id === chatModal.id ? {...m, statut:"accepte", accord_coursier:true} : m
+                                ));
+                                showToast("✅ Accord validé — statut : Accepté !");
+                              } else {
+                                showToast(data.message || "Erreur", "error");
+                              }
+                            }}
+                            disabled={chatModal.accord_coursier || !chatModal.accord_client}
+                            style={{
+                              padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12,
+                              border:"none",
+                              cursor: (!chatModal.accord_client || chatModal.accord_coursier) ? "not-allowed" : "pointer",
+                              backgroundColor: chatModal.accord_coursier ? "#10b981"
+                                : !chatModal.accord_client ? "#ffffff11" : "#10b98122",
+                              color: chatModal.accord_coursier ? "#fff"
+                                : !chatModal.accord_client ? "#555" : "#10b981",
+                            }}>
+                            {chatModal.accord_coursier ? "✅ Accepté"
+                              : !chatModal.accord_client ? "🔒 Attendre client" : "✅ Accepter"}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const token = localStorage.getItem("token");
+                              const res = await fetch(
+                                `${BASE_URL}/api/commandes/${chatModal.id}/refuser`,
+                                { method:"POST", headers:{ "Authorization":`Bearer ${token}` } }
+                              );
+                              if (res.ok) {
+                                setMissions(prev => prev.filter(m => m.id !== chatModal.id));
+                                setChatModal(null);
+                                setMessages([]);
+                                showToast("❌ Mission refusée — remise en attente", "error");
+                              }
+                            }}
+                            style={{ padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12,
+                              border:"none", cursor:"pointer",
+                              backgroundColor:"#ef444422", color:"#ef4444" }}>
+                            ❌ Refuser
+                          </button>
+                        </div>
+                        <div style={{ marginTop:6, display:"flex", gap:12 }}>
+                          <span style={{ fontSize:11, color: chatModal.accord_client ? "#10b981" : "#666" }}>
+                            {chatModal.accord_client ? "✅" : "⬜"} Client
+                          </span>
+                          <span style={{ fontSize:11, color: chatModal.accord_coursier ? "#10b981" : "#666" }}>
+                            {chatModal.accord_coursier ? "✅" : "⬜"} Coursier
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Messages */}
+{/* ✅ Barre d'outils messages */}
+                      <div style={{ padding:"8px 14px", backgroundColor:"#0d0d22",
+                        borderBottom:"1px solid #FFD70010", display:"flex",
+                        justifyContent:"space-between", alignItems:"center" }}>
+                        <span style={{ color:"#666", fontSize:11 }}>
+                          {messages.length} message(s)
+                        </span>
+                        <div style={{ display:"flex", gap:8 }}>
+                          {modeSelection && selectedMsgs.size > 0 && (
+                            <button
+                              onClick={async () => {
+                                const token = localStorage.getItem("token");
+                                await Promise.all([...selectedMsgs].map(msgId =>
+                                  fetch(`${BASE_URL}/api/commandes/${chatModal.id}/messages/${msgId}`, {
+                                    method: "DELETE",
+                                    headers: { "Authorization": `Bearer ${token}` },
+                                  })
+                                ));
+                                setMessages(prev => prev.filter(m => !selectedMsgs.has(m.id)));
+                                setSelectedMsgs(new Set());
+                                setModeSelection(false);
+                                showToast("Messages supprimés");
+                              }}
+                              style={{ background:"#ef444420", border:"1px solid #ef444430",
+                                color:"#ef6666", borderRadius:8, padding:"4px 12px",
+                                cursor:"pointer", fontSize:11, fontWeight:700 }}>
+                              🗑 Supprimer ({selectedMsgs.size})
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setModeSelection(!modeSelection);
+                              setSelectedMsgs(new Set());
+                            }}
+                            style={{ background: modeSelection ? "#FFD70020" : "transparent",
+                              border:`1px solid ${modeSelection ? "#FFD70044" : "#ffffff20"}`,
+                              color: modeSelection ? "#FFD700" : "#666",
+                              borderRadius:8, padding:"4px 10px",
+                              cursor:"pointer", fontSize:11 }}>
+                            {modeSelection ? "✕ Annuler" : "☑ Sélectionner"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* ✅ Messages avec scroll + sélection */}
+                      <div style={{ height:240, overflowY:"auto", padding:14,
+                        display:"flex", flexDirection:"column", gap:10 }}>
+                        {messages.length === 0 && (
+                          <div style={{ color:"#555", textAlign:"center", fontSize:13, marginTop:40 }}>
+                            Commencez la conversation
+                          </div>
+                        )}
+                        {messages.map((m, i) => {
+                          const isCoursier = m.sender_role === "coursier"
+                            || (profil.id && parseInt(m.sender_id) === parseInt(profil.id));
+                          const isSelected = selectedMsgs.has(m.id);
+
+                          return (
+                            <div key={m.id || i}
+                              onClick={() => {
+                                if (!modeSelection) return;
+                                setSelectedMsgs(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(m.id)) next.delete(m.id);
+                                  else next.add(m.id);
+                                  return next;
+                                });
+                              }}
+                              style={{
+                                display:"flex",
+                                justifyContent: isCoursier ? "flex-end" : "flex-start",
+                                cursor: modeSelection ? "pointer" : "default",
+                                opacity: modeSelection && !isSelected ? 0.6 : 1,
+                              }}>
+
+                              {/* Checkbox sélection */}
+                              {modeSelection && (
+                                <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
+                                  border:`2px solid ${isSelected ? "#FFD700" : "#444"}`,
+                                  backgroundColor: isSelected ? "#FFD700" : "transparent",
+                                  display:"flex", alignItems:"center", justifyContent:"center",
+                                  marginRight:8, alignSelf:"center", fontSize:11, color:"#000" }}>
+                                  {isSelected && "✓"}
+                                </div>
+                              )}
+
+                              {!isCoursier && !modeSelection && (
+                                <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                                  background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
+                                  display:"flex", alignItems:"center", justifyContent:"center",
+                                  fontWeight:800, color:"#fff", fontSize:11,
+                                  marginRight:6, alignSelf:"flex-end" }}>
+                                  {chatModal.client?.[0]}
+                                </div>
+                              )}
+
+                              <div style={{
+                                backgroundColor: isSelected ? "#FFD70033"
+                                  : isCoursier ? "#FFD70022" : "#1a1a35",
+                                border:`1px solid ${isSelected ? "#FFD700"
+                                  : isCoursier ? "#FFD70044" : "#ffffff15"}`,
+                                borderRadius: isCoursier
+                                  ? "16px 16px 4px 16px"
+                                  : "16px 16px 16px 4px",
+                                padding:"9px 14px", maxWidth:"75%",
+                                transition:"all 0.15s",
+                              }}>
+                                <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>
+                                  {m.texte}
+                                </div>
+                                <div style={{ color:"#666", fontSize:10, marginTop:3,
+                                  textAlign:"right", display:"flex", gap:6,
+                                  justifyContent:"flex-end", alignItems:"center" }}>
+                                  {m.modifie && <span style={{ color:"#888" }}>modifié ·</span>}
+                                  {m.time || (m.created_at
+                                    ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
+                                    : "")}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div ref={messagesEndRef}/>
+                      </div>
+
+                      {/* Input — ✅ corrigé : newMsg + envoyerMessage */}
+                      <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018",
+                        display:"flex", gap:8 }}>
+                        <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
+                          onKeyDown={e => e.key==="Enter" && newMsg.trim() && envoyerMessage()}
+                          placeholder="Écrire au client..."
+                          style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70030",
+                            color:"#fff", borderRadius:12, padding:"9px 14px",
+                            fontSize:13, outline:"none" }}
+                          onFocus={e=>e.target.style.borderColor="#FFD700"}
+                          onBlur={e=>e.target.style.borderColor="#FFD70030"}
+                        />
+                        <button onClick={envoyerMessage}
+                          disabled={!newMsg.trim()}
+                          style={{
+                            background:"linear-gradient(135deg,#FFD700,#ff9500)",
+                            color:"#000", border:"none", borderRadius:12, padding:"9px 14px",
+                            cursor: newMsg.trim() ? "pointer" : "not-allowed",
+                            opacity: newMsg.trim() ? 1 : 0.4,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            minWidth:42,
+                          }}>
+                          <MdSend style={{ fontSize:18 }}/>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
+            {/* ═══ PROFIL ═══ */}
+            {onglet === "profil" && (
+              <div>
+                <h4 style={{ color: "#FFD700", marginBottom: 24, fontWeight: 800, fontSize: 20,
+                  display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
+                    border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <MdPerson style={{ color: "#FFD700", fontSize: 22 }}/>
+                  </div>
+                  Mon profil
+                </h4>
 
-              {/* CIN Recto */}
-              <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
-                border: "1px solid #06b6d422", overflow: "hidden" }}>
-                <div style={{ padding: "10px 14px", borderBottom: "1px solid #06b6d418",
-                  color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-                  <MdBadge style={{ color: "#06b6d4" }}/> CIN Recto
+                <div style={{ backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
+
+                  {/* Avatar */}
+                  <div style={{ textAlign: "center", marginBottom: 28 }}>
+                    <div style={{
+                      width: 90, height: 90, borderRadius: "50%",
+                      background: "linear-gradient(135deg,#FFD700,#ff8c00)",
+                      margin: "0 auto 14px", display: "flex", alignItems: "center",
+                      justifyContent: "center", fontSize: 36, fontWeight: 800, color: "#000",
+                      boxShadow: "0 0 30px #FFD70044",
+                    }}>
+                      {profil.prenom?.[0]}{profil.nom?.[0]}
+                    </div>
+                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>{profil.prenom} {profil.nom}</div>
+                    <div style={{ marginTop: 8, display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                      <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,
+                        padding: "3px 14px", fontSize: 12, border: "1px solid #FFD70033",
+                        display: "flex", alignItems: "center", gap: 5 }}>
+                        <MdDeliveryDining style={{ fontSize: 14 }}/> Coursier IRAKY
+                      </span>
+                      <span style={{ backgroundColor: "#10b98118", color: "#10b981", borderRadius: 20,
+                        padding: "3px 14px", fontSize: 12, border: "1px solid #10b98133",
+                        display: "flex", alignItems: "center", gap: 5 }}>
+                        <MdVerified style={{ fontSize: 14 }}/> Vérifié
+                      </span>
+                    </div>
+                    <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
+                      <Etoiles value={profil.note}/>
+                    </div>
+                  </div>
+
+                  {profilLoading ? (
+                    <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
+                      <MdAccessTime style={{ fontSize: 40, marginBottom: 10 }}/>
+                      <p>Chargement du profil...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Infos personnelles */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14, marginBottom: 24 }}>
+                        {[
+                          { Icon: MdPerson,     label: "Nom",       val: profil.nom,       color: "#FFD700" },
+                          { Icon: MdPerson,     label: "Prénom",    val: profil.prenom,    color: "#3b82f6" },
+                          { Icon: MdEmail,      label: "Email",     val: profil.email,     color: "#8b5cf6" },
+                          { Icon: MdPhone,      label: "Téléphone", val: profil.telephone, color: "#10b981" },
+                          { Icon: MdLocationOn, label: "Adresse",   val: profil.adresse,   color: "#f59e0b" },
+                          { Icon: MdBadge,      label: "N° CIN",    val: profil.cin,       color: "#06b6d4" },
+                        ].map(({ Icon, label, val, color }) => (
+                          <div key={label} style={{ backgroundColor: "#0a0a1e", borderRadius: 12,
+                            padding: "14px 18px", border: "1px solid #FFD70018",
+                            transition: "all 0.2s", display: "flex", alignItems: "center", gap: 14 }}
+                            onMouseEnter={e => e.currentTarget.style.borderColor = "#FFD70033"}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = "#FFD70018"}>
+                            <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                              backgroundColor: `${color}18`, border: `1px solid ${color}33`,
+                              display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <Icon style={{ color, fontSize: 20 }}/>
+                            </div>
+                            <div>
+                              <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{label}</div>
+                              <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* ✅ Photos CIN avec composant réutilisable */}
+                      <div style={{ marginBottom: 24 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#06b6d418",
+                            border: "1px solid #06b6d433", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <MdBadge style={{ color: "#06b6d4", fontSize: 20 }}/>
+                          </div>
+                          <span style={{ color: "#06b6d4", fontWeight: 700, fontSize: 15 }}>
+                            Photos pièce d'identité (CIN)
+                          </span>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
+                          {/* ✅ Seulement recto et verso — photo_identite supprimée */}
+                          <PhotoCIN chemin={profil.photo_recto} label="CIN Recto" couleur="#06b6d4" />
+                          <PhotoCIN chemin={profil.photo_verso} label="CIN Verso" couleur="#8b5cf6" />
+                        </div>
+                      </div>
+
+                      {/* Statistiques */}
+                      <div style={{ background: "linear-gradient(135deg,#FFD70012,#ff950008)",
+                        borderRadius: 14, padding: 20, border: "1px solid #FFD70025" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
+                            border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
+                          </div>
+                          <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Mes statistiques</span>
+                        </div>
+                        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+                          {[
+                            { label: "TOTAL",     val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
+                            { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
+                            { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
+                            { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+                          ].map(s => (
+                            <div key={s.label} style={{
+                              backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
+                              border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
+                              transition: "transform 0.2s", display: "flex", alignItems: "center", gap: 14 }}
+                              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
+                              onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                              <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: `${s.color}18`,
+                                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <s.Icon style={{ color: s.color, fontSize: 22 }}/>
+                              </div>
+                              <div>
+                                <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
+                                <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-                {profil.photo_recto ? (
-                  <img src={`http://localhost:8000/storage/${profil.photo_recto}`}
-                    alt="CIN Recto"
-                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
-                    onError={e => { e.target.style.display = "none"; }}
-                  />
-                ) : (
-                  <div style={{ height: 180, display: "flex", alignItems: "center",
-                    justifyContent: "center", flexDirection: "column", gap: 8, color: "#555" }}>
-                    <MdBadge style={{ fontSize: 40 }}/>
-                    <span style={{ fontSize: 12 }}>Non fourni</span>
-                  </div>
-                )}
               </div>
-
-              {/* CIN Verso */}
-              <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
-                border: "1px solid #8b5cf622", overflow: "hidden" }}>
-                <div style={{ padding: "10px 14px", borderBottom: "1px solid #8b5cf618",
-                  color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-                  <MdBadge style={{ color: "#8b5cf6" }}/> CIN Verso
-                </div>
-                {profil.photo_verso ? (
-                  <img src={`http://localhost:8000/storage/${profil.photo_verso}`}
-                    alt="CIN Verso"
-                    style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
-                    onError={e => { e.target.style.display = "none"; }}
-                  />
-                ) : (
-                  <div style={{ height: 180, display: "flex", alignItems: "center",
-                    justifyContent: "center", flexDirection: "column", gap: 8, color: "#555" }}>
-                    <MdBadge style={{ fontSize: 40 }}/>
-                    <span style={{ fontSize: 12 }}>Non fourni</span>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          </div>
-
-          {/* Statistiques */}
-          <div style={{ background: "linear-gradient(135deg,#FFD70012,#ff950008)",
-            borderRadius: 14, padding: 20, border: "1px solid #FFD70025" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
-                border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
-              </div>
-              <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Mes statistiques</span>
-            </div>
-            <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-              {[
-                { label: "TOTAL",     val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
-                { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
-                { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
-                { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
-              ].map(s => (
-                <div key={s.label} style={{
-                  backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
-                  border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
-                  transition: "transform 0.2s", display: "flex", alignItems: "center", gap: 14 }}
-                  onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: `${s.color}18`,
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <s.Icon style={{ color: s.color, fontSize: 22 }}/>
-                  </div>
-                  <div>
-                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
-                    <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-    </div>
-  </div>
-)}
+            )}
 
             {/* ═══ AIDE ═══ */}
             {onglet === "aide" && (
@@ -927,16 +1458,16 @@ useEffect(() => {
 
                 <div className="aide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
                   {[
-                    { Icon: MdPhone,    title: "Nous appeler",   desc: "+261 38 21 266 83",         color: "#10b981", bg: "#10b98115", action: "Appeler maintenant →" },
-                    { Icon: MdChat,     title: "Chat en direct", desc: "Réponse en moins de 5 min", color: "#3b82f6", bg: "#3b82f615", action: "Démarrer le chat →"   },
-                    { Icon: MdEmail,    title: "Email support",  desc: "irakydelivery@gmail.com",   color: "#8b5cf6", bg: "#8b5cf615", action: "Envoyer un email →"    },
-                    { Icon: MdHelp,     title: "Guide coursier", desc: "Tutoriels pas à pas",       color: "#f59e0b", bg: "#f59e0b15", action: "Lire le guide →"       },
+                    { Icon: MdPhone, title: "Nous appeler",   desc: "+261 38 21 266 83",         color: "#10b981", bg: "#10b98115", action: "Appeler maintenant →" },
+                    { Icon: MdChat,  title: "Chat en direct", desc: "Réponse en moins de 5 min", color: "#3b82f6", bg: "#3b82f615", action: "Démarrer le chat →"   },
+                    { Icon: MdEmail, title: "Email support",  desc: "irakydelivery@gmail.com",   color: "#8b5cf6", bg: "#8b5cf615", action: "Envoyer un email →"    },
+                    { Icon: MdHelp,  title: "Guide coursier", desc: "Tutoriels pas à pas",       color: "#f59e0b", bg: "#f59e0b15", action: "Lire le guide →"       },
                   ].map((item, i) => (
                     <div key={i} style={{ backgroundColor: "#131330", borderRadius: 16, padding: "28px 20px",
                       border: `1px solid ${item.color}30`, cursor: "pointer",
                       transition: "all 0.3s ease", position: "relative", overflow: "hidden" }}
                       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${item.color}30`; e.currentTarget.style.borderColor = `${item.color}66`; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${item.color}30`; }}>
+                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${item.color}30`; }}>
                       <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80,
                         borderRadius: "50%", backgroundColor: `${item.color}10` }}/>
                       <div style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: item.bg,
@@ -959,7 +1490,7 @@ useEffect(() => {
         </main>
       </div>
 
-      {/* MODAL DÉTAIL MISSION */}
+      {/* MODAL DÉTAIL */}
       {detailModal && (
         <Modal onClose={() => setDetailModal(null)} size="lg">
           <h5 style={{ color: "#FFD700", marginBottom: 20, fontWeight: 800, fontSize: 17,
@@ -996,51 +1527,115 @@ useEffect(() => {
       )}
 
       {/* MODAL CHAT */}
-      {chatModal && (
-        <Modal onClose={() => setChatModal(null)} size="lg">
-          <h5 style={{ color: "#FFD700", marginBottom: 4, fontWeight: 800, fontSize: 16,
-            display: "flex", alignItems: "center", gap: 8 }}>
-            <MdChat style={{ fontSize: 20 }}/> Message — {chatModal.service}
-          </h5>
-          <p style={{ color: "#666", fontSize: 13, marginBottom: 16 }}>
-            Client : <strong style={{ color: "#fff" }}>{chatModal.client}</strong>
-          </p>
+{chatModal && (
+  <Modal onClose={() => {
+    setChatModal(null);
+    setMessages([]);
+  }} size="lg">
+    <h5 style={{ color: "#FFD700", marginBottom: 4, fontWeight: 800, fontSize: 16,
+      display: "flex", alignItems: "center", gap: 8 }}>
+      <MdChat style={{ fontSize: 20 }}/> Message — {chatModal.service}
+    </h5>
+    <p style={{ color: "#666", fontSize: 13, marginBottom: 16 }}>
+      Client : <strong style={{ color: "#fff" }}>
+        {chatModal.client || `Client #${chatModal.client_id}`}
+      </strong>
+    </p>
 
-          {/* messages */}
-          <div style={{ backgroundColor: "#0a0a1e", borderRadius: 12, padding: 16,
-            marginBottom: 16, maxHeight: 280, overflowY: "auto",
-            border: "1px solid #FFD70018" }}>
-            {messages.map(m => (
-              <div key={m.id} style={{
-                display: "flex", justifyContent: m.from === "coursier" ? "flex-end" : "flex-start",
-                marginBottom: 12,
-              }}>
-                <div style={{
-                  backgroundColor: m.from === "coursier" ? "#FFD70022" : "#1a1a35",
-                  border: `1px solid ${m.from === "coursier" ? "#FFD70044" : "#ffffff15"}`,
-                  borderRadius: m.from === "coursier" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  padding: "10px 14px", maxWidth: "70%",
-                }}>
-                  <div style={{ color: "#fff", fontSize: 13 }}>{m.texte}</div>
-                  <div style={{ color: "#666", fontSize: 10, marginTop: 4, textAlign: "right" }}>{m.time}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+    {/* ✅ Checkbox accord */}
+    <div style={{ marginBottom: 16, padding: "12px 16px",
+      backgroundColor: "#0a0a1e", borderRadius: 12,
+      border: "1px solid #FFD70018", display: "flex", alignItems: "center",
+      justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+      <span style={{ color: "#aaa", fontSize: 13, fontWeight: 600 }}>
+        Accord avec le client :
+      </span>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button
+          onClick={() => changerStatutAccord(chatModal.id, "accepte")}
+          style={{
+            padding: "7px 18px", borderRadius: 20, fontWeight: 700,
+            fontSize: 13, cursor: "pointer", border: "none",
+            backgroundColor: chatModal.statut === "accepte" ? "#10b981" : "#10b98122",
+            color: chatModal.statut === "accepte" ? "#fff" : "#10b981",
+            transition: "all 0.2s",
+          }}>
+          ✅ Oui — Accepter
+        </button>
+        <button
+          onClick={() => changerStatutAccord(chatModal.id, "refuse")}
+          style={{
+            padding: "7px 18px", borderRadius: 20, fontWeight: 700,
+            fontSize: 13, cursor: "pointer", border: "none",
+            backgroundColor: chatModal.statut === "refuse" ? "#ef4444" : "#ef444422",
+            color: chatModal.statut === "refuse" ? "#fff" : "#ef4444",
+            transition: "all 0.2s",
+          }}>
+          ❌ Non — Refuser
+        </button>
+      </div>
+    </div>
 
-          {/* input envoyer */}
-          <div style={{ display: "flex", gap: 10 }}>
-            <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && envoyerMessage()}
-              placeholder="Écrire un message..."
-              style={{ ...inp, flex: 1 }}/>
-            <button onClick={envoyerMessage}
-              style={{ ...btnY, padding: "11px 18px", display: "flex", alignItems: "center", gap: 6 }}>
-              <MdSend style={{ fontSize: 18 }}/>
-            </button>
-          </div>
-        </Modal>
+    {/* Messages */}
+    <div ref={messagesEndRef} style={{ backgroundColor: "#0a0a1e", borderRadius: 12,
+      padding: 16, marginBottom: 16, maxHeight: 280, overflowY: "auto",
+      border: "1px solid #FFD70018" }}>
+      {messages.length === 0 && (
+        <p style={{ color: "#555", textAlign: "center", fontSize: 13 }}>
+          Aucun message — commencez la conversation
+        </p>
       )}
+      {messages.map(m => (
+        <div key={m.id} style={{
+          display: "flex",
+          justifyContent: m.sender_id === profil.id || m.from === "coursier"
+            ? "flex-end" : "flex-start",
+          marginBottom: 12,
+        }}>
+          <div style={{
+            backgroundColor: m.sender_id === profil.id || m.from === "coursier"
+              ? "#FFD70022" : "#1a1a35",
+            border: `1px solid ${
+              m.sender_id === profil.id || m.from === "coursier"
+                ? "#FFD70044" : "#ffffff15"
+            }`,
+            borderRadius: m.sender_id === profil.id || m.from === "coursier"
+              ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+            padding: "10px 14px", maxWidth: "70%",
+          }}>
+            <div style={{ color: "#fff", fontSize: 13 }}>{m.texte}</div>
+            <div style={{ color: "#666", fontSize: 10, marginTop: 4, textAlign: "right" }}>
+              {m.time || new Date(m.created_at).toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" })}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Input envoyer */}
+    <div style={{ display: "flex", gap: 10 }}>
+      <input
+        value={newMsg}
+        onChange={e => setNewMsg(e.target.value)}
+        onKeyDown={e => e.key === "Enter" && newMsg.trim() && envoyerMessage()}
+        placeholder="Écrire un message..."
+        style={{ ...inp, flex: 1 }}
+      />
+      <button
+        onClick={envoyerMessage}
+        disabled={!newMsg.trim()}
+        style={{
+          ...btnY,
+          padding: "11px 18px",
+          display: "flex", alignItems: "center", gap: 6,
+          opacity: newMsg.trim() ? 1 : 0.4,
+          cursor: newMsg.trim() ? "pointer" : "not-allowed",
+        }}>
+        <MdSend style={{ fontSize: 18 }}/>
+      </button>
+    </div>
+  </Modal>
+)}
 
       <style>{`
         @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }
@@ -1055,13 +1650,12 @@ useEffect(() => {
           .stats-grid{ grid-template-columns:repeat(2,1fr) !important; }
           .aide-grid { grid-template-columns:1fr !important; }
         }
-        * { box-sizing:border-box; }
+         { box-sizing:border-box; }
         body { overflow-x:hidden; }
-        details summary::-webkit-details-marker { display:none; }
+      @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
       `}</style>
     </div>
   );
 }
 
 export default DashboardCoursier;
-

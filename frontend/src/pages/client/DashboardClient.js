@@ -1,6 +1,4 @@
-
-
-import { useState, useEffect, } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
 import jiramaImg from "../../images/jirama.jpg";
@@ -14,6 +12,7 @@ import { FaBox, FaClock, FaCheckCircle, FaTimesCircle, FaUser } from "react-icon
 import {
   MdDashboard,
   MdAddCircle,
+  MdClose,
   MdLocationOn,
   MdListAlt,
   MdPerson,
@@ -32,6 +31,10 @@ import {
   MdAccessTime,
   MdLocalShipping,
   MdDescription,
+  MdNotifications,
+  MdCircle,
+  MdDoneAll,
+  MdSend,
 } from "react-icons/md";
 // ══════════════════════════════════════════════
 //  DONNÉES
@@ -194,22 +197,32 @@ function StatutBadge({ statut }) {
     </span>
   );
 }
+
 // ══════════════════════════════════════════════
 //  SidebarContent
 // ══════════════════════════════════════════════
 function SidebarContent({ onglet, setOnglet, profil, commandes }) {
+  const enCours = commandes.filter(c =>
+    ["en_attente","negociable","accepte"].includes(c.statut)
+  ).length;
+
+  const nbMessages = commandes.filter(c =>
+    c.coursier && c.statut !== "en_attente"
+  ).length;
+
   const items = [
-    { id:"accueil",    Icon:MdDashboard,    label:"Tableau de bord"    },
-    { id:"nouvelle",   Icon:MdAddCircle,    label:"Nouvelle commande"  },
+    { id:"accueil",    Icon:MdDashboard,    label:"Tableau de bord"     },
+    { id:"nouvelle",   Icon:MdAddCircle,    label:"Nouvelle commande"   },
     { id:"suivi",      Icon:MdLocationOn,   label:"Suivi en temps réel" },
     { id:"historique", Icon:MdListAlt,      label:"Mes commandes"       },
+    { id:"messages",   Icon:MdChat,         label:"Messages"            },
     { id:"profil",     Icon:MdPerson,       label:"Mon profil"          },
     { id:"aide",       Icon:MdHelp,         label:"Aide & Support"      },
   ];
-  const enCours = commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length;
 
   return (
     <div style={{ height:"100%", display:"flex", flexDirection:"column" }}>
+
       {/* profil mini */}
       <div style={{ padding:"0 20px 20px", borderBottom:"1px solid #FFD70018", marginBottom:8 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -220,15 +233,20 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
             fontWeight:800, color:"#000", fontSize:16,
             boxShadow:"0 0 12px #FFD70044",
           }}>
-            {profil.prenom[0]}{profil.nom[0]}
+            {profil.prenom?.[0]}{profil.nom?.[0]}
           </div>
           <div>
-            <div style={{ color:"#fff", fontWeight:700, fontSize:13 }}>{profil.prenom} {profil.nom}</div>
-            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>✦ Client IRAKY</div>
+            <div style={{ color:"#fff", fontWeight:700, fontSize:13 }}>
+              {profil.prenom} {profil.nom}
+            </div>
+            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>
+              ✦ Client IRAKY
+            </div>
           </div>
         </div>
       </div>
 
+      {/* menu items */}
       <div style={{ flex:1, paddingTop:4 }}>
         {items.map(item => (
           <div key={item.id} onClick={() => setOnglet(item.id)}
@@ -240,20 +258,35 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
               color: onglet===item.id ? "#FFD700":"#8888aa",
               transition:"all 0.18s", borderRadius:"0 10px 10px 0", marginRight:8,
             }}
-            onMouseEnter={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="#ffffff08"; e.currentTarget.style.color="#fff"; }}}
-            onMouseLeave={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="transparent"; e.currentTarget.style.color="#8888aa"; }}}>
+            onMouseEnter={e=>{ if(onglet!==item.id){
+              e.currentTarget.style.backgroundColor="#ffffff08";
+              e.currentTarget.style.color="#fff";
+            }}}
+            onMouseLeave={e=>{ if(onglet!==item.id){
+              e.currentTarget.style.backgroundColor="transparent";
+              e.currentTarget.style.color="#8888aa";
+            }}}>
             <span style={{ display:"flex", alignItems:"center", gap:10 }}>
               <item.Icon style={{ fontSize:18 }}/>
               {item.label}
             </span>
+
+            {/* Badge suivi */}
             {item.id==="suivi" && enCours>0 && (
               <span style={{ background:"#f59e0b", color:"#000", borderRadius:12,
                 padding:"1px 8px", fontSize:11, fontWeight:800 }}>{enCours}</span>
+            )}
+
+            {/* Badge messages */}
+            {item.id==="messages" && nbMessages>0 && (
+              <span style={{ background:"#3b82f6", color:"#fff", borderRadius:12,
+                padding:"1px 8px", fontSize:11, fontWeight:800 }}>{nbMessages}</span>
             )}
           </div>
         ))}
       </div>
 
+      {/* bouton déconnexion */}
       <div style={{ padding:16 }}>
         <button onClick={() => { localStorage.clear(); window.location.href="/connexion"; }}
           style={{
@@ -268,6 +301,7 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
           <MdLogout style={{ fontSize:18 }}/> Se déconnecter
         </button>
       </div>
+
     </div>
   );
 }
@@ -279,8 +313,8 @@ function DashboardClient() {
   const [onglet, setOnglet]           = useState("accueil");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen]     = useState(false);
-  const [notifs, setNotifs]           = useState(MOCK_NOTIFS);
-  const [commandes, setCommandes]     = useState(MOCK_COMMANDES);
+const [notifs, setNotifs] = useState([]);
+ const [commandes, setCommandes] = useState([]);
   const [detailCmd, setDetailCmd]     = useState(null);
   const [noteCmd, setNoteCmd]         = useState(null);
   const [noteTmp, setNoteTmp]         = useState(0);
@@ -289,45 +323,172 @@ function DashboardClient() {
   const [serviceHov, setServiceHov]   = useState(null);
   const [moyenHov, setMoyenHov]       = useState(null);
   const [loading, setLoading]         = useState(false);
+  const [chatCommande, setChatCommande] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatMsg, setChatMsg]           = useState("");
+  const [chatLoading, setChatLoading]   = useState(false);
+  const messagesEndRef                  = useRef(null);
 
   const [form, setForm] = useState({
     service:"", moyen:"", detail:"", adresse_pickup:"",
     heure_publication:"", heure_debut:"", heure_livraison:"",
   });
+  
+  const [selectedMsgs, setSelectedMsgs] = useState(new Set());
+  const [modeSelection, setModeSelection] = useState(false);
 
+// ✅ Après — chargé depuis localStorage + API /me
 const [profil, setProfil] = useState({
-  nom: "", prenom: "", email: "",
-  telephone: "", adresse: "", role: "",
+  id:        null,
+  nom:       localStorage.getItem("nom")       || "",
+  prenom:    localStorage.getItem("prenom")    || "",
+  email:     localStorage.getItem("email")     || "",
+  telephone: localStorage.getItem("telephone") || "",
+  adresse:   localStorage.getItem("adresse")   || "",
+  role:      localStorage.getItem("role")      || "client",
 });
 
+// ✅ Synchronise avec l'API au chargement
 useEffect(() => {
   const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "/connexion";
-    return;
-  }
+  if (!token) return;
   fetch("http://localhost:8000/api/me", {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
   })
-    .then(res => {
-      if (!res.ok) {
-        localStorage.clear();
-        window.location.href = "/connexion";
-        return;
-      }
-      return res.json();
-    })
+    .then(res => { if (res.status === 401) { localStorage.clear(); window.location.href="/connexion"; } return res.json(); })
     .then(data => {
-      if (data) setProfil(data);
+      if (!data) return;
+      const p = {
+         id:        data.id        || null, 
+        nom:       data.nom       || "",
+        prenom:    data.prenom    || "",
+        email:     data.email     || "",
+        telephone: data.telephone || "",
+        adresse:   data.adresse   || "",
+        role:      data.role      || "client",
+      };
+      setProfil(p);
+      // ✅ Met à jour le localStorage aussi
+      Object.entries(p).forEach(([k,v]) => localStorage.setItem(k, v));
     })
-    .catch(() => {
-      localStorage.clear();
-      window.location.href = "/connexion";
-    });
+    .catch(err => console.error("Erreur profil :", err));
 }, []);
+
+// Ouvrir le chat d'une commande
+const ouvrirChat = async (cmd) => {
+  setChatCommande(cmd);
+  setChatMessages([]);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`http://localhost:8000/api/commandes/${cmd.id}/messages`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    });
+    const data = await res.json();
+    if (Array.isArray(data)) setChatMessages(data);
+  } catch (err) {
+    console.error("Erreur messages :", err);
+  }
+};
+
+// Envoyer un message
+const envoyerChatMsg = async () => {
+  if (!chatMsg.trim() || !chatCommande) return;
+  
+  // ✅ Affiche le message IMMÉDIATEMENT côté UI sans attendre l'API
+  const msgTemp = {
+    id:          `temp_${Date.now()}`,
+    texte:       chatMsg,
+    sender_id:   profil.id,
+    sender_role: "client",
+    modifie:     false,
+    lu:          false,
+    time:        new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
+    created_at:  new Date().toISOString(),
+    _sending:    true,  // flag temporaire
+  };
+  setChatMessages(prev => [...prev, msgTemp]);
+  const texteEnvoi = chatMsg;
+  setChatMsg("");         // ✅ Vide l'input immédiatement
+  setChatLoading(true);
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `http://localhost:8000/api/commandes/${chatCommande.id}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ texte: texteEnvoi }),
+      }
+    );
+    const data = await res.json();
+    if (res.ok) {
+      // ✅ Remplace le message temporaire par le vrai
+      setChatMessages(prev => prev.map(m =>
+        m.id === msgTemp.id
+          ? { ...data.message, sender_id: profil.id }
+          : m
+      ));
+    } else {
+      // ✅ Supprime le message temporaire si erreur
+      setChatMessages(prev => prev.filter(m => m.id !== msgTemp.id));
+      showToast(data.message || "Erreur envoi", "error");
+    }
+  } catch {
+    setChatMessages(prev => prev.filter(m => m.id !== msgTemp.id));
+    showToast("Erreur de connexion", "error");
+  }
+  setChatLoading(false);
+};
+// Polling messages dans le chat (toutes les 5s quand ouvert)
+// ── Polling global — notifs + commandes toutes les 2s ──────────
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const fetchAll = () => {
+    // Notifs
+    fetch("http://localhost:8000/api/notifications", {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => setNotifs(Array.isArray(data) ? data : [])).catch(()=>{});
+
+    // Commandes
+    fetch("http://localhost:8000/api/commandes/mes-commandes", {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (!Array.isArray(data)) return;
+      setCommandes(data.map(c => ({
+        ...c,
+        coursier: c.coursier ? `${c.coursier.prenom} ${c.coursier.nom}` : null,
+      })));
+    }).catch(()=>{});
+  };
+
+  fetchAll();
+  const interval = setInterval(fetchAll, 2000); // ✅ toutes les 2s
+  return () => clearInterval(interval);
+}, []);
+
+// ── Polling messages chat toutes les 2s ─────────────────────────
+useEffect(() => {
+  if (!chatCommande) return;
+  const token = localStorage.getItem("token");
+
+  const fetchMessages = () => {
+    fetch(`http://localhost:8000/api/commandes/${chatCommande.id}/messages`, {
+      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+    }).then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setChatMessages(data);
+    }).catch(()=>{});
+  };
+
+  fetchMessages();
+  const interval = setInterval(fetchMessages, 2000); // ✅ toutes les 2s
+  return () => clearInterval(interval);
+}, [chatCommande]);
 
   const tarifSel = MOYENS.find(m=>m.id===form.moyen)?.tarif || 0;
 
@@ -336,45 +497,85 @@ useEffect(() => {
     setTimeout(()=>setToast(null), 3500);
   };
 
-  const publier = () => {
-    if (!form.service||!form.moyen||!form.detail||!form.heure_publication||!form.heure_debut||!form.heure_livraison) {
-      showToast("Veuillez remplir tous les champs obligatoires","error"); return;
+  const publier = async () => {
+    if (!form.service || !form.moyen || !form.detail || !form.heure_publication || !form.heure_debut || !form.heure_livraison) {
+      showToast("Veuillez remplir tous les champs obligatoires", "error"); return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const nova = {
-        id: Date.now(),
-        service: SERVICES.find(s=>s.id===form.service)?.label,
-        moyen:   MOYENS.find(m=>m.id===form.moyen)?.label,
-        tarif: tarifSel, statut:"en_attente",
-        heure_publication: form.heure_publication,
-        heure_debut: form.heure_debut,
-        heure_livraison: form.heure_livraison,
-        detail: form.detail,
-        adresse_pickup: form.adresse_pickup,
-        date: new Date().toISOString().slice(0,10),
-        coursier: null, note: null,
-      };
-      setCommandes(prev=>[nova,...prev]);
-      setNotifs(prev=>[{id:Date.now(), texte:`Commande publiée — ${nova.service}`, lu:false, time:"À l'instant", type:"info"},...prev]);
-      setForm({service:"",moyen:"",detail:"",adresse_pickup:"",heure_publication:"",heure_debut:"",heure_livraison:""});
-      setLoading(false);
-      setOnglet("historique");
-      showToast("🚀 Commande publiée ! Tous les coursiers ont été notifiés.");
-    }, 1400);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8000/api/commandes", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service:           SERVICES.find(s => s.id === form.service)?.label,
+          moyen:             MOYENS.find(m => m.id === form.moyen)?.label,
+          tarif:             tarifSel,
+          detail:            form.detail,
+          adresse_pickup:    form.adresse_pickup,
+          heure_publication: form.heure_publication,
+          heure_debut:       form.heure_debut,
+          heure_livraison:   form.heure_livraison,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCommandes(prev => [data.commande, ...prev]);
+        setNotifs(prev => [{
+          id: Date.now(),
+          texte: `Commande publiée — ${data.commande.service}`,
+          lu: false, time: "À l'instant", type: "info",
+        }, ...prev]);
+        setForm({ service: "", moyen: "", detail: "", adresse_pickup: "", heure_publication: "", heure_debut: "", heure_livraison: "" });
+        setOnglet("historique");
+        showToast("🚀 Commande publiée ! Tous les coursiers ont été notifiés.");
+      } else {
+        showToast(data.message || "Erreur lors de la publication", "error");
+      }
+    } catch {
+      showToast("Erreur de connexion au serveur", "error");
+    }
+    setLoading(false);
   };
 
-  const supprimer = (id) => {
-    setCommandes(prev=>prev.filter(c=>c.id!==id));
+const supprimer = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    await fetch(`http://localhost:8000/api/commandes/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+    setCommandes(prev => prev.filter(c => c.id !== id));
     setDetailCmd(null); setConfirmDel(null);
     showToast("Commande supprimée");
-  };
+  } catch {
+    showToast("Erreur lors de la suppression", "error");
+  }
+};
 
-  const noterCoursier = (id, note) => {
-    setCommandes(prev=>prev.map(c=>c.id===id?{...c,note}:c));
-    setNoteCmd(null); setNoteTmp(0);
-    showToast("⭐ Merci pour votre évaluation !");
-  };
+const noterCoursier = async (id, note) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:8000/api/commandes/${id}/terminer`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ note }),
+    });
+    if (response.ok) {
+      setCommandes(prev => prev.map(c => c.id === id ? { ...c, statut: "termine", note } : c));
+      setNoteCmd(null); setNoteTmp(0);
+      showToast("⭐ Merci pour votre évaluation !");
+    }
+  } catch {
+    showToast("Erreur lors de l'évaluation", "error");
+  }
+};
 
   const nbNonLus = notifs.filter(n=>!n.lu).length;
 
@@ -426,22 +627,23 @@ useEffect(() => {
 
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
           {/* cloche */}
+         
           <div style={{ position:"relative", cursor:"pointer" }}
             onClick={()=>{ setNotifOpen(!notifOpen); setNotifs(p=>p.map(n=>({...n,lu:true}))); }}>
             <div style={{ width:38, height:38, borderRadius:"50%", backgroundColor:"#FFD70015",
-              border:"1px solid #FFD70030", display:"flex", alignItems:"center", justifyContent:"center",
-              fontSize:18, transition:"all 0.2s" }}>🔔</div>
-            {nbNonLus>0 && (
+              border:"1px solid #FFD70030", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <MdNotifications style={{ color:"#FFD700", fontSize:20 }}/>
+            </div>
+            {nbNonLus > 0 && (
               <span style={{
                 position:"absolute", top:-2, right:-2,
                 backgroundColor:"#ef4444", color:"#fff",
-                borderRadius:"50%", width:19, height:19, fontSize:10,
-                fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center",
+                borderRadius:"50%", width:19, height:19, fontSize:10, fontWeight:800,
+                display:"flex", alignItems:"center", justifyContent:"center",
                 border:"2px solid #080820",
               }}>{nbNonLus}</span>
             )}
-          </div>
-
+</div>
           {/* avatar */}
           <div style={{
             width:38, height:38, borderRadius:"50%",
@@ -459,39 +661,145 @@ useEffect(() => {
         </div>
       </nav>
 
-      {/* NOTIFS PANEL */}
-      {notifOpen && (
-        <>
-          <div onClick={()=>setNotifOpen(false)} style={{ position:"fixed",inset:0,zIndex:149 }}/>
-          <div style={{
-            position:"fixed", top:74, right:20, zIndex:150,
-            backgroundColor:"#131330", border:"1px solid #FFD70025",
-            borderRadius:16, width:330, boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
-            overflow:"hidden",
+{/* NOTIFS PANEL */}
+{notifOpen && (
+  <>
+    <div onClick={() => setNotifOpen(false)}
+      style={{ position:"fixed", inset:0, zIndex:149 }}/>
+    <div style={{
+      position:"fixed", top:74, right:20, zIndex:150,
+      backgroundColor:"#131330", border:"1px solid #FFD70025",
+      borderRadius:16, width:360, maxHeight:480,
+      boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
+      display:"flex", flexDirection:"column", overflow:"hidden",
+    }}>
+      {/* Header */}
+      <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
+        display:"flex", justifyContent:"space-between", alignItems:"center",
+        flexShrink:0 }}>
+        <span style={{ color:"#FFD700", fontWeight:700, fontSize:14,
+          display:"flex", alignItems:"center", gap:6 }}>
+          <MdNotifications style={{ fontSize:18 }}/> Notifications
+        </span>
+        <span style={{ color:"#666", fontSize:12 }}>
+          {notifs.filter(n => !n.lu).length} non lues
+        </span>
+      </div>
+
+      {/* Liste */}
+      <div style={{ overflowY:"auto", flex:1 }}>
+        {notifs.length === 0 && (
+          <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>
+            Aucune notification
+          </div>
+        )}
+        {notifs.map(n => (
+          <div key={n.id} style={{
+            padding:"12px 18px", borderBottom:"1px solid #ffffff08",
+            backgroundColor: n.lu ? "transparent" : "#FFD70008",
           }}>
-            <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
-              display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <span style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>🔔 Notifications</span>
-              <span style={{ color:"#666", fontSize:12 }}>{notifs.filter(n=>!n.lu).length} non lues</span>
-            </div>
-            {notifs.map(n=>(
-              <div key={n.id} style={{
-                padding:"13px 18px", borderBottom:"1px solid #ffffff08",
-                backgroundColor: n.lu?"transparent":"#FFD70008",
-              }}>
-                <p style={{ color:n.lu?"#888":"#fff", fontSize:13, margin:0, lineHeight:1.5 }}>{n.texte}</p>
+            <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+              {/* Point non lu */}
+              <div style={{ paddingTop:5, flexShrink:0 }}>
+                <div style={{
+                  width:8, height:8, borderRadius:"50%",
+                  backgroundColor: n.lu ? "transparent" : "#FFD700",
+                }}/>
+              </div>
+              <div style={{ flex:1 }}>
+                <p style={{ color:n.lu?"#888":"#fff", fontSize:13,
+                  margin:"0 0 4px 0", lineHeight:1.5 }}>{n.texte}</p>
                 <small style={{ color:"#555", fontSize:11 }}>{n.time}</small>
               </div>
-            ))}
-            <div style={{ padding:"10px 18px", textAlign:"center" }}>
-              <span style={{ color:"#FFD700", fontSize:12, cursor:"pointer" }}
-                onClick={()=>setNotifs(p=>p.map(n=>({...n,lu:true})))}>
-                Tout marquer comme lu
-              </span>
+            </div>
+            {/* Actions icônes */}
+            <div style={{ display:"flex", gap:8, marginTop:8, paddingLeft:18 }}>
+              {/* Voir → ouvre le chat si commande liée */}
+                              {n.commande_id && (
+                  <button
+                    onClick={async () => {
+                      setNotifOpen(false);
+
+                      // ✅ Cherche la commande
+                      const cmd = commandes.find(c => c.id === n.commande_id)
+                              || commandes.find(c => c.id === parseInt(n.commande_id));
+
+                      if (cmd) {
+                        // ✅ Charge les messages et ouvre le chat
+                        setChatMessages([]);
+                        setChatCommande(cmd);
+
+                        // Charge l'historique des messages
+                        try {
+                          const token = localStorage.getItem("token");
+                          const res = await fetch(
+                            `http://localhost:8000/api/commandes/${cmd.id}/messages`,
+                            { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" } }
+                          );
+                          const data = await res.json();
+                          if (Array.isArray(data)) setChatMessages(data);
+                        } catch {}
+
+                        setOnglet("messages");
+                      }
+
+                      // Marquer comme lu
+                      const token = localStorage.getItem("token");
+                      await fetch(`http://localhost:8000/api/notifications/${n.id}/lu`, {
+                        method: "POST",
+                        headers: { "Authorization": `Bearer ${token}` },
+                      });
+                      setNotifs(p => p.map(x => x.id === n.id ? {...x, lu:true} : x));
+                    }}
+                    title="Voir / Répondre"
+                    style={{ background:"#3b82f618", border:"1px solid #3b82f633",
+                      color:"#3b82f6", borderRadius:8, padding:"4px 10px",
+                      cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
+                    <MdChat style={{ fontSize:14 }}/> Répondre
+                  </button>
+                )}
+                              {/* Supprimer */}
+              <button
+                onClick={async () => {
+                  const token = localStorage.getItem("token");
+                  await fetch(`http://localhost:8000/api/notifications/${n.id}`, {
+                    method:"DELETE",
+                    headers:{ "Authorization":`Bearer ${token}` },
+                  });
+                  setNotifs(p => p.filter(x => x.id !== n.id));
+                }}
+                title="Supprimer"
+                style={{ background:"#ef444415", border:"1px solid #ef444430",
+                  color:"#ef6666", borderRadius:8, padding:"4px 10px",
+                  cursor:"pointer", fontSize:12, display:"flex",
+                  alignItems:"center", gap:4 }}>
+                <MdClose style={{ fontSize:14 }}/> Supprimer
+              </button>
             </div>
           </div>
-        </>
-      )}
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding:"10px 18px", borderTop:"1px solid #FFD70018",
+        display:"flex", justifyContent:"center", flexShrink:0 }}>
+        <span
+          onClick={async () => {
+            const token = localStorage.getItem("token");
+            await fetch("http://localhost:8000/api/notifications/tous-lus", {
+              method:"POST",
+              headers:{ "Authorization":`Bearer ${token}` },
+            });
+            setNotifs(p => p.map(n => ({...n, lu:true})));
+          }}
+          style={{ color:"#FFD700", fontSize:12, cursor:"pointer",
+            display:"inline-flex", alignItems:"center", gap:6 }}>
+          <MdDoneAll style={{ fontSize:16 }}/> Tout marquer comme lu
+        </span>
+      </div>
+    </div>
+  </>
+)}
 
       {/* LAYOUT */}
       <div style={{ display:"flex", paddingTop:66 }}>
@@ -1039,101 +1347,447 @@ useEffect(() => {
               </div>
             )}
 
-            {/* ═══ SUIVI ═══ */}
-            {onglet==="suivi" && (
+            {/* ═══ MESSAGES ═══ */}
+{/* ═══ MESSAGES CLIENT ═══ */}
+{onglet === "messages" && (
+  <div>
+    <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+      display:"flex", alignItems:"center", gap:12 }}>
+      <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#3b82f618",
+        border:"1px solid #3b82f633", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <MdChat style={{ color:"#3b82f6", fontSize:22 }}/>
+      </div>
+      Mes messages
+    </h4>
+    <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>
+      Vos conversations avec les coursiers
+    </p>
+
+    {commandes.filter(c => c.coursier && c.statut !== "en_attente").length === 0 ? (
+      <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
+        <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
+        <p>Aucune conversation active.</p>
+        <p style={{ fontSize:13 }}>Vos messages apparaîtront ici lorsqu'un coursier prend votre commande.</p>
+      </div>
+    ) : (
+      commandes.filter(c => c.coursier && c.statut !== "en_attente").map(cmd => (
+        <div key={cmd.id}
+          onClick={() => { setChatCommande(cmd); setChatMessages([]); }}
+          style={{ ...card, marginBottom:14, cursor:"pointer",
+            borderLeft:`4px solid ${STATUT_CONFIG[cmd.statut]?.color||"#FFD700"}`,
+            transition:"all 0.2s" }}
+          onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
+          onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:46, height:46, borderRadius:"50%",
+                background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontWeight:800, color:"#000", fontSize:16, flexShrink:0 }}>
+                {cmd.coursier?.[0]}
+              </div>
               <div>
-            <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
-  display:"flex", alignItems:"center", gap:12 }}>
-  <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
-    border:"1px solid #FFD70033", display:"flex", alignItems:"center",
-    justifyContent:"center", flexShrink:0 }}>
-    <MdLocationOn style={{ color:"#FFD700", fontSize:22 }}/>
-  </div>
-  Suivi en temps réel
-</h4>        <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>Commandes actives en ce moment</p>
+                <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}>{cmd.coursier}</div>
+                <div style={{ color:"#888", fontSize:12 }}>{cmd.service} · {cmd.date}</div>
+              </div>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <span style={{ backgroundColor:STATUT_CONFIG[cmd.statut]?.bg,
+                color:STATUT_CONFIG[cmd.statut]?.color,
+                borderRadius:20, padding:"3px 12px", fontSize:11, fontWeight:700,
+                border:`1px solid ${STATUT_CONFIG[cmd.statut]?.color}44` }}>
+                {STATUT_CONFIG[cmd.statut]?.icon} {STATUT_CONFIG[cmd.statut]?.label}
+              </span>
+              <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
+                color:"#3b82f6", borderRadius:10, padding:"7px 16px",
+                fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
+                <MdChat style={{ fontSize:16 }}/> Ouvrir
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    )}
 
-                {commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length===0 ? (
-                  <div style={{ ...card, textAlign:"center", color:"#666", padding:48 }}>
-                    <div style={{ fontSize:48, marginBottom:12 }}>🏁</div>
-                    Aucune commande active en ce moment.
+    {/* Fenêtre chat fixe en bas — même style coursier */}
+    {chatCommande && (
+      <div style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
+        backgroundColor:"#131330", border:"1px solid #FFD70030",
+        borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
+
+        {/* Header */}
+        <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
+          display:"flex", justifyContent:"space-between", alignItems:"center",
+          background:"linear-gradient(135deg,#FFD70015,#ff950008)" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:34, height:34, borderRadius:"50%",
+              background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontWeight:800, color:"#000", fontSize:14 }}>
+              {chatCommande.coursier?.[0]}
+            </div>
+            <div>
+              <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>{chatCommande.coursier}</div>
+              <div style={{ color:"#10b981", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>
+                <div style={{ width:6, height:6, borderRadius:"50%", backgroundColor:"#10b981" }}/>
+                {chatCommande.service}
+              </div>
+            </div>
+          </div>
+          <button onClick={() => { setChatCommande(null); setChatMessages([]); }}
+            style={{ background:"transparent", border:"none", color:"#666", fontSize:20, cursor:"pointer" }}
+            onMouseEnter={e=>e.target.style.color="#fff"}
+            onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
+        </div>
+
+        {/* Accord client */}
+        <div style={{ padding:"10px 14px", backgroundColor:"#0a0a1e",
+          borderBottom:"1px solid #FFD70018" }}>
+          <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>
+            Accord de service :
+          </div>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <button
+              onClick={async () => {
+                const token = localStorage.getItem("token");
+                const res = await fetch(
+                  `http://localhost:8000/api/commandes/${chatCommande.id}/accepter-client`,
+                  { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/json" } }
+                );
+                const data = await res.json();
+                if (res.ok) {
+                  setChatCommande(prev => ({...prev, accord_client:true, statut:data.commande?.statut||prev.statut}));
+                  showToast("✅ Vous avez accepté l'accord !");
+                } else {
+                  showToast(data.message||"Erreur", "error");
+                }
+              }}
+              disabled={chatCommande.accord_client}
+              style={{ padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12, border:"none",
+                cursor:chatCommande.accord_client?"not-allowed":"pointer",
+                backgroundColor:chatCommande.accord_client?"#10b981":"#10b98122",
+                color:chatCommande.accord_client?"#fff":"#10b981" }}>
+              {chatCommande.accord_client ? "✅ Accepté" : "✅ Accepter"}
+            </button>
+            <button
+              onClick={async () => {
+                const token = localStorage.getItem("token");
+                const res = await fetch(
+                  `http://localhost:8000/api/commandes/${chatCommande.id}/refuser`,
+                  { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/json" } }
+                );
+                if (res.ok) {
+                  setChatCommande(prev => ({...prev, statut:"en_attente", accord_client:false, accord_coursier:false}));
+                  showToast("❌ Accord refusé", "error");
+                }
+              }}
+              style={{ padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12,
+                border:"none", cursor:"pointer", backgroundColor:"#ef444422", color:"#ef4444" }}>
+              ❌ Refuser
+            </button>
+          </div>
+          <div style={{ marginTop:6, display:"flex", gap:12 }}>
+            <span style={{ fontSize:11, color:chatCommande.accord_client?"#10b981":"#666" }}>
+              {chatCommande.accord_client?"✅":"⬜"} Client
+            </span>
+            <span style={{ fontSize:11, color:chatCommande.accord_coursier?"#10b981":"#666" }}>
+              {chatCommande.accord_coursier?"✅":"⬜"} Coursier
+            </span>
+          </div>
+        </div>
+
+        {/* Messages */}
+       {/* ✅ Barre d'outils */}
+        <div style={{ padding:"8px 14px", backgroundColor:"#0d0d22",
+          borderBottom:"1px solid #FFD70010", display:"flex",
+          justifyContent:"space-between", alignItems:"center" }}>
+          <span style={{ color:"#666", fontSize:11 }}>{chatMessages.length} message(s)</span>
+          <div style={{ display:"flex", gap:8 }}>
+            {modeSelection && selectedMsgs.size > 0 && (
+              <button
+                onClick={async () => {
+                  const token = localStorage.getItem("token");
+                  await Promise.all([...selectedMsgs].map(msgId =>
+                    fetch(`http://localhost:8000/api/commandes/${chatCommande.id}/messages/${msgId}`, {
+                      method: "DELETE",
+                      headers: { "Authorization": `Bearer ${token}` },
+                    })
+                  ));
+                  setChatMessages(prev => prev.filter(m => !selectedMsgs.has(m.id)));
+                  setSelectedMsgs(new Set());
+                  setModeSelection(false);
+                  showToast("Messages supprimés");
+                }}
+                style={{ background:"#ef444420", border:"1px solid #ef444430",
+                  color:"#ef6666", borderRadius:8, padding:"4px 12px",
+                  cursor:"pointer", fontSize:11, fontWeight:700 }}>
+                🗑 Supprimer ({selectedMsgs.size})
+              </button>
+            )}
+            <button
+              onClick={() => { setModeSelection(!modeSelection); setSelectedMsgs(new Set()); }}
+              style={{ background: modeSelection ? "#FFD70020" : "transparent",
+                border:`1px solid ${modeSelection ? "#FFD70044" : "#ffffff20"}`,
+                color: modeSelection ? "#FFD700" : "#666",
+                borderRadius:8, padding:"4px 10px", cursor:"pointer", fontSize:11 }}>
+              {modeSelection ? "✕ Annuler" : "☑ Sélectionner"}
+            </button>
+          </div>
+        </div>
+
+        {/* ✅ Messages */}
+        <div style={{ height:240, overflowY:"auto", padding:14,
+          display:"flex", flexDirection:"column", gap:10 }}>
+          {chatMessages.length === 0 && (
+            <div style={{ color:"#555", textAlign:"center", fontSize:13, marginTop:40 }}>
+              Commencez la conversation
+            </div>
+          )}
+          {chatMessages.map((m, i) => {
+            const isClient = m.sender_role === "client"
+              || (profil.id && parseInt(m.sender_id) === parseInt(profil.id));
+            const isSelected = selectedMsgs.has(m.id);
+            return (
+              <div key={m.id || i}
+                onClick={() => {
+                  if (!modeSelection) return;
+                  setSelectedMsgs(prev => {
+                    const next = new Set(prev);
+                    if (next.has(m.id)) next.delete(m.id);
+                    else next.add(m.id);
+                    return next;
+                  });
+                }}
+                style={{
+                  display:"flex",
+                  justifyContent: isClient ? "flex-end" : "flex-start",
+                  cursor: modeSelection ? "pointer" : "default",
+                  opacity: modeSelection && !isSelected ? 0.6 : 1,
+                }}>
+                {modeSelection && (
+                  <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
+                    border:`2px solid ${isSelected ? "#FFD700" : "#444"}`,
+                    backgroundColor: isSelected ? "#FFD700" : "transparent",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    marginRight:8, alignSelf:"center", fontSize:11, color:"#000" }}>
+                    {isSelected && "✓"}
                   </div>
-                ) : (
-                  commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).map(cmd=>{
-                    const steps = ["en_attente","negociable","accepte","termine"];
-                    const idx = steps.indexOf(cmd.statut);
-                    return (
-                      <div key={cmd.id} style={{ ...card, marginBottom:20 }}>
-                        <div style={{ display:"flex", justifyContent:"space-between",
-                          flexWrap:"wrap", gap:10, marginBottom:20 }}>
-                          <div>
-                            <div style={{ color:"#fff", fontWeight:700, fontSize:16 }}>{cmd.service}</div>
-                            <div style={{ color:"#888", fontSize:13, marginTop:4 }}>
-                              {cmd.moyen} · 📢 {cmd.heure_publication} · 🕐 {cmd.heure_debut} → {cmd.heure_livraison}
-                            </div>
-                          </div>
-                          <StatutBadge statut={cmd.statut}/>
-                        </div>
+                )}
+                {!isClient && !modeSelection && (
+                  <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                    background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontWeight:800, color:"#000", fontSize:11, marginRight:6, alignSelf:"flex-end" }}>
+                    {chatCommande.coursier?.[0]}
+                  </div>
+                )}
+                <div style={{
+                  backgroundColor: isSelected ? "#FFD70033"
+                    : isClient ? "#FFD70022" : "#1a1a35",
+                  border:`1px solid ${isSelected ? "#FFD700" : isClient ? "#FFD70044" : "#ffffff15"}`,
+                  borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  padding:"9px 14px", maxWidth:"75%",
+                  transition:"all 0.15s",
+                }}>
+                  <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                  <div style={{ color:"#666", fontSize:10, marginTop:3, textAlign:"right",
+                    display:"flex", gap:6, justifyContent:"flex-end", alignItems:"center" }}>
+                    {m.modifie && <span style={{ color:"#888" }}>modifié ·</span>}
+                    {m.time || (m.created_at
+                      ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
+                      : "")}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <div ref={messagesEndRef}/>
+        </div>
 
-                        {/* barre progression */}
-                        <div style={{ display:"flex", alignItems:"center", marginBottom:10 }}>
-                          {steps.map((s,i)=>{
-                            const done = i<=idx;
-                            
-                            return (
-                              <div key={s} style={{ display:"flex", alignItems:"center", flex:1 }}>
-                                <div style={{
-                                  width:36, height:36, borderRadius:"50%", flexShrink:0,
-                                  background: done?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
-                                  border: done?"none":"2px solid #ffffff15",
-                                  display:"flex", alignItems:"center", justifyContent:"center",
-                                  fontSize:14, fontWeight:800, color:done?"#000":"#444",
-                                  boxShadow: done?"0 0 12px #FFD70055":"none",
-                                  transition:"all 0.4s",
-                                }}>
-                                  {done?"✓":i+1}
-                                </div>
-                                {i<3 && (
-                                  <div style={{
-                                    flex:1, height:4, borderRadius:2,
-                                    background: i<idx?"linear-gradient(90deg,#FFD700,#ff9500)":"#ffffff0f",
-                                    transition:"all 0.4s",
-                                  }}/>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div style={{ display:"flex", justifyContent:"space-between" }}>
-                          {["En attente","Négociation","Accepté","Terminé"].map((l,i)=>(
-                            <span key={l} style={{ fontSize:11, color:i<=idx?"#FFD700":"#444",
-                              flex:1, textAlign:i===0?"left":i===3?"right":"center",
-                              fontWeight:i<=idx?600:400 }}>{l}</span>
-                          ))}
-                        </div>
+        {/* ✅ Input — envoyerChatMsg + chatMsg */}
+        <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018", display:"flex", gap:8 }}>
+          <input value={chatMsg} onChange={e=>setChatMsg(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&chatMsg.trim()&&envoyerChatMsg()}
+            placeholder="Écrire au coursier..."
+            style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70030",
+              color:"#fff", borderRadius:12, padding:"9px 14px", fontSize:13, outline:"none" }}
+            onFocus={e=>e.target.style.borderColor="#FFD700"}
+            onBlur={e=>e.target.style.borderColor="#FFD70030"}
+          />
+          <button onClick={envoyerChatMsg}
+            disabled={!chatMsg.trim() || chatLoading}
+            style={{
+              background:"linear-gradient(135deg,#FFD700,#ff9500)",
+              color:"#000", border:"none", borderRadius:12, padding:"9px 14px",
+              cursor: chatMsg.trim() && !chatLoading ? "pointer" : "not-allowed",
+              opacity: chatMsg.trim() ? 1 : 0.4,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              minWidth:42,
+            }}>
+            {chatLoading
+              ? <div style={{ width:16, height:16, border:"2px solid #000",
+                  borderTop:"2px solid transparent", borderRadius:"50%",
+                  animation:"spin 0.6s linear infinite" }}/>
+              : <MdSend style={{ fontSize:18 }}/>
+            }
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+            {/* ═══ SUIVI ═══ */}
+{/* ═══ SUIVI ═══ */}
+{onglet === "suivi" && (
+  <div>
+    <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+      display:"flex", alignItems:"center", gap:12 }}>
+      <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
+        border:"1px solid #FFD70033", display:"flex", alignItems:"center",
+        justifyContent:"center", flexShrink:0 }}>
+        <MdLocationOn style={{ color:"#FFD700", fontSize:22 }}/>
+      </div>
+      Suivi en temps réel
+    </h4>
+    <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>Commandes actives en ce moment</p>
 
-                        {cmd.coursier && (
-                          <div style={{ marginTop:16, padding:14,
-                            background:"linear-gradient(135deg,#FFD70010,#ff950008)",
-                            borderRadius:12, border:"1px solid #FFD70025",
-                            display:"flex", alignItems:"center", gap:10 }}>
-                            <div style={{ width:36, height:36, borderRadius:"50%",
-                              background:"linear-gradient(135deg,#FFD700,#ff8c00)",
-                              display:"flex", alignItems:"center", justifyContent:"center",
-                              fontWeight:800, color:"#000", fontSize:14 }}>
-                              {cmd.coursier[0]}
-                            </div>
-                            <div>
-                              <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.coursier}</div>
-                              <div style={{ color:"#888", fontSize:12 }}>Coursier assigné</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
+    {commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length === 0 ? (
+      <div style={{ ...card, textAlign:"center", color:"#666", padding:48 }}>
+        <div style={{ fontSize:48, marginBottom:12 }}>🏁</div>
+        Aucune commande active en ce moment.
+      </div>
+    ) : (
+      commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).map(cmd => {
+        const steps = ["en_attente","negociable","accepte","termine"];
+        const idx   = steps.indexOf(cmd.statut);
+        return (
+          <div key={cmd.id} style={{ ...card, marginBottom:20 }}>
+            <div style={{ display:"flex", justifyContent:"space-between",
+              flexWrap:"wrap", gap:10, marginBottom:20 }}>
+              <div>
+                <div style={{ color:"#fff", fontWeight:700, fontSize:16 }}>{cmd.service}</div>
+                <div style={{ color:"#888", fontSize:13, marginTop:4 }}>
+                  {cmd.moyen} · 📢 {cmd.heure_publication} · 🕐 {cmd.heure_debut} → {cmd.heure_livraison}
+                </div>
+              </div>
+              <StatutBadge statut={cmd.statut}/>
+            </div>
+
+            {/* Barre progression */}
+            <div style={{ display:"flex", alignItems:"center", marginBottom:10 }}>
+              {steps.map((s, i) => {
+                const done = i <= idx;
+                return (
+                  <div key={s} style={{ display:"flex", alignItems:"center", flex:1 }}>
+                    <div style={{
+                      width:36, height:36, borderRadius:"50%", flexShrink:0,
+                      background: done ? "linear-gradient(135deg,#FFD700,#ff9500)" : "#1a1a35",
+                      border: done ? "none" : "2px solid #ffffff15",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:14, fontWeight:800, color:done?"#000":"#444",
+                      boxShadow: done ? "0 0 12px #FFD70055" : "none",
+                      transition:"all 0.4s",
+                    }}>
+                      {done ? "✓" : i + 1}
+                    </div>
+                    {i < 3 && (
+                      <div style={{
+                        flex:1, height:4, borderRadius:2,
+                        background: i < idx ? "linear-gradient(90deg,#FFD700,#ff9500)" : "#ffffff0f",
+                        transition:"all 0.4s",
+                      }}/>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:16 }}>
+              {["En attente","Négociation","Accepté","Terminé"].map((l, i) => (
+                <span key={l} style={{ fontSize:11, color:i<=idx?"#FFD700":"#444",
+                  flex:1, textAlign:i===0?"left":i===3?"right":"center",
+                  fontWeight:i<=idx?600:400 }}>{l}</span>
+              ))}
+            </div>
+
+            {/* Coursier assigné */}
+            {cmd.coursier && (
+              <div style={{ marginTop:8, padding:14,
+                background:"linear-gradient(135deg,#FFD70010,#ff950008)",
+                borderRadius:12, border:"1px solid #FFD70025",
+                display:"flex", alignItems:"center", justifyContent:"space-between",
+                flexWrap:"wrap", gap:10 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ width:36, height:36, borderRadius:"50%",
+                    background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontWeight:800, color:"#000", fontSize:14 }}>
+                    {cmd.coursier[0]}
+                  </div>
+                  <div>
+                    <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.coursier}</div>
+                    <div style={{ color:"#888", fontSize:12 }}>Coursier assigné</div>
+                  </div>
+                </div>
+
+                {/* ✅ Bouton terminer — visible uniquement si statut = accepte */}
+                {cmd.statut === "accepte" && (
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(`Confirmer la fin de la mission "${cmd.service}" ?\nLe coursier recevra 1 étoile automatiquement.`)) return;
+                      try {
+                        const token = localStorage.getItem("token");
+                        const res = await fetch(
+                          `http://localhost:8000/api/commandes/${cmd.id}/terminer`,
+                          {
+                            method: "POST",
+                            headers: {
+                              "Authorization": `Bearer ${token}`,
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ note: 1 }), // ✅ 1 étoile par défaut
+                          }
+                        );
+                        const data = await res.json();
+                        if (res.ok) {
+                          setCommandes(prev => prev.map(c =>
+                            c.id === cmd.id ? { ...c, statut: "termine", note: 1 } : c
+                          ));
+                          showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐");
+                          // ✅ Redirige vers historique pour noter
+                          setTimeout(() => setOnglet("historique"), 1500);
+                        } else {
+                          showToast(data.message || "Erreur", "error");
+                        }
+                      } catch {
+                        showToast("Erreur de connexion", "error");
+                      }
+                    }}
+                    style={{
+                      background: "linear-gradient(135deg,#10b981,#059669)",
+                      color: "#fff", border: "none", borderRadius: 12,
+                      padding: "10px 20px", cursor: "pointer",
+                      fontWeight: 700, fontSize: 13,
+                      display: "flex", alignItems: "center", gap: 8,
+                      boxShadow: "0 4px 16px #10b98133",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                    {/* ✅ Icône modifier/check */}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Marquer comme terminé
+                  </button>
                 )}
               </div>
             )}
+          </div>
+        );
+      })
+    )}
+  </div>
+)}
 
             {/* ═══ PROFIL ═══ */}
             {onglet==="profil" && (
@@ -1165,7 +1819,7 @@ useEffect(() => {
                       {profil.prenom[0]}{profil.nom[0]}
                     </div>
                     <div style={{ color:"#fff", fontWeight:800, fontSize:20 }}>
-                      {profil.prenom} {profil.nom}
+                      {profil.prenom?.[0]}{profil.nom?.[0]}
                     </div>
                     <div style={{ marginTop:6 }}>
                       <span style={{ backgroundColor:"#FFD70018", color:"#FFD700",
@@ -1500,6 +2154,8 @@ useEffect(() => {
     .aide-grid    { grid-template-columns:repeat(2,1fr) !important; }
   }
 
+@keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
   @media(max-width:480px){
     .stats-grid   { grid-template-columns:repeat(2,1fr) !important; }
     .services-grid{ grid-template-columns:repeat(2,1fr) !important; }
@@ -1507,19 +2163,16 @@ useEffect(() => {
     .aide-grid    { grid-template-columns:1fr !important; }
   }
 
-  * { box-sizing:border-box; }
+   { box-sizing:border-box; }
   body { overflow-x:hidden; }
   input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(1) brightness(0.6); }
   textarea:focus, input:focus { border-color:#FFD700 !important; }
   details summary::-webkit-details-marker { display:none; }
+
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 `}</style>
     </div>
   );
 }
 
 export default DashboardClient;
-
-
-
-
-
