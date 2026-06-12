@@ -25,13 +25,18 @@ function Connexion() {
         body: JSON.stringify(form),
       });
       const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.user.role);
-        if (data.user.role === "admin") navigate("/dashboard-admin");
-        else if (data.user.role === "coursier") navigate("/dashboard-coursier");
-        else navigate("/dashboard-client");
-      } else {
+if (response.ok) {
+  localStorage.setItem("token",     data.token);
+  localStorage.setItem("role",      data.user.role);
+  localStorage.setItem("nom",       data.user.nom       || "");
+  localStorage.setItem("prenom",    data.user.prenom    || "");
+  localStorage.setItem("email",     data.user.email     || "");
+  localStorage.setItem("telephone", data.user.telephone || "");
+  localStorage.setItem("adresse",   data.user.adresse   || "");
+  if (data.user.role === "admin")    navigate("/dashboard-admin");
+  else if (data.user.role === "coursier") navigate("/dashboard-coursier");
+  else navigate("/dashboard-client");
+} else {
         setError(data.message || "Email ou mot de passe incorrect");
       }
     } catch {

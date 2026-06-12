@@ -1,53 +1,52 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\NotificationIraky;
+use App\Models\Notification;
+use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class NotificationController extends Controller
 {
-    // ✅ Mes notifications
-    public function mesNotifications()
+    public function index()
     {
         $user = JWTAuth::user();
-
-        $notifs = NotificationIraky::where('user_id', $user->id)
+        $notifs = Notification::where('user_id', $user->id)
             ->orderByDesc('created_at')
-            ->take(30)
             ->get()
             ->map(fn($n) => [
                 'id'          => $n->id,
                 'texte'       => $n->texte,
                 'type'        => $n->type,
-                'lu'          => (bool) $n->lu,
+                'lu'          => $n->lu,
                 'commande_id' => $n->commande_id,
                 'time'        => $n->created_at->diffForHumans(),
+                'created_at'  => $n->created_at,
             ]);
-
         return response()->json($notifs);
     }
 
-    // ✅ Marquer toutes comme lues
-    public function marquerLues()
-    {
-        $user = JWTAuth::user();
-
-        NotificationIraky::where('user_id', $user->id)
-                         ->where('lu', false)
-                         ->update(['lu' => true]);
-
-        return response()->json(['message' => 'Notifications marquées comme lues']);
-    }
-
-    // ✅ Nombre non lues
-    public function nonLues()
+    public function marquerLu($id)
     {
         $user  = JWTAuth::user();
-        $count = NotificationIraky::where('user_id', $user->id)
-                                  ->where('lu', false)
-                                  ->count();
+        $notif = Notification::where('id', $id)
+            ->where('user_id', $user->id)->firstOrFail();
+        $notif->update(['lu' => true]);
+        return response()->json(['message' => 'Lu']);
+    }
 
-        return response()->json(['count' => $count]);
+    public function marquerTousLus()
+    {
+        $user = JWTAuth::user();
+        Notification::where('user_id', $user->id)->update(['lu' => true]);
+        return response()->json(['message' => 'Tout marqué comme lu']);
+    }
+
+    public function destroy($id)
+    {
+        $user  = JWTAuth::user();
+        $notif = Notification::where('id', $id)
+            ->where('user_id', $user->id)->firstOrFail();
+        $notif->delete();
+        return response()->json(['message' => 'Notification supprimée']);
     }
 }

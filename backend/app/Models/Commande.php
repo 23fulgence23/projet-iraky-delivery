@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,9 +7,14 @@ class Commande extends Model
 {
     protected $fillable = [
         'client_id', 'coursier_id', 'service', 'moyen', 'tarif',
-        'statut', 'adresse_pickup', 'detail',
+        'statut', 'detail', 'adresse_pickup',
         'heure_publication', 'heure_debut', 'heure_livraison',
-        'date', 'note',
+        'note_coursier', 'accord_client', 'accord_coursier',
+    ];
+
+    protected $casts = [
+        'accord_client'  => 'boolean',
+        'accord_coursier'=> 'boolean',
     ];
 
     public function client()
@@ -21,10 +25,5 @@ class Commande extends Model
     public function coursier()
     {
         return $this->belongsTo(User::class, 'coursier_id');
-    }
-
-    public function messages()
-    {
-        return $this->hasMany(Message::class);
     }
 }
