@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
@@ -9,11 +10,30 @@ use Illuminate\Support\Facades\Route;
     Route::post('/register',        [AuthController::class, 'register']);
     Route::post('/login',           [AuthController::class, 'login']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::get('/verifier-statut-coursier/{id}', [AuthController::class, 'verifierStatutCoursier']);
 
     // ── Authentifiées ────────────────────────────────
     Route::middleware('auth:api')->group(function () {
         Route::get('/me',     [AuthController::class, 'me']);
         Route::post('/logout',[AuthController::class, 'logout']);
+
+        // ── ADMIN ────────────────────────────────────────
+Route::prefix('admin')->group(function () {
+    Route::get   ('/stats',                    [AdminController::class, 'stats']);
+    Route::get   ('/commandes-mensuelles',     [AdminController::class, 'commandesMensuelles']);
+    Route::get   ('/services-populaires',      [AdminController::class, 'servicesPopulaires']);
+    Route::get   ('/dernieres-commandes',      [AdminController::class, 'dernieresCommandes']);
+    Route::get   ('/clients',                  [AdminController::class, 'clients']);
+    Route::get   ('/coursiers',                [AdminController::class, 'coursiers']);
+    Route::post  ('/toggle-statut/{id}',       [AdminController::class, 'toggleStatut']);
+    Route::delete('/users/{id}',               [AdminController::class, 'deleteUser']);
+    Route::get   ('/notifications',            [AdminController::class, 'notificationsAdmin']);
+    Route::delete('/notifications/{id}',       [AdminController::class, 'deleteNotif']);
+    Route::post  ('/notifications/tous-lus',   [AdminController::class, 'marquerTousLusAdmin']);
+    Route::get    ('/coursiers-en-attente',        [AdminController::class, 'coursiersEnAttente']);
+    Route::post   ('/valider-coursier/{id}',       [AdminController::class, 'validerCoursier']);
+    Route::post   ('/rejeter-coursier/{id}',       [AdminController::class, 'rejeterCoursier']);
+});
 
     // Commandes
 

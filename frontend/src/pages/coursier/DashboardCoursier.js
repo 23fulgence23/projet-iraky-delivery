@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef  } from "react";
 import logo from "../../images/logo.png";
+import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
 import {
   MdDashboard, MdLocationOn, MdListAlt, MdPerson, MdHelp,
   MdLogout, MdNotifications, MdDeliveryDining, MdCheckCircle,
@@ -281,6 +282,8 @@ function DashboardCoursier() {
           note:         data.note         || 0,
           nb_missions:  data.nb_missions  || 0,
           nb_terminees: data.nb_terminees || 0,
+          trophees:          data.trophees          || 0,
+          etoiles_actuelles: data.etoiles_actuelles  || 0,
         });
         setProfilLoading(false);
       })
@@ -328,7 +331,7 @@ useEffect(() => {
   };
 
   fetchAll();
-  const interval = setInterval(fetchAll, 2000);
+  const interval = setInterval(fetchAll, 5000);
   return () => clearInterval(interval);
 }, []);
 
@@ -791,7 +794,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Ma réputation</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                    <Etoiles value={profil.note}/>
+                    <EtoilesAvecTrophees trophees={profil.trophees} etoilesActuelles={profil.etoiles_actuelles} />
                     <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
                     <span style={{ color: "#888", fontSize: 13 }}>basé sur {profil.nb_terminees} missions terminées</span>
                   </div>

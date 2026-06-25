@@ -23,6 +23,11 @@ class User extends Authenticatable implements JWTSubject
         'longitude',
         'localisation',
         'mvola_transaction',
+        'note',
+        'nb_missions',
+        'nb_terminees',
+        'trophees',
+        'etoiles_actuelles',
     ];
 
     protected $hidden = ['password'];

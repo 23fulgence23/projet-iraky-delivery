@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import logo from "../../logo.png";
 
 function Connexion() {
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.success;
-
+  const coursierValide = location.state?.coursierValide;
+  const prenomCoursier = location.state?.prenom;
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -63,6 +66,19 @@ if (response.ok) {
             Accédez à votre espace IRAKY Delivery
           </p>
         </div>
+                {/* ✅ Message spécial coursier validé */}
+        {coursierValide && (
+          <div className="mb-3 p-3 text-center"
+            style={{ backgroundColor: "#FFD70018", border: "1px solid #FFD70044",
+              borderRadius: "10px", display: "flex", alignItems: "center",
+              gap: 10, justifyContent: "center" }}>
+            <span style={{ fontSize: 22 }}>🎉</span>
+            <span style={{ color: "#FFD700", fontSize: 14, fontWeight: 700 }}>
+              Bravo {prenomCoursier} ! Votre compte coursier est validé et activé.
+              Vous pouvez vous connecter dès maintenant.
+            </span>
+          </div>
+        )}
 
         {/* ✅ Message succès après inscription */}
         {successMessage && (
@@ -92,13 +108,44 @@ if (response.ok) {
         </div>
 
         {/* Mot de passe */}
-        <div className="mb-3">
-          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>Mot de passe</label>
-          <input type="password" name="password" className="form-control mt-1"
-            placeholder="••••••••" value={form.password} onChange={handleChange}
-            style={{ backgroundColor: "#0a0a1e", border: "1px solid #FFD70033",
-              color: "#ffffff", borderRadius: "10px" }} />
-        </div>
+{/* Mot de passe */}
+<div className="mb-3">
+  <label style={{ color: "#aaaaaa", fontSize: "14px" }}>Mot de passe</label>
+  <div style={{ position: "relative" }}>
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      className="form-control mt-1"
+      placeholder="••••••••"
+      value={form.password}
+      onChange={handleChange}
+      style={{
+        backgroundColor: "#0a0a1e",
+        border: "1px solid #FFD70033",
+        color: "#ffffff",
+        borderRadius: "10px",
+        paddingRight: "42px",
+      }}
+    />
+    <span
+      onClick={() => setShowPassword(!showPassword)}
+      style={{
+        position: "absolute",
+        right: 12,
+        top: "calc(50% + 4px)",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        color: "#aaaaaa",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      {showPassword
+        ? <MdVisibilityOff style={{ fontSize: 20 }} />
+        : <MdVisibility style={{ fontSize: 20 }} />}
+    </span>
+  </div>
+</div>
 
         {/* Mot de passe oublié */}
         <div className="text-end mb-3">

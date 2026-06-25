@@ -7,23 +7,23 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class NotificationController extends Controller
 {
-    public function index()
-    {
-        $user = JWTAuth::user();
-        $notifs = Notification::where('user_id', $user->id)
-            ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($n) => [
-                'id'          => $n->id,
-                'texte'       => $n->texte,
-                'type'        => $n->type,
-                'lu'          => $n->lu,
-                'commande_id' => $n->commande_id,
-                'time'        => $n->created_at->diffForHumans(),
-                'created_at'  => $n->created_at,
-            ]);
-        return response()->json($notifs);
-    }
+public function index()
+{
+    $user = JWTAuth::user();
+    $notifs = Notification::where('user_id', $user->id)
+        ->orderByDesc('created_at')
+        ->get()
+        ->map(fn($n) => [
+            'id'            => $n->id,
+            'texte'         => $n->texte,
+            'type'          => $n->type,
+            'lu'            => (bool) $n->lu,
+            'commande_id'   => $n->commande_id,
+            'user_id_cible' => $n->user_id_cible,
+            'time'          => $n->created_at->diffForHumans(),
+        ]);
+    return response()->json($notifs);
+}
 
     public function marquerLu($id)
     {

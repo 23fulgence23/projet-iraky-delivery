@@ -9,12 +9,13 @@ class Commande extends Model
         'client_id', 'coursier_id', 'service', 'moyen', 'tarif',
         'statut', 'detail', 'adresse_pickup',
         'heure_publication', 'heure_debut', 'heure_livraison',
-        'note_coursier', 'accord_client', 'accord_coursier',
+        'note', 'accord_client', 'accord_coursier',
     ];
 
     protected $casts = [
         'accord_client'  => 'boolean',
         'accord_coursier'=> 'boolean',
+        'note'            => 'integer',
     ];
 
     public function client()

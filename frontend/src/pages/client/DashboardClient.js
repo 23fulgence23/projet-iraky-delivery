@@ -35,6 +35,7 @@ import {
   MdCircle,
   MdDoneAll,
   MdSend,
+  MdStar,
 } from "react-icons/md";
 // ══════════════════════════════════════════════
 //  DONNÉES
@@ -468,11 +469,11 @@ useEffect(() => {
   };
 
   fetchAll();
-  const interval = setInterval(fetchAll, 2000); // ✅ toutes les 2s
+  const interval = setInterval(fetchAll, 5000); // ✅ toutes les 2s
   return () => clearInterval(interval);
 }, []);
 
-// ── Polling messages chat toutes les 2s ─────────────────────────
+// ── Polling messages chat toutes les 5s ─────────────────────────
 useEffect(() => {
   if (!chatCommande) return;
   const token = localStorage.getItem("token");
@@ -1710,76 +1711,96 @@ const noterCoursier = async (id, note) => {
             </div>
 
             {/* Coursier assigné */}
-            {cmd.coursier && (
-              <div style={{ marginTop:8, padding:14,
-                background:"linear-gradient(135deg,#FFD70010,#ff950008)",
-                borderRadius:12, border:"1px solid #FFD70025",
-                display:"flex", alignItems:"center", justifyContent:"space-between",
-                flexWrap:"wrap", gap:10 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:36, height:36, borderRadius:"50%",
-                    background:"linear-gradient(135deg,#FFD700,#ff8c00)",
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    fontWeight:800, color:"#000", fontSize:14 }}>
-                    {cmd.coursier[0]}
-                  </div>
-                  <div>
-                    <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.coursier}</div>
-                    <div style={{ color:"#888", fontSize:12 }}>Coursier assigné</div>
-                  </div>
-                </div>
+                {cmd.coursier && (
+                  <div style={{ marginTop:8, padding:14,
+                    background:"linear-gradient(135deg,#FFD70010,#ff950008)",
+                    borderRadius:12, border:"1px solid #FFD70025",
+                    display:"flex", alignItems:"center", justifyContent:"space-between",
+                    flexWrap:"wrap", gap:10 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <div style={{ width:36, height:36, borderRadius:"50%",
+                        background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        fontWeight:800, color:"#000", fontSize:14 }}>
+                        {cmd.coursier[0]}
+                      </div>
+                      <div>
+                        <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.coursier}</div>
+                        {/* ✅ Étoile du coursier directement visible */}
+                        <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                          <Etoiles value={cmd.coursier_note || 0}/>
+                          <span style={{ color:"#888", fontSize:11 }}>({cmd.coursier_note || 0}/5)</span>
+                        </div>
+                      </div>
+                    </div>
 
                 {/* ✅ Bouton terminer — visible uniquement si statut = accepte */}
-                {cmd.statut === "accepte" && (
-                  <button
-                    onClick={async () => {
-                      if (!window.confirm(`Confirmer la fin de la mission "${cmd.service}" ?\nLe coursier recevra 1 étoile automatiquement.`)) return;
-                      try {
-                        const token = localStorage.getItem("token");
-                        const res = await fetch(
-                          `http://localhost:8000/api/commandes/${cmd.id}/terminer`,
-                          {
-                            method: "POST",
-                            headers: {
-                              "Authorization": `Bearer ${token}`,
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ note: 1 }), // ✅ 1 étoile par défaut
-                          }
-                        );
-                        const data = await res.json();
-                        if (res.ok) {
-                          setCommandes(prev => prev.map(c =>
-                            c.id === cmd.id ? { ...c, statut: "termine", note: 1 } : c
-                          ));
-                          showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐");
-                          // ✅ Redirige vers historique pour noter
-                          setTimeout(() => setOnglet("historique"), 1500);
-                        } else {
-                          showToast(data.message || "Erreur", "error");
-                        }
-                      } catch {
-                        showToast("Erreur de connexion", "error");
-                      }
-                    }}
-                    style={{
-                      background: "linear-gradient(135deg,#10b981,#059669)",
-                      color: "#fff", border: "none", borderRadius: 12,
-                      padding: "10px 20px", cursor: "pointer",
-                      fontWeight: 700, fontSize: 13,
-                      display: "flex", alignItems: "center", gap: 8,
-                      boxShadow: "0 4px 16px #10b98133",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-                    {/* ✅ Icône modifier/check */}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Marquer comme terminé
-                  </button>
-                )}
+{cmd.statut === "accepte" && (
+  <button
+    onClick={async () => {
+      if (!window.confirm(`Confirmer la fin de la mission "${cmd.service}" ?\nLe coursier recevra 1 étoile automatiquement.`)) return;
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(
+          `http://localhost:8000/api/commandes/${cmd.id}/terminer`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ note: 1 }),
+          }
+        );
+        const data = await res.json();
+        if (res.ok) {
+          // ✅ Mise à jour locale immédiate
+          setCommandes(prev => prev.map(c =>
+            c.id === cmd.id ? { ...c, statut: "termine", note: 1 } : c
+          ));
+          showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐");
+
+          // ✅ Refetch immédiat pour éviter toute désync avec le polling
+          const resFresh = await fetch("http://localhost:8000/api/commandes/mes-commandes", {
+            headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+          });
+          const fresh = await resFresh.json();
+          if (Array.isArray(fresh)) {
+            setCommandes(fresh.map(c => ({
+              ...c,
+              coursier: c.coursier ? `${c.coursier.prenom} ${c.coursier.nom}` : null,
+              coursier_note: c.coursier_note ?? null,
+            })));
+          }
+
+          setTimeout(() => setOnglet("historique"), 1500);
+        } else {
+          // ✅ Affiche le vrai message d'erreur backend (pas générique)
+          showToast(data.message || "Erreur lors de la finalisation", "error");
+          console.error("Erreur terminer():", data);
+        }
+      } catch (err) {
+        showToast("Erreur de connexion", "error");
+        console.error(err);
+      }
+    }}
+    style={{
+      background: "linear-gradient(135deg,#10b981,#059669)",
+      color: "#fff", border: "none", borderRadius: 12,
+      padding: "10px 20px", cursor: "pointer",
+      fontWeight: 700, fontSize: 13,
+      display: "flex", alignItems: "center", gap: 8,
+      boxShadow: "0 4px 16px #10b98133",
+      transition: "all 0.2s",
+    }}
+    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Marquer comme terminé
+  </button>
+)}
               </div>
             )}
           </div>
@@ -2092,29 +2113,52 @@ const noterCoursier = async (id, note) => {
       )}
 
       {/* MODAL NOTE */}
-      {noteCmd && (
-        <Modal onClose={()=>{ setNoteCmd(null); setNoteTmp(0); }}>
-          <h5 style={{ color:"#FFD700", marginBottom:10, fontWeight:800 }}>⭐ Évaluer le coursier</h5>
-          <p style={{ color:"#aaa", fontSize:14, marginBottom:20, lineHeight:1.6 }}>
-            Coursier : <strong style={{ color:"#fff" }}>{noteCmd.coursier}</strong><br/>
-            Service : {noteCmd.service}
-          </p>
-          <div style={{ marginBottom:10 }}>
-            <div style={{ color:"#888", fontSize:13, marginBottom:10 }}>Votre note :</div>
-            <Etoiles value={noteTmp} onChange={setNoteTmp}/>
-            {noteTmp>0 && (
-              <div style={{ color:"#FFD700", fontSize:13, marginTop:8 }}>
-                {["","Mauvais 😞","Passable 😐","Bien 🙂","Très bien 😊","Excellent 🤩"][noteTmp]}
-              </div>
-            )}
-          </div>
-          <button onClick={()=>noterCoursier(noteCmd.id,noteTmp)}
-            disabled={!noteTmp}
-            style={{ ...btnY, width:"100%", marginTop:16, opacity:noteTmp?1:0.4 }}>
-            Valider l'évaluation
-          </button>
-        </Modal>
+{noteCmd && (
+  <Modal onClose={() => {}} size="md"> {/* onClose vide = impossible de fermer sans noter */}
+    <div style={{ textAlign: "center", padding: "8px 0" }}>
+      <div style={{
+        width: 64, height: 64, borderRadius: "50%",
+        background: "linear-gradient(135deg,#FFD700,#ff9500)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        margin: "0 auto 16px", boxShadow: "0 0 24px #FFD70055",
+      }}>
+        <MdStar style={{ fontSize: 32, color: "#000" }} />
+      </div>
+
+      <h5 style={{ color: "#FFD700", fontWeight: 800, marginBottom: 6 }}>
+        Mission terminée !
+      </h5>
+      <p style={{ color: "#aaa", fontSize: 14, marginBottom: 4 }}>
+        Coursier : <strong style={{ color: "#fff" }}>{noteCmd.coursier}</strong>
+      </p>
+      <p style={{ color: "#666", fontSize: 13, marginBottom: 24 }}>
+        Merci de noter le service rendu — une note est obligatoire.
+      </p>
+
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+        <Etoiles value={noteTmp} onChange={setNoteTmp} />
+      </div>
+
+      {noteTmp > 0 && (
+        <div style={{ color: "#FFD700", fontWeight: 700, fontSize: 14, marginBottom: 24 }}>
+          {["", "Mauvais 😞", "Passable 😐", "Bien 🙂", "Très bien 😊", "Excellent 🤩"][noteTmp]}
+        </div>
       )}
+
+      <button
+        onClick={() => noterCoursier(noteCmd.id, noteTmp)}
+        disabled={!noteTmp}
+        style={{
+          ...btnY, width: "100%", fontSize: 15,
+          opacity: noteTmp ? 1 : 0.4,
+          cursor: noteTmp ? "pointer" : "not-allowed",
+        }}
+      >
+        Confirmer la note
+      </button>
+    </div>
+  </Modal>
+)}
 
       {/* MODAL SUPPRESSION */}
       {confirmDel && (

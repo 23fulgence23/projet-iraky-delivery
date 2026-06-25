@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Commande;
 use App\Models\Notification;
+use App\Models\User; 
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -35,27 +36,42 @@ class CommandeController extends Controller
             'statut'            => 'en_attente',
         ]);
 
+        // ✅ Notifier l'admin
+        $admin = \App\Models\User::where('role','admin')->first();
+                    if ($admin) {
+                        \App\Models\Notification::create([
+                            'user_id'     => $admin->id,
+                            'texte'       => "📦 Nouvelle commande : {$commande->service} — Client #{$user->prenom} {$user->nom}",
+                            'type'        => 'info',
+                            'commande_id' => $commande->id,
+                        ]);
+                    }
+
         return response()->json([
             'commande' => $commande->load('client','coursier')
         ], 201);
     }
 
-    // ── Commandes du client ────────────────────────
-    public function mesCommandes()
-    {
-        $user = JWTAuth::user();
-        $commandes = Commande::where('client_id', $user->id)
-            ->with('coursier')
-            ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($c) => [
-                ...$c->toArray(),
-                'date'            => $c->created_at->format('Y-m-d'),
-                'accord_client'   => (bool)$c->accord_client,
-                'accord_coursier' => (bool)$c->accord_coursier,
-            ]);
-        return response()->json($commandes);
-    }
+   
+        // ── Commandes du client ────────────────────────
+        public function mesCommandes()
+        {
+            $user = JWTAuth::user();
+            $commandes = Commande::where('client_id', $user->id)
+                ->with('coursier') // charge déjà la relation
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(fn($c) => [
+                    ...$c->toArray(),
+                    'date'            => $c->created_at->format('Y-m-d'),
+                    'accord_client'   => (bool)$c->accord_client,
+                    'accord_coursier' => (bool)$c->accord_coursier,
+                    // ✅ Expose la note et les trophées du coursier directement
+                    'coursier_note'     => $c->coursier->note ?? null,
+                    'coursier_trophees' => $c->coursier->trophees ?? null,
+                ]);
+            return response()->json($commandes);
+        }
 
     // ── Commandes disponibles ──────────────────────
     public function disponibles()
@@ -90,32 +106,43 @@ class CommandeController extends Controller
     }
 
     // ── Coursier prend mission ─────────────────────
-    public function prendre($id)
-    {
-        $user     = JWTAuth::user();
-        $commande = Commande::findOrFail($id);
+public function prendre($id)
+{
+    $user     = JWTAuth::user();
+    $commande = Commande::findOrFail($id);
 
-        if ($commande->statut !== 'en_attente') {
-            return response()->json(['message' => 'Mission non disponible'], 400);
-        }
+    if ($commande->statut !== 'en_attente') {
+        return response()->json(['message' => 'Mission non disponible'], 400);
+    }
 
-        $commande->update([
-            'coursier_id' => $user->id,
-            'statut'      => 'negociable',
-        ]);
+    $commande->update([
+        'coursier_id' => $user->id,
+        'statut'      => 'negociable',
+    ]);
 
-        Notification::create([
-            'user_id'     => $commande->client_id,
-            'texte'       => "{$user->prenom} a pris votre commande — En négociation",
+    // ✅ Notifier l'admin que le coursier a pris la mission (PAS de $note ici)
+    $admin = \App\Models\User::where('role','admin')->first();
+    if ($admin) {
+        \App\Models\Notification::create([
+            'user_id'     => $admin->id,
+            'texte'       => "🚴 {$user->prenom} {$user->nom} a pris la mission : {$commande->service}",
             'type'        => 'info',
             'commande_id' => $commande->id,
         ]);
-
-        return response()->json([
-            'message'  => 'Mission prise',
-            'commande' => $commande->fresh()->load('client','coursier'),
-        ]);
     }
+
+    Notification::create([
+        'user_id'     => $commande->client_id,
+        'texte'       => "{$user->prenom} a pris votre commande — En négociation",
+        'type'        => 'info',
+        'commande_id' => $commande->id,
+    ]);
+
+    return response()->json([
+        'message'  => 'Mission prise',
+        'commande' => $commande->fresh()->load('client','coursier'),
+    ]);
+}
 
     // ── CLIENT accepte en PREMIER ──────────────────
     // ✅ CORRECTION : cast (int) pour éviter "Non autorisé"
@@ -237,12 +264,12 @@ class CommandeController extends Controller
     }
 
     // ── Client termine + note ──────────────────────
-   public function terminer(Request $request, $id)
+public function terminer(Request $request, $id)
 {
     $user     = JWTAuth::user();
     $commande = Commande::findOrFail($id);
 
-    if ((int)$commande->client_id !== (int)$user->id) {
+    if ((int) $commande->client_id !== (int) $user->id) {
         return response()->json(['message' => 'Non autorisé'], 403);
     }
 
@@ -250,41 +277,66 @@ class CommandeController extends Controller
         return response()->json(['message' => 'La commande doit être acceptée avant de terminer'], 400);
     }
 
-    $note = $request->note ?? 1; // ✅ note par défaut = 1 étoile si non fournie
-
-    $commande->update([
-        'statut'        => 'termine',
-        'note_coursier' => $note,
+    // ✅ Note obligatoire entre 1 et 5 — pas de défaut silencieux
+    $request->validate([
+        'note' => 'required|integer|min:1|max:5',
+    ], [
+        'note.required' => 'Vous devez attribuer une note au coursier.',
+        'note.min'       => 'La note minimale est 1 étoile.',
+        'note.max'       => 'La note maximale est 5 étoiles.',
     ]);
 
-    // ✅ Mettre à jour les stats du coursier
+    $note = (int) $request->note;
+
+    $commande->update([
+        'statut' => 'termine',
+        'note'   => $note,
+    ]);
+
     if ($commande->coursier_id) {
-        $coursier = \App\Models\User::find($commande->coursier_id);
+        $coursier = User::find($commande->coursier_id);
+
         if ($coursier) {
+            // ✅ Moyenne des notes sur toutes les missions terminées
             $missionsTerm = Commande::where('coursier_id', $coursier->id)
                 ->where('statut', 'termine')
-                ->whereNotNull('note_coursier')
+                ->whereNotNull('note')
                 ->get();
 
             $nbTerminees = $missionsTerm->count();
-            $moyNote     = $nbTerminees > 0
-                ? round($missionsTerm->avg('note_coursier'), 1)
-                : 0;
+            $moyNote     = $nbTerminees > 0 ? round($missionsTerm->avg('note'), 1) : 0;
+
+            // ✅ Système trophées : chaque note ajoutée incrémente etoiles_actuelles
+            // À 5 étoiles accumulées → +1 trophée, etoiles_actuelles repart à 0
+            $etoilesActuelles = $coursier->etoiles_actuelles + $note;
+            $nouveauxTrophees = intdiv($etoilesActuelles, 5);
+            $etoilesRestantes = $etoilesActuelles % 5;
 
             $coursier->update([
-                'nb_terminees' => $nbTerminees,
-                'nb_missions'  => Commande::where('coursier_id', $coursier->id)->count(),
-                'note'         => $moyNote,
+                'nb_terminees'      => $nbTerminees,
+                'nb_missions'       => Commande::where('coursier_id', $coursier->id)->count(),
+                'note'              => $moyNote,
+                'trophees'          => $coursier->trophees + $nouveauxTrophees,
+                'etoiles_actuelles' => $etoilesRestantes,
             ]);
         }
 
-        // ✅ Notifier le coursier
-        \App\Models\Notification::create([
+        Notification::create([
             'user_id'     => $commande->coursier_id,
-            'texte'       => "🎉 Mission terminée ! Vous avez reçu {$note}/5 ⭐ — Merci !",
+            'texte'       => "🎉 Mission terminée ! Le client vous a donné {$note}/5 ⭐",
             'type'        => 'success',
             'commande_id' => $commande->id,
         ]);
+
+        $admin = User::where('role', 'admin')->first();
+        if ($admin) {
+            Notification::create([
+                'user_id'     => $admin->id,
+                'texte'       => "🏁 Commande terminée : {$commande->service} — {$note}⭐",
+                'type'        => 'success',
+                'commande_id' => $commande->id,
+            ]);
+        }
     }
 
     return response()->json([
