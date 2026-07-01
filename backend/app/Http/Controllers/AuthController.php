@@ -12,6 +12,14 @@ class AuthController extends Controller
 {
 public function register(Request $request)
 {
+    // ✅ Si un compte rejeté existe avec cet email, le supprimer avant validation
+    $ancienCompte = User::where('email', $request->email)
+        ->where('statut', 'rejete')
+        ->first();
+    if ($ancienCompte) {
+        $ancienCompte->delete();
+    }
+
     $request->validate([
         'nom'         => 'required|string|max:255',
         'prenom'      => 'required|string|max:255',
@@ -181,7 +189,7 @@ public function login(Request $request)
         }
     }
     // ── Vérifier si un coursier a été validé (polling depuis l'écran d'attente) ──
-        public function verifierStatutCoursier($id)
+ public function verifierStatutCoursier($id)
 {
     $user = User::find($id);
 
@@ -189,7 +197,19 @@ public function login(Request $request)
         return response()->json(['statut' => 'introuvable'], 404);
     }
 
-    // Si le compte a été supprimé après rejet, il n'existera plus → 404 ci-dessus
+    // ✅ Si rejeté, récupérer aussi le message de rejet
+    if ($user->statut === 'rejete') {
+        $notifRejet = \App\Models\Notification::where('user_id', $user->id)
+            ->where('type', 'warning')
+            ->orderByDesc('created_at')
+            ->first();
+
+        return response()->json([
+            'statut'  => 'rejete',
+            'message' => $notifRejet ? $notifRejet->texte : 'Votre dossier a été rejeté.',
+        ]);
+    }
+
     return response()->json([
         'statut' => $user->statut, // 'actif' ou 'inactif'
     ]);

@@ -17,7 +17,7 @@ function Inscription() {
   const [modalSucces, setModalSucces] = useState(false);
   const [userIdCree, setUserIdCree] = useState(null);
   const [etapeValidation, setEtapeValidation] = useState(1);
-
+  const [msgRejetRecu, setMsgRejetRecu] = useState("");
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     adresse: "", password: "", password_confirmation: "",
@@ -166,18 +166,25 @@ useEffect(() => {
   const iv = setInterval(async () => {
     try {
       const res = await fetch(`http://localhost:8000/api/verifier-statut-coursier/${userIdCree}`);
+
       if (res.status === 404) {
-        // Compte supprimé = rejeté
-        setEtapeValidation(0); // état spécial "rejeté"
+        setEtapeValidation(0);
         clearInterval(iv);
         return;
       }
+
       const data = await res.json();
+
       if (data.statut === "actif") {
-        setEtapeValidation(4); // ✅ validé — toutes les étapes passent en jaune
+        setEtapeValidation(4);
+        clearInterval(iv);
+      } else if (data.statut === "rejete") {
+        // ✅ Stocker le message de rejet pour l'afficher
+        setMsgRejetRecu(data.message || "Votre dossier a été rejeté.");
+        setEtapeValidation(0);
         clearInterval(iv);
       } else {
-        setEtapeValidation(2); // toujours en attente
+        setEtapeValidation(2);
       }
     } catch (e) {
       console.error(e);
@@ -254,14 +261,36 @@ useEffect(() => {
           </span>
         </div>
       )}
-      {etapeValidation === 0 && (
-        <div style={{ backgroundColor: "#ef444418", border: "1px solid #ef444444",
-          borderRadius: 10, padding: "10px 14px", marginBottom: 16, textAlign: "center" }}>
-          <span style={{ color: "#ef4444", fontWeight: 700, fontSize: 13 }}>
-            ❌ Votre dossier a été rejeté. Consultez vos emails ou réinscrivez-vous.
-          </span>
-        </div>
-      )}
+{etapeValidation === 0 && (
+  <div style={{ backgroundColor: "#ef444418", border: "1px solid #ef444444",
+    borderRadius: 12, padding: "16px", marginBottom: 16, textAlign: "left" }}>
+    <p style={{ color: "#ef4444", fontWeight: 800, fontSize: 14, margin: "0 0 8px" }}>
+      ❌ Votre dossier a été rejeté
+    </p>
+    {/* ✅ Affiche le message de l'admin */}
+    {msgRejetRecu && (
+      <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
+        padding: "10px 12px", marginBottom: 10 }}>
+        <p style={{ color: "#aaa", fontSize: 12, margin: "0 0 4px" }}>
+          Message de l'administrateur :
+        </p>
+        <p style={{ color: "#fff", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+          {msgRejetRecu.replace("❌ Votre dossier a été rejeté. Raison : ", "").replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
+        </p>
+      </div>
+    )}
+    <p style={{ color: "#888", fontSize: 12, margin: "0 0 10px" }}>
+      📧 Un email de notification a été envoyé à <strong style={{ color: "#fff" }}>{form.email}</strong>
+    </p>
+    <button
+      onClick={() => { setModalSucces(false); setEtapeValidation(1); }}
+      style={{ backgroundColor: "#ef4444", color: "#fff", border: "none",
+        borderRadius: 8, padding: "8px 16px", cursor: "pointer",
+        fontWeight: 700, fontSize: 13, width: "100%" }}>
+      🔄 Corriger et se réinscrire
+    </button>
+  </div>
+)}
           <button
             onClick={() => navigate("/connexion", {
               state: etapeValidation === 4

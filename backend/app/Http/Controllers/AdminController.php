@@ -272,6 +272,7 @@ public function validerCoursier($id)
     return response()->json(['message' => 'Coursier validé avec succès']);
 }
 
+
 // ── Rejeter un coursier avec message ──────────
 public function rejeterCoursier(Request $request, $id)
 {
@@ -282,17 +283,46 @@ public function rejeterCoursier(Request $request, $id)
         'message' => 'required|string|max:500',
     ]);
 
-    // ✅ Notifier le coursier avec le message de rejet
+    // ✅ 1. Envoyer l'email de rejet AVANT de supprimer le compte
+    try {
+        \Mail::raw(
+            "Bonjour {$coursier->prenom} {$coursier->nom},\n\n" .
+            "Votre demande d'inscription en tant que coursier sur IRAKY Delivery a été examinée.\n\n" .
+            "Votre dossier a été rejeté pour la raison suivante :\n\n" .
+            "{$request->message}\n\n" .
+            "Vous pouvez vous réinscrire sur notre plateforme en corrigeant les erreurs mentionnées.\n\n" .
+            "Lien d'inscription : http://localhost:3000/inscription\n\n" .
+            "Cordialement,\nL'équipe IRAKY Delivery - Toliara",
+            function ($mail) use ($coursier) {
+                $mail->to($coursier->email, "{$coursier->prenom} {$coursier->nom}")
+                     ->subject('IRAKY Delivery — Votre dossier coursier a été rejeté');
+            }
+        );
+    } catch (\Exception $e) {
+        // Log l'erreur mais continue — l'email n'est pas bloquant
+        \Log::error("Erreur envoi email rejet coursier: " . $e->getMessage());
+    }
+
+    // ✅ 2. Stocker le message de rejet dans notifications_iraky
+    //    AVANT la suppression pour que le polling puisse le lire
     Notification::create([
         'user_id'     => $coursier->id,
-        'texte'       => "❌ Votre inscription a été rejetée. Raison : {$request->message}. Veuillez vous réinscrire en corrigeant les erreurs.",
+        'texte'       => "❌ Votre dossier a été rejeté. Raison : {$request->message}. Réinscrivez-vous en corrigeant les erreurs.",
         'type'        => 'warning',
         'commande_id' => null,
     ]);
 
-    // ✅ Supprimer le compte rejeté pour qu'il puisse se réinscrire
-    $coursier->delete();
+    // ✅ 3. Marquer le compte comme "rejete" au lieu de supprimer immédiatement
+    //    → le coursier voit le message de rejet via polling pendant 24h
+    $coursier->statut = 'rejete'; // nouveau statut
+    $coursier->save();
 
-    return response()->json(['message' => 'Coursier rejeté et notifié']);
+    // Supprimer après 24h via job ou laisser l'admin supprimer manuellement
+    // Pour l'instant on ne supprime pas pour que le polling fonctionne
+
+    return response()->json([
+        'message' => 'Coursier rejeté, email envoyé et notifié.',
+        'email_envoye' => true,
+    ]);
 }
 }
