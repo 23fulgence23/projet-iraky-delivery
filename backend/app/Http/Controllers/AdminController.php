@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Commande;
 use App\Models\Notification;
+use App\Models\Tarif;
+use App\Models\MoyenTransport;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -325,4 +327,281 @@ public function rejeterCoursier(Request $request, $id)
         'email_envoye' => true,
     ]);
 }
+
+    public function admins()
+    {
+        $admin = $this->checkAdmin();
+ 
+        $admins = User::where('role', 'admin')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($u) => [
+                'id'         => $u->id,
+                'nom'        => $u->nom,
+                'prenom'     => $u->prenom,
+                'email'      => $u->email,
+                'telephone'  => $u->telephone,
+                'created_at' => $u->created_at->format('Y-m-d'),
+                'est_moi'    => $u->id === $admin->id,
+            ]);
+ 
+        return response()->json($admins);
+    }
+ 
+    // ── Créer un admin ──────────────────────────────
+    public function creerAdmin(Request $request)
+    {
+        $this->checkAdmin();
+
+        // ✅ Limite : 3 administrateurs maximum
+        $nbAdmins = User::where('role', 'admin')->count();
+        if ($nbAdmins >= 3) {
+            return response()->json([
+                'message' => 'Le nombre maximum de 3 administrateurs est déjà atteint.',
+            ], 403);
+        }
+
+        $request->validate([
+            'nom'       => 'required|string|max:100',
+            'prenom'    => 'required|string|max:100',
+            'email'     => 'required|email|unique:users,email',
+            'telephone' => 'nullable|string|max:20',
+            'password'  => 'required|string|min:6',
+        ], [
+            // ✅ Messages personnalisés — évite d'afficher la clé brute
+            // "validation.unique" si les fichiers de langue Laravel ne
+            // sont pas publiés sur le serveur (courant depuis Laravel 9+).
+            'nom.required'      => 'Le nom est obligatoire.',
+            'prenom.required'   => 'Le prénom est obligatoire.',
+            'email.required'    => 'L\'email est obligatoire.',
+            'email.email'       => 'L\'email n\'est pas valide.',
+            'email.unique'      => 'Cet email est déjà utilisé par un autre compte.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
+
+        // ✅ Assignation explicite (et non User::create([...])) pour éviter
+        // que 'role' et 'statut' soient silencieusement ignorés si le modèle
+        // User ne les autorise pas dans $fillable (protection anti mass-assignment,
+        // très courante pour empêcher qu'un simple inscrit s'auto-déclare admin).
+        // C'est très probablement la cause du "je n'arrive pas à ajouter d'admin" :
+        // le compte était créé, mais sans role='admin', donc invisible dans la liste.
+        $admin = new User();
+        $admin->nom       = $request->nom;
+        $admin->prenom    = $request->prenom;
+        $admin->email     = $request->email;
+        $admin->telephone = $request->telephone;
+        $admin->adresse   = $request->adresse ?: 'Toliara, Madagascar'; // ✅ colonne NOT NULL en base
+        $admin->password  = bcrypt($request->password);
+        $admin->role      = 'admin';
+        $admin->statut    = 'actif';
+        $admin->save();
+
+        return response()->json([
+            'message' => 'Admin créé avec succès',
+            'admin'   => $admin,
+        ], 201);
+    }
+ 
+    // ── Modifier un admin ───────────────────────────
+    public function modifierAdmin(Request $request, $id)
+    {
+        $this->checkAdmin();
+        $admin = User::where('role', 'admin')->findOrFail($id);
+ 
+        $request->validate([
+            'nom'       => 'required|string|max:100',
+            'prenom'    => 'required|string|max:100',
+            'email'     => 'required|email|unique:users,email,' . $id,
+            'telephone' => 'nullable|string|max:20',
+            'password'  => 'nullable|string|min:6',
+        ], [
+            'nom.required'      => 'Le nom est obligatoire.',
+            'prenom.required'   => 'Le prénom est obligatoire.',
+            'email.required'    => 'L\'email est obligatoire.',
+            'email.email'       => 'L\'email n\'est pas valide.',
+            'email.unique'      => 'Cet email est déjà utilisé par un autre compte.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
+ 
+        $admin->nom       = $request->nom;
+        $admin->prenom    = $request->prenom;
+        $admin->email     = $request->email;
+        $admin->telephone = $request->telephone;
+ 
+        if ($request->filled('password')) {
+            $admin->password = bcrypt($request->password);
+        }
+ 
+        $admin->save();
+ 
+        return response()->json([
+            'message' => 'Admin modifié avec succès',
+            'admin'   => $admin,
+        ]);
+    }
+ 
+    // ── Supprimer un admin ──────────────────────────
+    public function supprimerAdmin($id)
+    {
+        $moi = $this->checkAdmin();
+ 
+        if ((int) $moi->id === (int) $id) {
+            return response()->json([
+                'message' => 'Impossible de supprimer votre propre compte',
+            ], 403);
+        }
+ 
+        $admin = User::where('role', 'admin')->findOrFail($id);
+        $admin->delete();
+ 
+        return response()->json(['message' => 'Admin supprimé avec succès']);
+    }
+
+    public function tarifs()
+    {
+        $this->checkAdmin();
+        return response()->json(Tarif::orderBy('id')->get());
+    }
+ 
+    // ── Créer un tarif ───────────────────────────────
+    public function creerTarif(Request $request)
+    {
+        $this->checkAdmin();
+ 
+        $request->validate([
+            'service'     => 'required|string|max:100',
+            'label'       => 'required|string|max:150',
+            'prix_base'   => 'required|numeric|min:0',
+            'prix_km'     => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+        ], [
+            'service.required'   => 'Le service est obligatoire.',
+            'label.required'     => 'Le libellé est obligatoire.',
+            'prix_base.required' => 'Le prix de base est obligatoire.',
+            'prix_base.numeric'  => 'Le prix de base doit être un nombre.',
+            'prix_km.numeric'    => 'Le prix par km doit être un nombre.',
+        ]);
+ 
+        $tarif = new Tarif();
+        $tarif->service     = $request->service;
+        $tarif->label       = $request->label;
+        $tarif->prix_base   = $request->prix_base;
+        $tarif->prix_km     = $request->prix_km;
+        $tarif->description = $request->description;
+        $tarif->save();
+ 
+        return response()->json(['message' => 'Tarif créé avec succès', 'tarif' => $tarif], 201);
+    }
+ 
+    // ── Modifier un tarif ────────────────────────────
+    public function modifierTarif(Request $request, $id)
+    {
+        $this->checkAdmin();
+        $tarif = Tarif::findOrFail($id);
+ 
+        $request->validate([
+            'service'     => 'required|string|max:100',
+            'label'       => 'required|string|max:150',
+            'prix_base'   => 'required|numeric|min:0',
+            'prix_km'     => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+        ], [
+            'service.required'   => 'Le service est obligatoire.',
+            'label.required'     => 'Le libellé est obligatoire.',
+            'prix_base.required' => 'Le prix de base est obligatoire.',
+            'prix_base.numeric'  => 'Le prix de base doit être un nombre.',
+            'prix_km.numeric'    => 'Le prix par km doit être un nombre.',
+        ]);
+ 
+        $tarif->service     = $request->service;
+        $tarif->label       = $request->label;
+        $tarif->prix_base   = $request->prix_base;
+        $tarif->prix_km     = $request->prix_km;
+        $tarif->description = $request->description;
+        $tarif->save();
+ 
+        return response()->json(['message' => 'Tarif modifié avec succès', 'tarif' => $tarif]);
+    }
+ 
+    // ── Supprimer un tarif ───────────────────────────
+    public function supprimerTarif($id)
+    {
+        $this->checkAdmin();
+        $tarif = Tarif::findOrFail($id);
+        $tarif->delete();
+        return response()->json(['message' => 'Tarif supprimé avec succès']);
+    }
+        public function moyensTransport()
+    {
+        $this->checkAdmin();
+        return response()->json(MoyenTransport::orderBy('prix')->get());
+    }
+ 
+    // ── Créer un moyen de transport ──────────────────
+    public function creerMoyenTransport(Request $request)
+    {
+        $this->checkAdmin();
+ 
+        $request->validate([
+            'nom'           => 'required|string|max:100',
+            'icone'         => 'nullable|string|max:10',
+            'prix'          => 'required|numeric|min:0',
+            'duree_estimee' => 'nullable|integer|min:0',
+        ], [
+            'nom.required'  => 'Le nom est obligatoire.',
+            'prix.required' => 'Le prix est obligatoire.',
+            'prix.numeric'  => 'Le prix doit être un nombre.',
+        ]);
+ 
+        $moyen = new MoyenTransport();
+        $moyen->nom           = $request->nom;
+        $moyen->icone         = $request->icone;
+        $moyen->prix          = $request->prix;
+        $moyen->duree_estimee = $request->duree_estimee;
+        $moyen->save();
+ 
+        return response()->json(['message' => 'Moyen de transport créé avec succès', 'moyen' => $moyen], 201);
+    }
+ 
+    // ── Modifier un moyen de transport ───────────────
+    public function modifierMoyenTransport(Request $request, $id)
+    {
+        $this->checkAdmin();
+        $moyen = MoyenTransport::findOrFail($id);
+ 
+        $request->validate([
+            'nom'           => 'required|string|max:100',
+            'icone'         => 'nullable|string|max:10',
+            'prix'          => 'required|numeric|min:0',
+            'duree_estimee' => 'nullable|integer|min:0',
+        ], [
+            'nom.required'  => 'Le nom est obligatoire.',
+            'prix.required' => 'Le prix est obligatoire.',
+            'prix.numeric'  => 'Le prix doit être un nombre.',
+        ]);
+ 
+        $moyen->nom           = $request->nom;
+        $moyen->icone         = $request->icone;
+        $moyen->prix          = $request->prix;
+        $moyen->duree_estimee = $request->duree_estimee;
+        $moyen->save();
+ 
+        return response()->json(['message' => 'Moyen de transport modifié avec succès', 'moyen' => $moyen]);
+    }
+ 
+    // ── Supprimer un moyen de transport ──────────────
+    public function supprimerMoyenTransport($id)
+    {
+        $this->checkAdmin();
+        $moyen = MoyenTransport::findOrFail($id);
+        $moyen->delete();
+        return response()->json(['message' => 'Moyen de transport supprimé avec succès']);
+    }
+    public function moyensTransportPublic()
+    {
+        return response()->json(\App\Models\MoyenTransport::orderBy('prix')->get());
+    }
+ 
+ 
 }

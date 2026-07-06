@@ -98,12 +98,8 @@ const SERVICES = [
     desc: "Livrez vos colis partout dans Toliara"
   }
 ];
-const MOYENS = [
-  { id:"pieton",  label:"Piéton",  icon:"🚶", tarif:5000,  temps:"50 min", color:"#10b981" },
-  { id:"velo",    label:"Vélo",    icon:"🚲", tarif:6000,  temps:"40 min", color:"#3b82f6" },
-  { id:"moto",    label:"Moto",    icon:"🏍️", tarif:8000,  temps:"25 min", color:"#f59e0b" },
-  { id:"voiture", label:"Voiture", icon:"🚗", tarif:12000, temps:"20 min", color:"#ef4444" },
-];
+// ✅ MOYENS n'est plus codé en dur — chargé dynamiquement depuis la BDD
+// (voir le state `moyens` + le useEffect de fetch dans le composant).
 
 const STATUT_CONFIG = {
   en_attente: { label:"En attente",     color:"#f59e0b", bg:"#f59e0b18", icon:"⏳", step:0 },
@@ -323,6 +319,7 @@ const [notifs, setNotifs] = useState([]);
   const [toast, setToast]             = useState(null);
   const [serviceHov, setServiceHov]   = useState(null);
   const [moyenHov, setMoyenHov]       = useState(null);
+  const [moyens, setMoyens]           = useState([]); // ✅ chargé depuis la BDD
   const [loading, setLoading]         = useState(false);
   const [chatCommande, setChatCommande] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
@@ -473,6 +470,25 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+// ── Charger les moyens de transport (tarifs) depuis la BDD ─────
+useEffect(() => {
+  const palette = ["#10b981","#3b82f6","#f59e0b","#ef4444","#8b5cf6","#06b6d4"];
+  fetch("http://localhost:8000/api/moyens-transport")
+    .then(r => r.json())
+    .then(data => {
+      if (!Array.isArray(data)) return;
+      setMoyens(data.map((m,i) => ({
+        id:    m.id,                                   // ✅ id numérique réel de la BDD
+        label: m.nom,
+        icon:  m.icone || "🚗",
+        tarif: Number(m.prix),
+        temps: m.duree_estimee ? `${m.duree_estimee} min` : "—",
+        color: palette[i % palette.length],
+      })));
+    })
+    .catch(()=>{});
+}, []);
+
 // ── Polling messages chat toutes les 5s ─────────────────────────
 useEffect(() => {
   if (!chatCommande) return;
@@ -491,7 +507,7 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [chatCommande]);
 
-  const tarifSel = MOYENS.find(m=>m.id===form.moyen)?.tarif || 0;
+  const tarifSel = moyens.find(m=>m.id===form.moyen)?.tarif || 0;
 
   const showToast = (msg, type="success") => {
     setToast({msg,type});
@@ -513,7 +529,7 @@ useEffect(() => {
         },
         body: JSON.stringify({
           service:           SERVICES.find(s => s.id === form.service)?.label,
-          moyen:             MOYENS.find(m => m.id === form.moyen)?.label,
+          moyen:             moyens.find(m => m.id === form.moyen)?.label,
           tarif:             tarifSel,
           detail:            form.detail,
           adresse_pickup:    form.adresse_pickup,
@@ -1039,7 +1055,7 @@ const noterCoursier = async (id, note) => {
                       Choisissez votre moyen de course
                     </label>
                     <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
-                      {MOYENS.map(m=>{
+                      {moyens.map(m=>{
                         const sel = form.moyen===m.id;
                         const hov = moyenHov===m.id;
                         return (
@@ -1193,7 +1209,7 @@ const noterCoursier = async (id, note) => {
     <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:12 }}>
       {[
         { Icon:MdMiscellaneousServices, label:"Service",    val:SERVICES.find(s=>s.id===form.service)?.label||"—", color:"#FFD700" },
-        { Icon:MdDirectionsBike,        label:"Moyen",      val:MOYENS.find(m=>m.id===form.moyen)?.label||"—",     color:"#3b82f6" },
+        { Icon:MdDirectionsBike,        label:"Moyen",      val:moyens.find(m=>m.id===form.moyen)?.label||"—",     color:"#3b82f6" },
         { Icon:MdAttachMoney,           label:"Tarif",      val:`${tarifSel.toLocaleString()} Ar`,                  color:"#10b981" },
         { Icon:MdCampaign,              label:"Publie à",   val:form.heure_publication||"—",                        color:"#8b5cf6" },
         { Icon:MdAccessTime,            label:"Début",      val:form.heure_debut||"—",                              color:"#f59e0b" },
@@ -1255,7 +1271,7 @@ const noterCoursier = async (id, note) => {
 
                 {commandes.map(cmd => {
                   const svc = SERVICES.find(s=>s.label===cmd.service);
-                  const moy = MOYENS.find(m=>m.label===cmd.moyen);
+                  const moy = moyens.find(m=>m.label===cmd.moyen);
                   return (
                     <div key={cmd.id} style={{ ...card, marginBottom:14, cursor:"pointer",
                       transition:"all 0.2s" }}
@@ -1753,12 +1769,12 @@ const noterCoursier = async (id, note) => {
           }
         );
         const data = await res.json();
-        if (res.ok) {
-          // ✅ Mise à jour locale immédiate
-          setCommandes(prev => prev.map(c =>
-            c.id === cmd.id ? { ...c, statut: "termine", note: 1 } : c
-          ));
-          showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐");
+          if (res.ok) {
+            // ✅ Efface immédiatement la commande du suivi
+            setCommandes(prev => prev.filter(c => c.id !== cmd.id));
+            // ✅ Retour direct au tableau de bord sans délai
+            setOnglet("accueil");
+            showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐", "success");
 
           // ✅ Refetch immédiat pour éviter toute désync avec le polling
           const resFresh = await fetch("http://localhost:8000/api/commandes/mes-commandes", {

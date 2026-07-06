@@ -6,6 +6,7 @@ import {
   MdBlock, MdVerified, MdEmail, MdPhone, MdBadge, MdStar,
   MdAttachMoney, MdSchedule, MdSearch, MdAdminPanelSettings,
   MdWarning, MdBarChart, MdPieChart, MdShowChart, MdDelete, MdDoneAll,MdClose,
+  MdEdit, MdPersonAdd, MdAdd,
 } from "react-icons/md";
 
 const BASE_URL = "http://localhost:8000";
@@ -226,6 +227,23 @@ function DashboardAdmin() {
   const [coursierVerif, setCoursierVerif] = useState(null); // ✅ modal vérification
   const [msgRejet, setMsgRejet]           = useState("");    // ✅ message de rejet
   const [coursiersEnAttente, setCoursiersEnAttente] = useState([]); // ✅ liste
+
+  // ── Gestion des admins ──────────────────────────
+  const [admins, setAdmins]               = useState([]);
+  const [adminModal, setAdminModal]       = useState(null); // "ajouter" | "modifier" | null
+  const [adminForm, setAdminForm]         = useState({ id:null, nom:"", prenom:"", email:"", telephone:"", password:"" });
+  const [adminEnvoi, setAdminEnvoi]       = useState(false);
+  const [adminErreur, setAdminErreur]     = useState("");
+  const [confirmDeleteAdmin, setConfirmDeleteAdmin] = useState(null);
+
+  // ── Gestion des moyens de transport (tarifs) ─────
+  const [moyens, setMoyens]               = useState([]);
+  const [moyenModal, setMoyenModal]       = useState(null); // "ajouter" | "modifier" | null
+  const [moyenForm, setMoyenForm]         = useState({ id:null, nom:"", icone:"", prix:"", duree_estimee:"" });
+  const [moyenEnvoi, setMoyenEnvoi]       = useState(false);
+  const [moyenErreur, setMoyenErreur]     = useState("");
+  const [confirmDeleteMoyen, setConfirmDeleteMoyen] = useState(null);
+
   const getHeaders = () => ({
     "Authorization": `Bearer ${localStorage.getItem("token")}`,
     "Accept": "application/json",
@@ -240,7 +258,7 @@ function DashboardAdmin() {
  const fetchAll = async () => {
   try {
     const h = getHeaders();
-    const [sR, mR, svR, cR, clR, coR, nR, eaR] = await Promise.all([
+    const [sR, mR, svR, cR, clR, coR, nR, eaR, adR, tR] = await Promise.all([
       fetch(`${BASE_URL}/api/admin/stats`,                {headers: h}),
       fetch(`${BASE_URL}/api/admin/commandes-mensuelles`, {headers: h}),
       fetch(`${BASE_URL}/api/admin/services-populaires`,  {headers: h}),
@@ -249,6 +267,8 @@ function DashboardAdmin() {
       fetch(`${BASE_URL}/api/admin/coursiers`,            {headers: h}),
       fetch(`${BASE_URL}/api/admin/notifications`,        {headers: h}),
       fetch(`${BASE_URL}/api/admin/coursiers-en-attente`, {headers: h}), // ✅ inclus dans le Promise.all
+      fetch(`${BASE_URL}/api/admin/admins`,               {headers: h}), // ✅ liste des admins
+      fetch(`${BASE_URL}/api/admin/moyens-transport`,     {headers: h}), // ✅ liste des moyens de transport
     ]);
     if (sR.ok)   setStats(await sR.json());
     if (mR.ok)   setChartMensuel(await mR.json());
@@ -258,6 +278,8 @@ function DashboardAdmin() {
     if (coR.ok)  setCoursiers(await coR.json());
     if (nR.ok)   setNotifs(await nR.json());
     if (eaR.ok)  setCoursiersEnAttente(await eaR.json()); // ✅ h est bien défini ici
+    if (adR.ok)  setAdmins(await adR.json());
+    if (tR.ok)   setMoyens(await tR.json());
   } catch(e) { console.error(e); }
   setLoading(false);
 };
@@ -326,6 +348,134 @@ function DashboardAdmin() {
       method:"POST", headers:getHeaders(),
     });
     setNotifs(prev=>prev.map(n=>({...n,lu:true})));
+  };
+
+  // ── Gestion des admins : ouvrir modal ───────────
+  const ouvrirAjoutAdmin = () => {
+    setAdminForm({ id:null, nom:"", prenom:"", email:"", telephone:"", password:"" });
+    setAdminErreur("");
+    setAdminModal("ajouter");
+  };
+  const ouvrirModifierAdmin = (a) => {
+    setAdminForm({ ...a, password:"" });
+    setAdminErreur("");
+    setAdminModal("modifier");
+  };
+
+  // ── Gestion des admins : créer / modifier ───────
+  const soumettreAdmin = async (e) => {
+    e.preventDefault();
+    setAdminErreur("");
+    setAdminEnvoi(true);
+    try {
+      const url = adminModal==="ajouter"
+        ? `${BASE_URL}/api/admin/admins`
+        : `${BASE_URL}/api/admin/admins/${adminForm.id}`;
+      const method = adminModal==="ajouter" ? "POST" : "PUT";
+      const payload = { ...adminForm };
+      if (adminModal==="modifier" && !payload.password) delete payload.password;
+
+      const res = await fetch(url, {
+        method,
+        headers: { ...getHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // Laravel renvoie souvent { message, errors: { champ: [messages] } }
+        // en cas d'erreur 422 — on affiche le premier message précis s'il existe.
+        const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+        setAdminErreur(premierMsg || data.message || "Une erreur est survenue.");
+        return;
+      }
+
+      setAdminModal(null);
+      showToast(adminModal==="ajouter" ? "Admin créé avec succès" : "Admin modifié avec succès");
+      fetch(`${BASE_URL}/api/admin/admins`, {headers:getHeaders()})
+        .then(r=>r.json()).then(d=>setAdmins(d)).catch(()=>{});
+    } catch (err) {
+      setAdminErreur("Erreur réseau, veuillez réessayer.");
+    } finally {
+      setAdminEnvoi(false);
+    }
+  };
+
+  // ── Gestion des admins : supprimer ──────────────
+  const supprimerAdmin = async (id, nom) => {
+    const res = await fetch(`${BASE_URL}/api/admin/admins/${id}`, {
+      method:"DELETE", headers:getHeaders(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setAdmins(prev=>prev.filter(a=>a.id!==id));
+      setConfirmDeleteAdmin(null);
+      showToast(`${nom} supprimé`);
+    } else {
+      showToast(data.message || "Suppression impossible", "error");
+      setConfirmDeleteAdmin(null);
+    }
+  };
+
+  // ── Gestion des moyens de transport : ouvrir modal
+  const ouvrirAjoutMoyen = () => {
+    setMoyenForm({ id:null, nom:"", icone:"", prix:"", duree_estimee:"" });
+    setMoyenErreur("");
+    setMoyenModal("ajouter");
+  };
+  const ouvrirModifierMoyen = (m) => {
+    setMoyenForm({ id:m.id, nom:m.nom, icone:m.icone||"", prix:m.prix, duree_estimee:m.duree_estimee||"" });
+    setMoyenErreur("");
+    setMoyenModal("modifier");
+  };
+
+  // ── Gestion des moyens de transport : créer / modifier
+  const soumettreMoyen = async (e) => {
+    e.preventDefault();
+    setMoyenErreur("");
+    setMoyenEnvoi(true);
+    try {
+      const url = moyenModal==="ajouter"
+        ? `${BASE_URL}/api/admin/moyens-transport`
+        : `${BASE_URL}/api/admin/moyens-transport/${moyenForm.id}`;
+      const method = moyenModal==="ajouter" ? "POST" : "PUT";
+
+      const res = await fetch(url, {
+        method,
+        headers: { ...getHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify(moyenForm),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+        setMoyenErreur(premierMsg || data.message || "Une erreur est survenue.");
+        return;
+      }
+
+      setMoyenModal(null);
+      showToast(moyenModal==="ajouter" ? "Moyen de transport créé avec succès" : "Moyen de transport modifié avec succès");
+      fetch(`${BASE_URL}/api/admin/moyens-transport`, {headers:getHeaders()})
+        .then(r=>r.json()).then(d=>setMoyens(d)).catch(()=>{});
+    } catch (err) {
+      setMoyenErreur("Erreur réseau, veuillez réessayer.");
+    } finally {
+      setMoyenEnvoi(false);
+    }
+  };
+
+  // ── Gestion des moyens de transport : supprimer ──
+  const supprimerMoyen = async (id, nom) => {
+    const res = await fetch(`${BASE_URL}/api/admin/moyens-transport/${id}`, {
+      method:"DELETE", headers:getHeaders(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setMoyens(prev=>prev.filter(m=>m.id!==id));
+      setConfirmDeleteMoyen(null);
+      showToast(`${nom} supprimé`);
+    } else {
+      showToast(data.message || "Suppression impossible", "error");
+      setConfirmDeleteMoyen(null);
+    }
   };
 
   // Styles originaux inchangés
@@ -1154,7 +1304,7 @@ function DashboardAdmin() {
               </div>
             )}
 
-            {/* ═══ PARAMÈTRES — inchangé ═══ */}
+            {/* ═══ PARAMÈTRES ═══ */}
             {onglet==="settings" && (
               <div>
                 <h4 style={{ color:"#FFD700",marginBottom:24,fontWeight:800,fontSize:20,
@@ -1165,22 +1315,63 @@ function DashboardAdmin() {
                   </div>
                   Paramètres
                 </h4>
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:20 }}>
-                  {[
-                    { title:"Tarif piéton",             val:"5 000 Ar",  color:"#10b981" },
-                    { title:"Tarif vélo",               val:"6 000 Ar",  color:"#3b82f6" },
-                    { title:"Tarif moto",               val:"8 000 Ar",  color:"#f59e0b" },
-                    { title:"Tarif voiture",            val:"12 000 Ar", color:"#ef4444" },
-                    { title:"Abonnement mensuel coursier",val:"10 000 Ar",color:"#FFD700" },
-                    { title:"Durée abonnement",         val:"30 jours",  color:"#8b5cf6" },
-                  ].map(s=>(
-                    <div key={s.title} style={{ ...card,display:"flex",justifyContent:"space-between",
-                      alignItems:"center",border:`1px solid ${s.color}22` }}>
-                      <span style={{ color:"#aaa",fontSize:14 }}>{s.title}</span>
-                      <span style={{ color:s.color,fontWeight:800,fontSize:16 }}>{s.val}</span>
+
+                {/* ═══ GESTION DES TARIFS PAR MOYEN DE DÉPLACEMENT — dynamique BDD ═══ */}
+                <div style={{ ...card,marginBottom:20 }}>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                      <MdAttachMoney style={{ fontSize:20 }}/> Tarifs par moyen de déplacement
                     </div>
-                  ))}
+                    <button onClick={ouvrirAjoutMoyen} title="Ajouter un moyen de transport"
+                      style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
+                      <MdAdd style={{ fontSize:16 }}/> Ajouter
+                    </button>
+                  </div>
+                  <p style={{ color:"#555",fontSize:12,marginTop:-10,marginBottom:16 }}>
+                    Ce tarif s'applique à tous les services (courses, livraison, JIRAMA, mentorat, documents), selon le moyen choisi par le client.
+                  </p>
+
+                  {moyens.length===0 ? (
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>Aucun moyen de transport enregistré.</p>
+                  ) : (
+                    <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }} className="stats-grid">
+                      {moyens.map(m=>(
+                        <div key={m.id} style={{ ...card,padding:16,display:"flex",justifyContent:"space-between",
+                          alignItems:"center",border:"1px solid #FFD70033" }}>
+                          <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                            {m.icone && <span style={{ fontSize:26 }}>{m.icone}</span>}
+                            <div>
+                              <div style={{ color:"#aaa",fontSize:13 }}>{m.nom}</div>
+                              <div style={{ color:"#FFD700",fontWeight:800,fontSize:17,marginTop:2 }}>
+                                {Number(m.prix).toLocaleString()} Ar
+                              </div>
+                              {m.duree_estimee ? (
+                                <div style={{ color:"#555",fontSize:11,marginTop:2,display:"flex",alignItems:"center",gap:4 }}>
+                                  <MdSchedule style={{ fontSize:12 }}/> ~{m.duree_estimee} min
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0 }}>
+                            <button onClick={()=>ouvrirModifierMoyen(m)} title="Modifier"
+                              style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
+                                color:"#3b82f6",borderRadius:10,width:32,height:32,cursor:"pointer",
+                                display:"flex",alignItems:"center",justifyContent:"center" }}>
+                              <MdEdit style={{ fontSize:15 }}/>
+                            </button>
+                            <button onClick={()=>setConfirmDeleteMoyen({id:m.id,nom:m.nom})} title="Supprimer"
+                              style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
+                                color:"#ef4444",borderRadius:10,width:32,height:32,cursor:"pointer",
+                                display:"flex",alignItems:"center",justifyContent:"center" }}>
+                              <MdDelete style={{ fontSize:15 }}/>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
                 <div style={{ ...card,marginTop:20 }}>
                   <div style={{ color:"#FFD700",fontWeight:700,marginBottom:16,fontSize:15 }}>Compte administrateur</div>
                   <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14 }}>
@@ -1192,6 +1383,56 @@ function DashboardAdmin() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* ═══ GESTION DES ADMINS ═══ */}
+                <div style={{ ...card,marginTop:20 }}>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                      <MdAdminPanelSettings style={{ fontSize:20 }}/> Gestion des admins
+                    </div>
+                    <button onClick={ouvrirAjoutAdmin} title="Ajouter un admin"
+                      style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
+                      <MdPersonAdd style={{ fontSize:16 }}/> Ajouter
+                    </button>
+                  </div>
+
+                  {admins.length===0 ? (
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>Aucun admin enregistré.</p>
+                  ) : (
+                    <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+                      {admins.map(a=>(
+                        <div key={a.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                          border:"1px solid #FFD70018",padding:"14px 18px",display:"flex",
+                          alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10 }}>
+                          <div>
+                            <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>
+                              {a.prenom} {a.nom}
+                              {a.est_moi && <span style={{ color:"#10b981",fontSize:11,marginLeft:8 }}>(vous)</span>}
+                            </div>
+                            <div style={{ color:"#888",fontSize:12,marginTop:2 }}>{a.email}</div>
+                            {a.telephone && <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{a.telephone}</div>}
+                          </div>
+                          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                            <button onClick={()=>ouvrirModifierAdmin(a)} title="Modifier"
+                              style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
+                                color:"#3b82f6",borderRadius:10,width:34,height:34,cursor:"pointer",
+                                display:"flex",alignItems:"center",justifyContent:"center" }}>
+                              <MdEdit style={{ fontSize:16 }}/>
+                            </button>
+                            {!a.est_moi && (
+                              <button onClick={()=>setConfirmDeleteAdmin({id:a.id,nom:`${a.prenom} ${a.nom}`})} title="Supprimer"
+                                style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
+                                  color:"#ef4444",borderRadius:10,width:34,height:34,cursor:"pointer",
+                                  display:"flex",alignItems:"center",justifyContent:"center" }}>
+                                <MdDelete style={{ fontSize:16 }}/>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1298,6 +1539,135 @@ function DashboardAdmin() {
               Annuler
             </button>
             <button onClick={()=>deleteUser(confirmDelete.id,confirmDelete.nom)}
+              style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
+                backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
+                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              <MdDelete style={{ fontSize:18 }}/> Supprimer
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* MODAL AJOUTER / MODIFIER ADMIN */}
+      {adminModal && (
+        <Modal onClose={()=>setAdminModal(null)}>
+          <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
+            display:"flex",alignItems:"center",gap:10 }}>
+            <MdAdminPanelSettings style={{ fontSize:22 }}/>
+            {adminModal==="ajouter" ? "Ajouter un admin" : "Modifier l'admin"}
+          </h5>
+          <form onSubmit={soumettreAdmin} style={{ display:"flex",flexDirection:"column",gap:14 }}>
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+              <input type="text" placeholder="Prénom" required style={inp}
+                value={adminForm.prenom}
+                onChange={e=>setAdminForm({...adminForm,prenom:e.target.value})}/>
+              <input type="text" placeholder="Nom" required style={inp}
+                value={adminForm.nom}
+                onChange={e=>setAdminForm({...adminForm,nom:e.target.value})}/>
+            </div>
+            <input type="email" placeholder="Email" required style={inp}
+              value={adminForm.email}
+              onChange={e=>setAdminForm({...adminForm,email:e.target.value})}/>
+            <input type="text" placeholder="Téléphone" style={inp}
+              value={adminForm.telephone||""}
+              onChange={e=>setAdminForm({...adminForm,telephone:e.target.value})}/>
+            <input type="password" style={inp}
+              placeholder={adminModal==="ajouter" ? "Mot de passe" : "Nouveau mot de passe (optionnel)"}
+              required={adminModal==="ajouter"}
+              value={adminForm.password}
+              onChange={e=>setAdminForm({...adminForm,password:e.target.value})}/>
+
+            {adminErreur && <p style={{ color:"#ef4444",fontSize:13,margin:0 }}>{adminErreur}</p>}
+
+            <button type="submit" disabled={adminEnvoi}
+              style={{ ...btnY,padding:"12px",fontSize:14,opacity:adminEnvoi?0.6:1,
+                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              {adminEnvoi ? "Envoi..." : (adminModal==="ajouter" ? "Créer l'admin" : "Enregistrer")}
+            </button>
+          </form>
+        </Modal>
+      )}
+
+      {/* MODAL CONFIRM DELETE ADMIN */}
+      {confirmDeleteAdmin && (
+        <Modal onClose={()=>setConfirmDeleteAdmin(null)}>
+          <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
+            <MdDelete style={{ fontSize:22 }}/> Confirmer la suppression
+          </h5>
+          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>
+            Supprimer l'admin <strong style={{ color:"#fff" }}>{confirmDeleteAdmin.nom}</strong> ?
+            Cette action est <span style={{ color:"#ef4444" }}>irréversible</span>.
+          </p>
+          <div style={{ display:"flex",gap:12 }}>
+            <button onClick={()=>setConfirmDeleteAdmin(null)}
+              style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
+                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>
+              Annuler
+            </button>
+            <button onClick={()=>supprimerAdmin(confirmDeleteAdmin.id,confirmDeleteAdmin.nom)}
+              style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
+                backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
+                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              <MdDelete style={{ fontSize:18 }}/> Supprimer
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* MODAL AJOUTER / MODIFIER MOYEN DE TRANSPORT */}
+      {moyenModal && (
+        <Modal onClose={()=>setMoyenModal(null)}>
+          <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
+            display:"flex",alignItems:"center",gap:10 }}>
+            <MdAttachMoney style={{ fontSize:22 }}/>
+            {moyenModal==="ajouter" ? "Ajouter un moyen de transport" : "Modifier le moyen de transport"}
+          </h5>
+          <form onSubmit={soumettreMoyen} style={{ display:"flex",flexDirection:"column",gap:14 }}>
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 3fr",gap:14 }}>
+              <input type="text" placeholder="🚶" maxLength={2} style={{ ...inp,textAlign:"center",fontSize:20 }}
+                value={moyenForm.icone}
+                onChange={e=>setMoyenForm({...moyenForm,icone:e.target.value})}/>
+              <input type="text" placeholder="Nom (ex: Piéton)" required style={inp}
+                value={moyenForm.nom}
+                onChange={e=>setMoyenForm({...moyenForm,nom:e.target.value})}/>
+            </div>
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+              <input type="number" placeholder="Prix (Ar)" required style={inp}
+                value={moyenForm.prix}
+                onChange={e=>setMoyenForm({...moyenForm,prix:e.target.value})}/>
+              <input type="number" placeholder="Durée estimée (min)" style={inp}
+                value={moyenForm.duree_estimee}
+                onChange={e=>setMoyenForm({...moyenForm,duree_estimee:e.target.value})}/>
+            </div>
+
+            {moyenErreur && <p style={{ color:"#ef4444",fontSize:13,margin:0 }}>{moyenErreur}</p>}
+
+            <button type="submit" disabled={moyenEnvoi}
+              style={{ ...btnY,padding:"12px",fontSize:14,opacity:moyenEnvoi?0.6:1,
+                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+              {moyenEnvoi ? "Envoi..." : (moyenModal==="ajouter" ? "Créer" : "Enregistrer")}
+            </button>
+          </form>
+        </Modal>
+      )}
+
+      {/* MODAL CONFIRM DELETE MOYEN DE TRANSPORT */}
+      {confirmDeleteMoyen && (
+        <Modal onClose={()=>setConfirmDeleteMoyen(null)}>
+          <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
+            <MdDelete style={{ fontSize:22 }}/> Confirmer la suppression
+          </h5>
+          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>
+            Supprimer le moyen de transport <strong style={{ color:"#fff" }}>{confirmDeleteMoyen.nom}</strong> ?
+            Cette action est <span style={{ color:"#ef4444" }}>irréversible</span>.
+          </p>
+          <div style={{ display:"flex",gap:12 }}>
+            <button onClick={()=>setConfirmDeleteMoyen(null)}
+              style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
+                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>
+              Annuler
+            </button>
+            <button onClick={()=>supprimerMoyen(confirmDeleteMoyen.id,confirmDeleteMoyen.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
