@@ -602,6 +602,334 @@ public function rejeterCoursier(Request $request, $id)
     {
         return response()->json(\App\Models\MoyenTransport::orderBy('prix')->get());
     }
+
+    // ══════════════════════════════════════════════
+    //  CRUD COMMANDES ADMIN
+    // ══════════════════════════════════════════════
+
+    public function toutesCommandes()
+    {
+        $this->checkAdmin();
+        return response()->json(
+            Commande::with(['client','coursier'])
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(fn($c) => [
+                    'id'             => $c->id,
+                    'service'        => $c->service,
+                    'detail'         => $c->detail,
+                    'adresse_pickup' => $c->adresse_pickup,
+                    'moyen'          => $c->moyen,
+                    'tarif'          => (float)$c->tarif,
+                    'statut'         => $c->statut,
+                    'client_id'      => $c->client_id,
+                    'coursier_id'    => $c->coursier_id,
+                    'client'         => $c->client   ? $c->client->prenom.' '.$c->client->nom   : '—',
+                    'coursier'       => $c->coursier ? $c->coursier->prenom.' '.$c->coursier->nom : null,
+                    'date'           => $c->created_at->format('Y-m-d'),
+                    'heure'          => $c->heure_publication,
+                ])
+        );
+    }
+
+    public function ajouterCommande(Request $request)
+    {
+        $this->checkAdmin();
+        $request->validate([
+            'client_id'         => 'required|exists:users,id',
+            'service'           => 'required|string|max:255',
+            'moyen'             => 'required|string|max:100',
+            'tarif'             => 'required|numeric|min:0',
+            'detail'            => 'nullable|string|max:500',
+            'adresse_pickup'    => 'nullable|string|max:255',
+            'heure_publication' => 'nullable|string',
+            'heure_debut'       => 'nullable|string',
+            'heure_livraison'   => 'nullable|string',
+            'statut'            => 'nullable|in:en_attente,negociable,accepte,refuse,termine',
+        ]);
+
+        $commande = Commande::create([
+            'client_id'         => $request->client_id,
+            'coursier_id'       => $request->coursier_id ?? null,
+            'service'           => $request->service,
+            'moyen'             => $request->moyen,
+            'tarif'             => $request->tarif,
+            'detail'            => $request->detail ?? '',
+            'adresse_pickup'    => $request->adresse_pickup ?? '',
+            'heure_publication' => $request->heure_publication ?? now()->format('H:i'),
+            'heure_debut'       => $request->heure_debut ?? now()->format('H:i'),
+            'heure_livraison'   => $request->heure_livraison ?? now()->addHour()->format('H:i'),
+            'statut'            => $request->statut ?? 'en_attente',
+            'accord_client'     => false,
+            'accord_coursier'   => false,
+        ]);
+
+        // Notifier le client
+        Notification::create([
+            'user_id'     => $commande->client_id,
+            'texte'       => "📦 Une commande a été créée pour vous par l'administrateur : {$commande->service}",
+            'type'        => 'info',
+            'commande_id' => $commande->id,
+        ]);
+
+        return response()->json(['message' => 'Commande créée', 'commande' => $commande], 201);
+    }
+
+    public function modifierCommande(Request $request, $id)
+    {
+        $this->checkAdmin();
+        $commande = Commande::findOrFail($id);
+
+        $request->validate([
+            'service'        => 'nullable|string|max:255',
+            'moyen'          => 'nullable|string|max:100',
+            'tarif'          => 'nullable|numeric|min:0',
+            'detail'         => 'nullable|string|max:500',
+            'adresse_pickup' => 'nullable|string|max:255',
+            'statut'         => 'nullable|in:en_attente,negociable,accepte,refuse,termine',
+            'coursier_id'    => 'nullable|exists:users,id',
+        ]);
+
+        $commande->fill($request->only([
+            'service','moyen','tarif','detail','adresse_pickup','statut','coursier_id'
+        ]));
+        $commande->save();
+
+        // Notifier client et coursier
+        $texte = "⚙️ Votre commande #{$commande->id} ({$commande->service}) a été modifiée par l'administrateur.";
+        Notification::create(['user_id' => $commande->client_id, 'texte' => $texte, 'type' => 'info', 'commande_id' => $commande->id]);
+        if ($commande->coursier_id) {
+            Notification::create(['user_id' => $commande->coursier_id, 'texte' => $texte, 'type' => 'info', 'commande_id' => $commande->id]);
+        }
+
+        return response()->json(['message' => 'Commande modifiée', 'commande' => $commande]);
+    }
+
+    public function supprimerCommande($id)
+    {
+        $this->checkAdmin();
+        $commande = Commande::findOrFail($id);
+
+        $texte = "🗑️ Votre commande #{$commande->id} ({$commande->service}) a été supprimée par l'administrateur.";
+        Notification::create(['user_id' => $commande->client_id, 'texte' => $texte, 'type' => 'warning', 'commande_id' => null]);
+        if ($commande->coursier_id) {
+            Notification::create(['user_id' => $commande->coursier_id, 'texte' => $texte, 'type' => 'warning', 'commande_id' => null]);
+        }
+
+        $commande->delete();
+        return response()->json(['message' => 'Commande supprimée']);
+    }
+     // ── Créer un client ──────────────────────────────
+    public function creerClient(Request $request)
+    {
+        $this->checkAdmin();
  
+        $request->validate([
+            'nom'       => 'required|string|max:100',
+            'prenom'    => 'required|string|max:100',
+            'email'     => 'required|email|unique:users,email',
+            'telephone' => 'nullable|string|max:20',
+            'adresse'   => 'nullable|string|max:255',
+            'cin'       => 'nullable|string|max:20',
+            'password'  => 'required|string|min:6',
+        ], [
+            'nom.required'      => 'Le nom est obligatoire.',
+            'prenom.required'   => 'Le prénom est obligatoire.',
+            'email.required'    => 'L\'email est obligatoire.',
+            'email.email'       => 'L\'email n\'est pas valide.',
+            'email.unique'      => 'Cet email est déjà utilisé par un autre compte.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
  
+        $client = new User();
+        $client->nom       = $request->nom;
+        $client->prenom    = $request->prenom;
+        $client->email     = $request->email;
+        $client->telephone = $request->telephone;
+        $client->adresse   = $request->adresse ?: 'Toliara, Madagascar'; // colonne NOT NULL
+        $client->password  = bcrypt($request->password);
+        $client->role      = 'client';
+        $client->statut    = 'actif';
+        $client->save();
+ 
+        return response()->json([
+            'message' => 'Client créé avec succès',
+            'user'    => $client,
+        ], 201);
+    }
+ 
+    // ── Modifier un client OU un coursier ─────────────
+    // (route déjà déclarée : PUT /admin/users/{id})
+    public function modifierUser(Request $request, $id)
+    {
+        $this->checkAdmin();
+        $user = User::findOrFail($id);
+ 
+        $request->validate([
+            'nom'       => 'required|string|max:100',
+            'prenom'    => 'required|string|max:100',
+            'email'     => 'required|email|unique:users,email,' . $id,
+            'telephone' => 'nullable|string|max:20',
+            'adresse'   => 'nullable|string|max:255',
+            'cin'       => 'nullable|string|max:20',
+            'password'  => 'nullable|string|min:6',
+        ], [
+            'nom.required'      => 'Le nom est obligatoire.',
+            'prenom.required'   => 'Le prénom est obligatoire.',
+            'email.required'    => 'L\'email est obligatoire.',
+            'email.email'       => 'L\'email n\'est pas valide.',
+            'email.unique'      => 'Cet email est déjà utilisé par un autre compte.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
+ 
+        $user->nom       = $request->nom;
+        $user->prenom    = $request->prenom;
+        $user->email     = $request->email;
+        $user->telephone = $request->telephone;
+        if ($request->filled('adresse')) $user->adresse = $request->adresse;
+        if ($request->filled('cin'))     $user->cin     = $request->cin;
+        if ($request->filled('password')) $user->password = bcrypt($request->password);
+        $user->save();
+ 
+        return response()->json([
+            'message' => 'Utilisateur modifié avec succès',
+            'user'    => $user,
+        ]);
+    }
+
+    // ── Historique / Classements ─────────────────────
+    public function historique(Request $request)
+    {
+        $this->checkAdmin();
+
+        $mois  = $request->query('mois');   // 1-12 ou vide = tous
+        $annee = $request->query('annee');  // ex: 2026 ou vide = toutes
+        $limM  = (int) ($request->query('limite_missions') ?: 10);
+        $limC  = (int) ($request->query('limite_clients') ?: 10);
+        $limA  = (int) ($request->query('limite_anciens') ?: 10);
+
+        // ── Top coursiers par missions terminées ─────
+        $qCoursiers = Commande::where('statut', 'termine')->whereNotNull('coursier_id');
+        if ($mois)  $qCoursiers->whereMonth('created_at', $mois);
+        if ($annee) $qCoursiers->whereYear('created_at', $annee);
+
+        $topCoursiers = $qCoursiers->selectRaw('coursier_id, COUNT(*) as nb_missions')
+            ->groupBy('coursier_id')
+            ->orderByDesc('nb_missions')
+            ->limit($limM)
+            ->get()
+            ->map(function ($row) use ($mois, $annee) {
+                $coursier = User::find($row->coursier_id);
+                if (!$coursier) return null;
+
+                $qServices = Commande::where('coursier_id', $row->coursier_id)->where('statut', 'termine');
+                if ($mois)  $qServices->whereMonth('created_at', $mois);
+                if ($annee) $qServices->whereYear('created_at', $annee);
+                $services = $qServices->distinct()->pluck('service')->filter()->values();
+
+                return [
+                    'id'          => $coursier->id,
+                    'nom'         => $coursier->nom,
+                    'prenom'      => $coursier->prenom,
+                    'note'        => round((float) $coursier->note, 1),
+                    'nb_missions' => (int) $row->nb_missions,
+                    'services'    => $services,
+                ];
+            })
+            ->filter()
+            ->values();
+
+        // ── Top clients par nombre de commandes ──────
+        $qClients = Commande::query();
+        if ($mois)  $qClients->whereMonth('created_at', $mois);
+        if ($annee) $qClients->whereYear('created_at', $annee);
+
+        $topClients = $qClients->selectRaw('client_id, COUNT(*) as nb_commandes')
+            ->groupBy('client_id')
+            ->orderByDesc('nb_commandes')
+            ->limit($limC)
+            ->get()
+            ->map(function ($row) use ($mois, $annee) {
+                $client = User::find($row->client_id);
+                if (!$client) return null;
+
+                $qServices = Commande::where('client_id', $row->client_id);
+                if ($mois)  $qServices->whereMonth('created_at', $mois);
+                if ($annee) $qServices->whereYear('created_at', $annee);
+                $services = $qServices->distinct()->pluck('service')->filter()->values();
+
+                return [
+                    'id'           => $client->id,
+                    'nom'          => $client->nom,
+                    'prenom'       => $client->prenom,
+                    'nb_commandes' => (int) $row->nb_commandes,
+                    'services'     => $services,
+                ];
+            })
+            ->filter()
+            ->values();
+
+        // ── Coursiers / Clients les plus anciens ─────
+        $anciensCoursiers = User::where('role', 'coursier')
+            ->orderBy('created_at', 'asc')
+            ->limit($limA)
+            ->get(['id', 'nom', 'prenom', 'created_at']);
+
+        $anciensClients = User::where('role', 'client')
+            ->orderBy('created_at', 'asc')
+            ->limit($limA)
+            ->get(['id', 'nom', 'prenom', 'created_at']);
+
+        return response()->json([
+            'top_coursiers'     => $topCoursiers,
+            'top_clients'       => $topClients,
+            'anciens_coursiers' => $anciensCoursiers,
+            'anciens_clients'   => $anciensClients,
+        ]);
+    }
+
+    // ── Créer un coursier (ajout direct par l'admin) ──
+    public function creerCoursier(Request $request)
+    {
+        $this->checkAdmin();
+
+        $request->validate([
+            'nom'       => 'required|string|max:100',
+            'prenom'    => 'required|string|max:100',
+            'email'     => 'required|email|unique:users,email',
+            'telephone' => 'nullable|string|max:20',
+            'adresse'   => 'nullable|string|max:255',
+            'cin'       => 'nullable|string|max:20',
+            'password'  => 'required|string|min:6',
+        ], [
+            'nom.required'      => 'Le nom est obligatoire.',
+            'prenom.required'   => 'Le prénom est obligatoire.',
+            'email.required'    => 'L\'email est obligatoire.',
+            'email.email'       => 'L\'email n\'est pas valide.',
+            'email.unique'      => 'Cet email est déjà utilisé par un autre compte.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
+
+        $coursier = new User();
+        $coursier->nom       = $request->nom;
+        $coursier->prenom    = $request->prenom;
+        $coursier->email     = $request->email;
+        $coursier->telephone = $request->telephone;
+        $coursier->adresse   = $request->adresse ?: 'Toliara, Madagascar'; // colonne NOT NULL
+        $coursier->cin       = $request->cin;
+        $coursier->password  = bcrypt($request->password);
+        $coursier->role      = 'coursier';
+        // ✅ Ajouté directement par l'admin -> actif immédiatement,
+        // pas besoin de repasser par la vérification CIN/MVola.
+        $coursier->statut    = 'actif';
+        $coursier->save();
+
+        return response()->json([
+            'message' => 'Coursier créé avec succès',
+            'user'    => $coursier,
+        ], 201);
+    }
+    
 }

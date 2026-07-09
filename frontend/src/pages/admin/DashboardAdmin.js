@@ -7,6 +7,7 @@ import {
   MdAttachMoney, MdSchedule, MdSearch, MdAdminPanelSettings,
   MdWarning, MdBarChart, MdPieChart, MdShowChart, MdDelete, MdDoneAll,MdClose,
   MdEdit, MdPersonAdd, MdAdd,
+  MdHistory, MdEmojiEvents, MdMilitaryTech, MdWorkHistory, MdFilterList,
 } from "react-icons/md";
 
 const BASE_URL = "http://localhost:8000";
@@ -134,6 +135,7 @@ function SidebarContent({ onglet, setOnglet, stats }) {
     { id:"coursiers", Icon:MdDeliveryDining, label:"Coursiers",         badge:stats.coursiers_inactifs },
     { id:"commandes", Icon:MdListAlt,        label:"Commandes",         badge:0                        },
     { id:"paiements", Icon:MdAttachMoney,    label:"Abonnements",       badge:0                        },
+    { id:"historique",Icon:MdHistory,        label:"Historique",        badge:0                        },
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
@@ -244,6 +246,62 @@ function DashboardAdmin() {
   const [moyenErreur, setMoyenErreur]     = useState("");
   const [confirmDeleteMoyen, setConfirmDeleteMoyen] = useState(null);
 
+  // ── CRUD Commandes ──────────────────────────────
+  const [pageCommande, setPageCommande]   = useState(1);
+  const [cmdModal, setCmdModal]           = useState(null);
+  const [cmdForm, setCmdForm]             = useState({ id:null, client_id:"", service:"", moyen:"", tarif:"", detail:"", adresse_pickup:"", statut:"en_attente", coursier_id:"" });
+  const [cmdEnvoi, setCmdEnvoi]           = useState(false);
+  const [cmdErreur, setCmdErreur]         = useState("");
+  const [confirmDeleteCmd, setConfirmDeleteCmd] = useState(null);
+
+  // ── CRUD Clients + pagination ───────────────────
+  const [pageClient, setPageClient]         = useState(1);
+  const [pageCoursier, setPageCoursier]     = useState(1);
+  const [clientModal, setClientModal]     = useState(null); // "ajouter" | "modifier" | null
+  const [clientForm, setClientForm]       = useState({ id:null, nom:"", prenom:"", email:"", telephone:"", adresse:"", password:"" });
+  const [clientEnvoi, setClientEnvoi]     = useState(false);
+  const [clientErreur, setClientErreur]   = useState("");
+
+  // ── CRUD Coursiers ────────────────────────────────
+  const [coursierModal, setCoursierModal]   = useState(null); // "ajouter" | "modifier" | null
+  const [coursierForm, setCoursierForm]     = useState({ id:null, nom:"", prenom:"", email:"", telephone:"", adresse:"", cin:"", password:"" });
+  const [coursierEnvoi, setCoursierEnvoi]   = useState(false);
+  const [coursierErreur, setCoursierErreur] = useState("");
+
+  // ── Historique / Classements ─────────────────────
+  const [histLoading, setHistLoading]       = useState(false);
+  const [topCoursiers, setTopCoursiers]     = useState([]);
+  const [topClients, setTopClients]         = useState([]);
+  const [anciensCoursiers, setAnciensCoursiers] = useState([]);
+  const [anciensClients, setAnciensClients] = useState([]);
+  const [histMois, setHistMois]             = useState("");   // "" = tous
+  const [histAnnee, setHistAnnee]           = useState("");   // "" = toutes
+  const [limMissions, setLimMissions]       = useState(10);
+  const [limClientsTop, setLimClientsTop]   = useState(10);
+  const [limAnciens, setLimAnciens]         = useState(10);
+
+  const fetchHistorique = async () => {
+    setHistLoading(true);
+    try {
+      const params = new URLSearchParams({
+        limite_missions: limMissions,
+        limite_clients:  limClientsTop,
+        limite_anciens:  limAnciens,
+      });
+      if (histMois)  params.append("mois", histMois);
+      if (histAnnee) params.append("annee", histAnnee);
+      const res = await fetch(`${BASE_URL}/api/admin/historique?${params.toString()}`, { headers: getHeaders() });
+      if (res.ok) {
+        const d = await res.json();
+        setTopCoursiers(d.top_coursiers || []);
+        setTopClients(d.top_clients || []);
+        setAnciensCoursiers(d.anciens_coursiers || []);
+        setAnciensClients(d.anciens_clients || []);
+      }
+    } catch (e) { console.error(e); }
+    setHistLoading(false);
+  };
+
   const getHeaders = () => ({
     "Authorization": `Bearer ${localStorage.getItem("token")}`,
     "Accept": "application/json",
@@ -297,6 +355,11 @@ function DashboardAdmin() {
     }, 2000);
     return () => clearInterval(iv);
   }, []);
+
+  // ── Recharger l'historique à l'ouverture de l'onglet ou changement de filtre ──
+  useEffect(() => {
+    if (onglet === "historique") fetchHistorique();
+  }, [onglet, histMois, histAnnee, limMissions, limClientsTop, limAnciens]);
 
   const nbNonLus = notifs.filter(n=>!n.lu).length;
 
@@ -475,6 +538,131 @@ function DashboardAdmin() {
     } else {
       showToast(data.message || "Suppression impossible", "error");
       setConfirmDeleteMoyen(null);
+    }
+  };
+
+  // ── Handlers CRUD Commandes ────────────────────
+  const sauvegarderCommande = async () => {
+    if (!cmdForm.client_id || !cmdForm.service || !cmdForm.moyen || !cmdForm.tarif) {
+      setCmdErreur("Client, service, moyen et tarif sont obligatoires."); return;
+    }
+    setCmdEnvoi(true); setCmdErreur("");
+    const url = cmdModal === "modifier"
+      ? `${BASE_URL}/api/admin/commandes/${cmdForm.id}`
+      : `${BASE_URL}/api/admin/commandes`;
+    const method = cmdModal === "modifier" ? "PUT" : "POST";
+    try {
+      const res = await fetch(url, {
+        method, headers:{ ...getHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify(cmdForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (cmdModal === "ajouter") {
+          const newCmd = {
+            ...data.commande,
+            client: clients.find(c=>c.id===parseInt(cmdForm.client_id))
+              ? `${clients.find(c=>c.id===parseInt(cmdForm.client_id)).prenom} ${clients.find(c=>c.id===parseInt(cmdForm.client_id)).nom}`
+              : `Client #${cmdForm.client_id}`,
+            coursier: null, date: new Date().toISOString().slice(0,10),
+          };
+          setCommandes(prev=>[newCmd,...prev]);
+        } else {
+          setCommandes(prev=>prev.map(c=>c.id===cmdForm.id
+            ? { ...c, ...cmdForm,
+                client: clients.find(cl=>cl.id===parseInt(cmdForm.client_id))
+                  ? `${clients.find(cl=>cl.id===parseInt(cmdForm.client_id)).prenom} ${clients.find(cl=>cl.id===parseInt(cmdForm.client_id)).nom}`
+                  : c.client }
+            : c));
+        }
+        setCmdModal(null);
+        showToast(cmdModal==="ajouter" ? "Commande créée !" : "Commande modifiée !");
+      } else {
+        setCmdErreur(data.message || "Erreur lors de l'opération");
+      }
+    } catch { setCmdErreur("Erreur réseau"); }
+    setCmdEnvoi(false);
+  };
+
+  // ── Handlers CRUD Clients ────────────────────────
+  const sauvegarderClient = async () => {
+    if (!clientForm.nom || !clientForm.prenom || !clientForm.email ||
+        (clientModal==="ajouter" && !clientForm.password)) {
+      setClientErreur("Nom, prénom, email" + (clientModal==="ajouter" ? " et mot de passe" : "") + " sont obligatoires.");
+      return;
+    }
+    setClientEnvoi(true); setClientErreur("");
+    const url = clientModal === "modifier"
+      ? `${BASE_URL}/api/admin/users/${clientForm.id}`
+      : `${BASE_URL}/api/admin/clients`;
+    const method = clientModal === "modifier" ? "PUT" : "POST";
+    try {
+      const res = await fetch(url, {
+        method, headers:{ ...getHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify(clientForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (clientModal === "ajouter") {
+          setClients(prev=>[{ ...data.user, commandes:0 }, ...prev]);
+        } else {
+          setClients(prev=>prev.map(c=>c.id===clientForm.id ? { ...c, ...clientForm } : c));
+        }
+        setClientModal(null);
+        showToast(clientModal==="ajouter" ? "Client créé !" : "Client modifié !");
+      } else {
+        const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+        setClientErreur(premierMsg || data.message || "Erreur lors de l'opération");
+      }
+    } catch { setClientErreur("Erreur réseau"); }
+    setClientEnvoi(false);
+  };
+
+  // ── Handlers CRUD Coursiers ──────────────────────
+  const sauvegarderCoursier = async () => {
+    if (!coursierForm.nom || !coursierForm.prenom || !coursierForm.email ||
+        (coursierModal==="ajouter" && !coursierForm.password)) {
+      setCoursierErreur("Nom, prénom, email" + (coursierModal==="ajouter" ? " et mot de passe" : "") + " sont obligatoires.");
+      return;
+    }
+    setCoursierEnvoi(true); setCoursierErreur("");
+    const url = coursierModal === "modifier"
+      ? `${BASE_URL}/api/admin/users/${coursierForm.id}`
+      : `${BASE_URL}/api/admin/coursiers`;
+    const method = coursierModal === "modifier" ? "PUT" : "POST";
+    try {
+      const res = await fetch(url, {
+        method, headers:{ ...getHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify(coursierForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (coursierModal === "ajouter") {
+          setCoursiers(prev=>[{ ...data.user, missions:0 }, ...prev]);
+        } else {
+          setCoursiers(prev=>prev.map(c=>c.id===coursierForm.id ? { ...c, ...coursierForm } : c));
+        }
+        setCoursierModal(null);
+        showToast(coursierModal==="ajouter" ? "Coursier créé !" : "Coursier modifié !");
+      } else {
+        const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+        setCoursierErreur(premierMsg || data.message || "Erreur lors de l'opération");
+      }
+    } catch { setCoursierErreur("Erreur réseau"); }
+    setCoursierEnvoi(false);
+  };
+
+  const supprimerCommande = async (id) => {
+    const res = await fetch(`${BASE_URL}/api/admin/commandes/${id}`, {
+      method:"DELETE", headers:getHeaders(),
+    });
+    if (res.ok) {
+      setCommandes(prev=>prev.filter(c=>c.id!==id));
+      setConfirmDeleteCmd(null);
+      showToast("Commande supprimée");
+    } else {
+      showToast("Suppression impossible","error");
+      setConfirmDeleteCmd(null);
     }
   };
 
@@ -943,6 +1131,13 @@ function DashboardAdmin() {
                     <MdPeople style={{ color:"#3b82f6",fontSize:22 }}/>
                   </div>
                   Gestion des clients
+                  {/* ✅ Bouton Ajouter */}
+                  <button onClick={()=>{ setClientModal("ajouter"); setClientForm({id:null,nom:"",prenom:"",email:"",telephone:"",adresse:"",password:""}); setClientErreur(""); }}
+                    style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
+                      border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
+                      display:"flex",alignItems:"center",gap:6 }}>
+                    <MdAdd style={{ fontSize:18 }}/> Ajouter
+                  </button>
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{clients.length} client(s) enregistré(s)</p>
 
@@ -961,6 +1156,13 @@ function DashboardAdmin() {
                   </select>
                 </div>
 
+                {(() => {
+                  const CLIENT_PAR_PAGE = 5;
+                  const clientsFiltres = clients.filter(c=>(filtreStatut==="tous"||c.statut===filtreStatut)&&
+                    (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase()));
+                  const totalPagesClient = Math.ceil(clientsFiltres.length / CLIENT_PAR_PAGE);
+                  const clientsPageData = clientsFiltres.slice((pageClient-1)*CLIENT_PAR_PAGE, pageClient*CLIENT_PAR_PAGE);
+                  return (
                 <div style={{ overflowX:"auto" }}>
                   <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
@@ -972,10 +1174,7 @@ function DashboardAdmin() {
                       </tr>
                     </thead>
                     <tbody>
-                      {clients
-                        .filter(c=>(filtreStatut==="tous"||c.statut===filtreStatut)&&
-                          (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase()))
-                        .map(c=>(
+                      {clientsPageData.map(c=>(
                         <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
@@ -1006,6 +1205,17 @@ function DashboardAdmin() {
                                   color:"#3b82f6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdVisibility style={{ fontSize:15 }}/>
                               </button>
+                              {/* ✅ Modifier */}
+                              <button onClick={()=>{
+                                setClientModal("modifier");
+                                setClientForm({ id:c.id, nom:c.nom||"", prenom:c.prenom||"", email:c.email||"",
+                                  telephone:c.telephone||"", adresse:c.adresse||"", password:"" });
+                                setClientErreur("");
+                              }} title="Modifier"
+                                style={{ backgroundColor:"#8b5cf618",border:"1px solid #8b5cf633",
+                                  color:"#8b5cf6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
+                                <MdEdit style={{ fontSize:15 }}/>
+                              </button>
                               <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
                                 title={c.statut==="actif"?"Désactiver":"Activer"}
                                 style={{ backgroundColor:c.statut==="actif"?"#ef444418":"#10b98118",
@@ -1026,16 +1236,51 @@ function DashboardAdmin() {
                       ))}
                     </tbody>
                   </table>
-                  {clients.filter(c=>(filtreStatut==="tous"||c.statut===filtreStatut)&&
-                    (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase())).length===0 && (
+                  {clientsFiltres.length===0 && (
                     <div style={{ textAlign:"center",padding:32,color:"#555" }}>Aucun client trouvé</div>
                   )}
+
+                  {/* Pagination — 5 par page, même style que Commandes */}
+                  {totalPagesClient > 1 && (
+                    <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
+                      <button onClick={()=>setPageClient(p=>Math.max(1,p-1))} disabled={pageClient===1}
+                        style={{ background:pageClient===1?"#1a1a35":"#FFD70022",color:pageClient===1?"#444":"#FFD700",
+                          border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageClient===1?"not-allowed":"pointer",fontWeight:700 }}>
+                        ‹
+                      </button>
+                      {Array.from({length:totalPagesClient},(_,i)=>i+1).map(p=>(
+                        <button key={p} onClick={()=>setPageClient(p)}
+                          style={{ background:p===pageClient?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
+                            color:p===pageClient?"#000":"#aaa",border:"1px solid #FFD70033",
+                            borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
+                          {p}
+                        </button>
+                      ))}
+                      <button onClick={()=>setPageClient(p=>Math.min(totalPagesClient,p+1))} disabled={pageClient===totalPagesClient}
+                        style={{ background:pageClient===totalPagesClient?"#1a1a35":"#FFD70022",color:pageClient===totalPagesClient?"#444":"#FFD700",
+                          border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageClient===totalPagesClient?"not-allowed":"pointer",fontWeight:700 }}>
+                        ›
+                      </button>
+                    </div>
+                  )}
                 </div>
+                  );
+                })()}
               </div>
             )}
 
             {/* ═══ COURSIERS — données BDD ═══ */}
-            {onglet==="coursiers" && !loading && (
+            {onglet==="coursiers" && !loading && (() => {
+              const COURSIER_PAR_PAGE = 5;
+              const coursiersFiltres = coursiers.filter(c =>
+                (filtreStatut==="tous" || c.statut===filtreStatut) &&
+                (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase())
+              );
+              const totalPagesCoursier = Math.ceil(coursiersFiltres.length / COURSIER_PAR_PAGE);
+              const coursierPageData = coursiersFiltres.slice(
+                (pageCoursier-1)*COURSIER_PAR_PAGE, pageCoursier*COURSIER_PAR_PAGE
+              );
+              return (
               <div>
                 <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
@@ -1044,9 +1289,17 @@ function DashboardAdmin() {
                     <MdDeliveryDining style={{ color:"#FFD700",fontSize:22 }}/>
                   </div>
                   Gestion des coursiers
+                  {/* ✅ Bouton Ajouter */}
+                  <button onClick={()=>{ setCoursierModal("ajouter"); setCoursierForm({id:null,nom:"",prenom:"",email:"",telephone:"",adresse:"",cin:"",password:""}); setCoursierErreur(""); }}
+                    style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
+                      border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
+                      display:"flex",alignItems:"center",gap:6 }}>
+                    <MdAdd style={{ fontSize:18 }}/> Ajouter
+                  </button>
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{coursiers.length} coursier(s) enregistré(s)</p>
 
+                {/* Barre recherche + filtre */}
                 <div style={{ display:"flex",gap:12,marginBottom:20,flexWrap:"wrap" }}>
                   <div style={{ flex:1,position:"relative",minWidth:200 }}>
                     <MdSearch style={{ position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"#555",fontSize:18 }}/>
@@ -1062,83 +1315,123 @@ function DashboardAdmin() {
                   </select>
                 </div>
 
-                {coursiers
-                  .filter(c=>(filtreStatut==="tous"||c.statut===filtreStatut)&&
-                    (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase()))
-                  .map(c=>(
-                  <div key={c.id} style={{ ...card,marginBottom:16,
-                    borderLeft:`4px solid ${c.statut==="actif"?"#10b981":"#ef4444"}` }}
-                    onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"}
-                    onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                    <div style={{ display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-                      <div style={{ display:"flex",alignItems:"center",gap:16,flex:1 }}>
-                        <div style={{ width:52,height:52,borderRadius:"50%",
-                          background:"linear-gradient(135deg,#FFD700,#ff8c00)",
-                          display:"flex",alignItems:"center",justifyContent:"center",
-                          fontWeight:800,color:"#000",fontSize:18,flexShrink:0 }}>
-                          {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
-                        </div>
-                        <div>
-                          <div style={{ color:"#fff",fontWeight:800,fontSize:16 }}>{c.prenom} {c.nom}</div>
-                          <div style={{ display:"flex",flexWrap:"wrap",gap:10,marginTop:4 }}>
-                            <span style={{ color:"#888",fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
-                              <MdEmail style={{ color:"#FFD700" }}/> {c.email}
-                            </span>
-                            <span style={{ color:"#888",fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
-                              <MdPhone style={{ color:"#FFD700" }}/> {c.telephone}
-                            </span>
-                            <span style={{ color:"#888",fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
-                              <MdBadge style={{ color:"#FFD700" }}/> CIN: {c.cin||"—"}
-                            </span>
-                            {c.note>0 && (
-                              <span style={{ color:"#888",fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
-                                <MdStar style={{ color:"#FFD700" }}/> {c.note}/5
+                {/* Tableau */}
+                <div style={{ overflowX:"auto" }}>
+                  <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                    <thead>
+                      <tr style={{ borderBottom:"1px solid #FFD70018" }}>
+                        {["Nom","Téléphone","Missions","Note","Statut","Actions"].map(h=>(
+                          <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
+                            textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coursierPageData.map(c=>(
+                        <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
+                          onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
+                          onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
+                          <td style={{ padding:"12px 14px" }}>
+                            <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+                              <div style={{ width:34,height:34,borderRadius:"50%",
+                                background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                                display:"flex",alignItems:"center",justifyContent:"center",
+                                fontWeight:800,color:"#000",fontSize:13,flexShrink:0 }}>
+                                {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
+                              </div>
+                              <div>
+                                <div style={{ color:"#fff",fontWeight:600 }}>{c.prenom} {c.nom}</div>
+                                <div style={{ color:"#555",fontSize:11 }}>{c.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
+                          <td style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
+                          <td style={{ padding:"12px 14px" }}>
+                            {c.note > 0 ? (
+                              <span style={{ display:"flex",alignItems:"center",gap:4,color:"#FFD700",fontWeight:700 }}>
+                                <MdStar style={{ fontSize:14 }}/> {c.note}/5
                               </span>
-                            )}
-                          </div>
-                          <div style={{ display:"flex",gap:8,marginTop:8,flexWrap:"wrap",alignItems:"center" }}>
-                            <StatutBadge statut={c.statut}/>
-                            <span style={{ color:"#888",fontSize:12 }}>{c.missions} missions</span>
-                            <span style={{ color:"#555",fontSize:12 }}>Inscrit: {c.created_at}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0 }}>
-                        <button onClick={()=>setDetailUser({...c,type:"coursier"})}
-                          title="Voir"
-                          style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
-                            color:"#3b82f6",borderRadius:8,padding:"8px 12px",cursor:"pointer",
-                            display:"flex",alignItems:"center",gap:6,fontWeight:700,fontSize:12 }}>
-                          <MdVisibility style={{ fontSize:15 }}/> Voir
+                            ) : <span style={{ color:"#555" }}>—</span>}
+                          </td>
+                          <td style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
+                          <td style={{ padding:"12px 14px" }}>
+                            <div style={{ display:"flex",gap:6 }}>
+                              <button onClick={()=>setDetailUser({...c,type:"coursier"})}
+                                title="Voir"
+                                style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
+                                  color:"#3b82f6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
+                                <MdVisibility style={{ fontSize:15 }}/>
+                              </button>
+                              {/* ✅ Modifier */}
+                              <button onClick={()=>{
+                                setCoursierModal("modifier");
+                                setCoursierForm({ id:c.id, nom:c.nom||"", prenom:c.prenom||"", email:c.email||"",
+                                  telephone:c.telephone||"", adresse:c.adresse||"", cin:c.cin||"", password:"" });
+                                setCoursierErreur("");
+                              }} title="Modifier"
+                                style={{ backgroundColor:"#8b5cf618",border:"1px solid #8b5cf633",
+                                  color:"#8b5cf6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
+                                <MdEdit style={{ fontSize:15 }}/>
+                              </button>
+                              <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
+                                title={c.statut==="actif"?"Désactiver":"Activer"}
+                                style={{ backgroundColor:c.statut==="actif"?"#ef444418":"#10b98118",
+                                  border:`1px solid ${c.statut==="actif"?"#ef444433":"#10b98133"}`,
+                                  color:c.statut==="actif"?"#ef4444":"#10b981",
+                                  borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
+                                {c.statut==="actif"?<MdBlock style={{ fontSize:15 }}/>:<MdCheckCircle style={{ fontSize:15 }}/>}
+                              </button>
+                              <button onClick={()=>setConfirmDelete({id:c.id,nom:`${c.prenom} ${c.nom}`})}
+                                title="Supprimer"
+                                style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
+                                  color:"#ef4444",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
+                                <MdDelete style={{ fontSize:15 }}/>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {coursiersFiltres.length===0 && (
+                    <div style={{ textAlign:"center",padding:32,color:"#555" }}>Aucun coursier trouvé</div>
+                  )}
+
+                  {/* Pagination — 5 par page */}
+                  {totalPagesCoursier > 1 && (
+                    <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
+                      <button onClick={()=>setPageCoursier(p=>Math.max(1,p-1))} disabled={pageCoursier===1}
+                        style={{ background:pageCoursier===1?"#1a1a35":"#FFD70022",color:pageCoursier===1?"#444":"#FFD700",
+                          border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCoursier===1?"not-allowed":"pointer",fontWeight:700 }}>
+                        ‹
+                      </button>
+                      {Array.from({length:totalPagesCoursier},(_,i)=>i+1).map(p=>(
+                        <button key={p} onClick={()=>setPageCoursier(p)}
+                          style={{ background:p===pageCoursier?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
+                            color:p===pageCoursier?"#000":"#aaa",border:"1px solid #FFD70033",
+                            borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
+                          {p}
                         </button>
-                        <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                          style={{ backgroundColor:c.statut==="actif"?"#ef444418":"#10b98118",
-                            border:`1px solid ${c.statut==="actif"?"#ef444433":"#10b98133"}`,
-                            color:c.statut==="actif"?"#ef4444":"#10b981",
-                            borderRadius:8,padding:"8px 12px",cursor:"pointer",fontWeight:700,fontSize:12,
-                            display:"flex",alignItems:"center",gap:6 }}>
-                          {c.statut==="actif"?<><MdBlock style={{ fontSize:15 }}/> Désactiver</>:<><MdCheckCircle style={{ fontSize:15 }}/> Activer</>}
-                        </button>
-                        <button onClick={()=>setConfirmDelete({id:c.id,nom:`${c.prenom} ${c.nom}`})}
-                          title="Supprimer"
-                          style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
-                            color:"#ef4444",borderRadius:8,padding:"8px 12px",cursor:"pointer",
-                            display:"flex",alignItems:"center",gap:6,fontWeight:700,fontSize:12 }}>
-                          <MdDelete style={{ fontSize:15 }}/> Supprimer
-                        </button>
-                      </div>
+                      ))}
+                      <button onClick={()=>setPageCoursier(p=>Math.min(totalPagesCoursier,p+1))} disabled={pageCoursier===totalPagesCoursier}
+                        style={{ background:pageCoursier===totalPagesCoursier?"#1a1a35":"#FFD70022",color:pageCoursier===totalPagesCoursier?"#444":"#FFD700",
+                          border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCoursier===totalPagesCoursier?"not-allowed":"pointer",fontWeight:700 }}>
+                        ›
+                      </button>
                     </div>
-                  </div>
-                ))}
-                {coursiers.filter(c=>(filtreStatut==="tous"||c.statut===filtreStatut)&&
-                  (c.nom+c.prenom+c.email).toLowerCase().includes(search.toLowerCase())).length===0 && (
-                  <div style={{ ...card,textAlign:"center",color:"#555",padding:48 }}>Aucun coursier trouvé</div>
-                )}
+                  )}
+                </div>
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══ COMMANDES — données BDD ═══ */}
-            {onglet==="commandes" && !loading && (
+            {onglet==="commandes" && !loading && (() => {
+              const CMD_PAR_PAGE = 5;
+              const totalPagesCmd = Math.ceil(commandes.length / CMD_PAR_PAGE);
+              const cmdPage = commandes.slice((pageCommande-1)*CMD_PAR_PAGE, pageCommande*CMD_PAR_PAGE);
+              return (
               <div>
                 <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
@@ -1147,10 +1440,17 @@ function DashboardAdmin() {
                     <MdListAlt style={{ color:"#10b981",fontSize:22 }}/>
                   </div>
                   Toutes les commandes
+                  {/* ✅ Bouton Ajouter */}
+                  <button onClick={()=>{ setCmdModal("ajouter"); setCmdForm({id:null,client_id:"",service:"",moyen:"",tarif:"",detail:"",adresse_pickup:"",statut:"en_attente",coursier_id:""}); setCmdErreur(""); }}
+                    style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
+                      border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
+                      display:"flex",alignItems:"center",gap:6 }}>
+                    <MdAdd style={{ fontSize:18 }}/> Ajouter
+                  </button>
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{commandes.length} commande(s) au total</p>
 
-                {/* 3 box BDD */}
+                {/* 3 box statuts */}
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:14,marginBottom:24 }}>
                   {[
                     { label:"En attente", val:commandes.filter(c=>c.statut==="en_attente").length, color:"#f59e0b" },
@@ -1166,18 +1466,19 @@ function DashboardAdmin() {
                   ))}
                 </div>
 
+                {/* Tableau avec pagination */}
                 <div style={{ overflowX:"auto" }}>
                   <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
-                        {["#","Service","Client","Coursier","Tarif","Statut","Date"].map(h=>(
+                        {["#","Service","Client","Coursier","Tarif","Statut","Date","Actions"].map(h=>(
                           <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
                             textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {commandes.map(cmd=>(
+                      {cmdPage.map(cmd=>(
                         <tr key={cmd.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
@@ -1188,16 +1489,67 @@ function DashboardAdmin() {
                           <td style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
                           <td style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
                           <td style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
+                          <td style={{ padding:"12px 14px" }}>
+                            <div style={{ display:"flex",gap:6 }}>
+                              {/* Modifier */}
+                              <button onClick={()=>{
+                                setCmdModal("modifier");
+                                setCmdForm({ id:cmd.id, client_id:cmd.client_id||"", service:cmd.service||"",
+                                  moyen:cmd.moyen||"", tarif:cmd.tarif||"", detail:cmd.detail||"",
+                                  adresse_pickup:cmd.adresse_pickup||"", statut:cmd.statut||"en_attente",
+                                  coursier_id:cmd.coursier_id||"" });
+                                setCmdErreur("");
+                              }} title="Modifier"
+                                style={{ background:"#3b82f618",border:"1px solid #3b82f633",
+                                  color:"#3b82f6",borderRadius:6,padding:"5px 8px",cursor:"pointer",
+                                  display:"flex",alignItems:"center" }}>
+                                <MdEdit style={{ fontSize:15 }}/>
+                              </button>
+                              {/* Supprimer */}
+                              <button onClick={()=>setConfirmDeleteCmd(cmd.id)} title="Supprimer"
+                                style={{ background:"#ef444418",border:"1px solid #ef444433",
+                                  color:"#ef6666",borderRadius:6,padding:"5px 8px",cursor:"pointer",
+                                  display:"flex",alignItems:"center" }}>
+                                <MdDelete style={{ fontSize:15 }}/>
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                       {commandes.length===0 && (
-                        <tr><td colSpan={7} style={{ padding:24,textAlign:"center",color:"#555" }}>Aucune commande</td></tr>
+                        <tr><td colSpan={8} style={{ padding:24,textAlign:"center",color:"#555" }}>Aucune commande</td></tr>
                       )}
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination */}
+                {totalPagesCmd > 1 && (
+                  <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
+                    <button onClick={()=>setPageCommande(p=>Math.max(1,p-1))} disabled={pageCommande===1}
+                      style={{ background:pageCommande===1?"#1a1a35":"#FFD70022",color:pageCommande===1?"#444":"#FFD700",
+                        border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCommande===1?"not-allowed":"pointer",fontWeight:700 }}>
+                      ‹
+                    </button>
+                    {Array.from({length:totalPagesCmd},(_,i)=>i+1).map(p=>(
+                      <button key={p} onClick={()=>setPageCommande(p)}
+                        style={{ background:p===pageCommande?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
+                          color:p===pageCommande?"#000":"#aaa",border:"1px solid #FFD70033",
+                          borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
+                        {p}
+                      </button>
+                    ))}
+                    <button onClick={()=>setPageCommande(p=>Math.min(totalPagesCmd,p+1))} disabled={pageCommande===totalPagesCmd}
+                      style={{ background:pageCommande===totalPagesCmd?"#1a1a35":"#FFD70022",color:pageCommande===totalPagesCmd?"#444":"#FFD700",
+                        border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCommande===totalPagesCmd?"not-allowed":"pointer",fontWeight:700 }}>
+                      ›
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+              );
+            })()}
+
 
             {/* ═══ ABONNEMENTS — données BDD + pagination ═══ */}
             {onglet==="paiements" && !loading && (
@@ -1301,6 +1653,232 @@ function DashboardAdmin() {
                         opacity:abonnPage===totalAbonnPages?0.4:1 }}>Suivant →</button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* ═══ HISTORIQUE & CLASSEMENTS ═══ */}
+            {onglet==="historique" && (
+              <div>
+                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                  display:"flex",alignItems:"center",gap:12 }}>
+                  <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
+                    border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
+                    <MdHistory style={{ color:"#FFD700",fontSize:22 }}/>
+                  </div>
+                  Historique & Classements
+                </h4>
+                <p style={{ color:"#555",marginBottom:20,fontSize:14 }}>
+                  Palmarès des coursiers et clients de la plateforme
+                </p>
+
+                {/* Filtre période, partagé Top Coursiers + Top Clients */}
+                <div style={{ ...card,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:20 }}>
+                  <span style={{ color:"#FFD700",fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
+                    <MdFilterList style={{ fontSize:18 }}/> Période :
+                  </span>
+                  <select value={histMois} onChange={e=>setHistMois(e.target.value)}
+                    style={{ ...inp,width:"auto",cursor:"pointer" }}>
+                    <option value="">Tous les mois</option>
+                    {["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
+                      .map((m,i)=>(<option key={i} value={i+1}>{m}</option>))}
+                  </select>
+                  <select value={histAnnee} onChange={e=>setHistAnnee(e.target.value)}
+                    style={{ ...inp,width:"auto",cursor:"pointer" }}>
+                    <option value="">Toutes les années</option>
+                    {[2024,2025,2026,2027].map(a=>(<option key={a} value={a}>{a}</option>))}
+                  </select>
+                  {histLoading && <span style={{ color:"#555",fontSize:12 }}>Chargement…</span>}
+                </div>
+
+                {/* ── TOP COURSIERS ── */}
+                <div style={{ ...card,marginBottom:20 }}>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                      <MdEmojiEvents style={{ fontSize:20 }}/> Top coursiers — missions terminées
+                    </div>
+                    <select value={limMissions} onChange={e=>setLimMissions(Number(e.target.value))}
+                      style={{ ...inp,width:"auto",cursor:"pointer" }}>
+                      <option value={5}>Top 5</option>
+                      <option value={10}>Top 10</option>
+                      <option value={20}>Top 20</option>
+                    </select>
+                  </div>
+
+                  {topCoursiers.length===0 ? (
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>
+                      Aucune mission terminée sur cette période.
+                    </p>
+                  ) : (
+                    <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+                      {topCoursiers.map((c,i)=>{
+                        const medaille = i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":null;
+                        return (
+                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                            border:`1px solid ${medaille?medaille+"55":"#FFD70018"}`,padding:"14px 18px",
+                            display:"flex",alignItems:"center",gap:14,flexWrap:"wrap" }}>
+                            <div style={{ width:36,height:36,borderRadius:"50%",flexShrink:0,
+                              backgroundColor:medaille?medaille+"22":"#ffffff08",
+                              border:`2px solid ${medaille||"#ffffff20"}`,
+                              display:"flex",alignItems:"center",justifyContent:"center",
+                              fontWeight:800,fontSize:14,color:medaille||"#888" }}>
+                              {i<3 ? <MdMilitaryTech style={{ fontSize:18,color:medaille }}/> : `#${i+1}`}
+                            </div>
+                            <div style={{ width:38,height:38,borderRadius:"50%",flexShrink:0,
+                              background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                              display:"flex",alignItems:"center",justifyContent:"center",
+                              fontWeight:800,color:"#000",fontSize:14 }}>
+                              {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
+                            </div>
+                            <div style={{ flex:1,minWidth:160 }}>
+                              <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ display:"flex",alignItems:"center",gap:10,marginTop:4,flexWrap:"wrap" }}>
+                                <span style={{ color:"#FFD700",fontSize:12,display:"flex",alignItems:"center",gap:3 }}>
+                                  <MdStar style={{ fontSize:14 }}/> {c.note || 0}/5
+                                </span>
+                                <span style={{ color:"#10b981",fontSize:12,fontWeight:700 }}>
+                                  {c.nb_missions} mission{c.nb_missions>1?"s":""}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display:"flex",gap:6,flexWrap:"wrap",maxWidth:280 }}>
+                              {c.services.map((s,idx)=>(
+                                <span key={idx} style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
+                                  color:"#3b82f6",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:600 }}>{s}</span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── TOP CLIENTS FIDÈLES ── */}
+                <div style={{ ...card,marginBottom:20 }}>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                      <MdEmojiEvents style={{ fontSize:20 }}/> Top clients — les plus fidèles
+                    </div>
+                    <select value={limClientsTop} onChange={e=>setLimClientsTop(Number(e.target.value))}
+                      style={{ ...inp,width:"auto",cursor:"pointer" }}>
+                      <option value={5}>Top 5</option>
+                      <option value={10}>Top 10</option>
+                      <option value={20}>Top 20</option>
+                    </select>
+                  </div>
+
+                  {topClients.length===0 ? (
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>
+                      Aucune commande sur cette période.
+                    </p>
+                  ) : (
+                    <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+                      {topClients.map((c,i)=>{
+                        const medaille = i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":null;
+                        return (
+                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                            border:`1px solid ${medaille?medaille+"55":"#FFD70018"}`,padding:"14px 18px",
+                            display:"flex",alignItems:"center",gap:14,flexWrap:"wrap" }}>
+                            <div style={{ width:36,height:36,borderRadius:"50%",flexShrink:0,
+                              backgroundColor:medaille?medaille+"22":"#ffffff08",
+                              border:`2px solid ${medaille||"#ffffff20"}`,
+                              display:"flex",alignItems:"center",justifyContent:"center",
+                              fontWeight:800,fontSize:14,color:medaille||"#888" }}>
+                              {i<3 ? <MdMilitaryTech style={{ fontSize:18,color:medaille }}/> : `#${i+1}`}
+                            </div>
+                            <div style={{ width:38,height:38,borderRadius:"50%",flexShrink:0,
+                              background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
+                              display:"flex",alignItems:"center",justifyContent:"center",
+                              fontWeight:800,color:"#fff",fontSize:14 }}>
+                              {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
+                            </div>
+                            <div style={{ flex:1,minWidth:160 }}>
+                              <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"#10b981",fontSize:12,fontWeight:700,marginTop:4 }}>
+                                {c.nb_commandes} commande{c.nb_commandes>1?"s":""}
+                              </div>
+                            </div>
+                            <div style={{ display:"flex",gap:6,flexWrap:"wrap",maxWidth:280 }}>
+                              {c.services.map((s,idx)=>(
+                                <span key={idx} style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
+                                  color:"#3b82f6",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:600 }}>{s}</span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── ANCIENNETÉ : COURSIERS + CLIENTS côte à côte ── */}
+                <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10 }}>
+                  <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                    <MdWorkHistory style={{ fontSize:20 }}/> Ancienneté sur la plateforme
+                  </div>
+                  <select value={limAnciens} onChange={e=>setLimAnciens(Number(e.target.value))}
+                    style={{ ...inp,width:"auto",cursor:"pointer" }}>
+                    <option value={5}>Top 5</option>
+                    <option value={10}>Top 10</option>
+                    <option value={20}>Top 20</option>
+                  </select>
+                </div>
+
+                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:20 }} className="stats-grid">
+                  {/* Coursiers anciens */}
+                  <div style={card}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
+                      display:"flex",alignItems:"center",gap:8 }}>
+                      <MdDeliveryDining style={{ fontSize:18 }}/> Coursiers les plus anciens
+                    </div>
+                    {anciensCoursiers.length===0 ? (
+                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>Aucun coursier.</p>
+                    ) : (
+                      <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                        {anciensCoursiers.map((c,i)=>(
+                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:10,
+                            border:"1px solid #FFD70018",padding:"10px 14px",
+                            display:"flex",alignItems:"center",gap:12 }}>
+                            <span style={{ color:"#666",fontWeight:700,fontSize:12,width:24 }}>#{i+1}</span>
+                            <div style={{ flex:1 }}>
+                              <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
+                                Depuis le {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Clients anciens */}
+                  <div style={card}>
+                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
+                      display:"flex",alignItems:"center",gap:8 }}>
+                      <MdPeople style={{ fontSize:18 }}/> Clients les plus anciens
+                    </div>
+                    {anciensClients.length===0 ? (
+                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>Aucun client.</p>
+                    ) : (
+                      <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                        {anciensClients.map((c,i)=>(
+                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:10,
+                            border:"1px solid #FFD70018",padding:"10px 14px",
+                            display:"flex",alignItems:"center",gap:12 }}>
+                            <span style={{ color:"#666",fontWeight:700,fontSize:12,width:24 }}>#{i+1}</span>
+                            <div style={{ flex:1 }}>
+                              <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
+                                Depuis le {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1836,6 +2414,219 @@ function DashboardAdmin() {
         </Modal>
       )}
 
+
+      {/* ═══ MODAL AJOUTER/MODIFIER COMMANDE ═══ */}
+      {cmdModal && (
+        <Modal titre={cmdModal==="ajouter" ? "Ajouter une commande" : "Modifier la commande"} onClose={()=>setCmdModal(null)}>
+          <div style={{ display:"grid", gap:12 }}>
+            {cmdErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{cmdErreur}</div>}
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Client *</label>
+              <select value={cmdForm.client_id} onChange={e=>setCmdForm(f=>({...f,client_id:e.target.value}))}
+                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                <option value="">— Sélectionner un client —</option>
+                {clients.map(c=>(
+                  <option key={c.id} value={c.id}>{c.prenom} {c.nom} ({c.email})</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Service *</label>
+              <input value={cmdForm.service} onChange={e=>setCmdForm(f=>({...f,service:e.target.value}))}
+                placeholder="Ex: Livraison de colis" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Moyen *</label>
+                <select value={cmdForm.moyen} onChange={e=>setCmdForm(f=>({...f,moyen:e.target.value}))}
+                  style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                  <option value="">— Moyen —</option>
+                  <option value="pieton">🚶 Piéton</option>
+                  <option value="bicyclette">🚲 Bicyclette</option>
+                  <option value="moto">🏍️ Moto</option>
+                  <option value="voiture">🚗 Voiture</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Tarif (Ar) *</label>
+                <input type="number" value={cmdForm.tarif} onChange={e=>setCmdForm(f=>({...f,tarif:e.target.value}))}
+                  placeholder="5000" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse de pickup</label>
+              <input value={cmdForm.adresse_pickup} onChange={e=>setCmdForm(f=>({...f,adresse_pickup:e.target.value}))}
+                placeholder="Adresse de prise en charge" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Détail</label>
+              <textarea value={cmdForm.detail} onChange={e=>setCmdForm(f=>({...f,detail:e.target.value}))}
+                placeholder="Description de la commande..." rows={3}
+                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none",resize:"vertical" }}/>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Statut</label>
+              <select value={cmdForm.statut} onChange={e=>setCmdForm(f=>({...f,statut:e.target.value}))}
+                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                <option value="en_attente">En attente</option>
+                <option value="negociable">Négociable</option>
+                <option value="accepte">Accepté</option>
+                <option value="refuse">Refusé</option>
+                <option value="termine">Terminé</option>
+              </select>
+            </div>
+
+            <button onClick={sauvegarderCommande} disabled={cmdEnvoi}
+              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+                borderRadius:10,padding:"11px",fontWeight:800,cursor:cmdEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
+              {cmdEnvoi ? "Enregistrement..." : (cmdModal==="ajouter" ? "Créer la commande" : "Enregistrer")}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* MODAL AJOUTER / MODIFIER CLIENT */}
+      {clientModal && (
+        <Modal titre={clientModal==="ajouter" ? "Ajouter un client" : "Modifier le client"} onClose={()=>setClientModal(null)}>
+          <div style={{ display:"grid", gap:12 }}>
+            {clientErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{clientErreur}</div>}
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Prénom *</label>
+                <input value={clientForm.prenom} onChange={e=>setClientForm(f=>({...f,prenom:e.target.value}))}
+                  placeholder="Prénom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Nom *</label>
+                <input value={clientForm.nom} onChange={e=>setClientForm(f=>({...f,nom:e.target.value}))}
+                  placeholder="Nom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Email *</label>
+              <input type="email" value={clientForm.email} onChange={e=>setClientForm(f=>({...f,email:e.target.value}))}
+                placeholder="client@email.com" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Téléphone</label>
+                <input value={clientForm.telephone} onChange={e=>setClientForm(f=>({...f,telephone:e.target.value}))}
+                  placeholder="03X XX XXX XX" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse</label>
+                <input value={clientForm.adresse} onChange={e=>setClientForm(f=>({...f,adresse:e.target.value}))}
+                  placeholder="Adresse" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
+                {clientModal==="ajouter" ? "Mot de passe *" : "Nouveau mot de passe (optionnel)"}
+              </label>
+              <input type="password" value={clientForm.password} onChange={e=>setClientForm(f=>({...f,password:e.target.value}))}
+                placeholder={clientModal==="ajouter" ? "Mot de passe" : "Laisser vide pour ne pas changer"}
+                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <button onClick={sauvegarderClient} disabled={clientEnvoi}
+              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+                borderRadius:10,padding:"11px",fontWeight:800,cursor:clientEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
+              {clientEnvoi ? "Enregistrement..." : (clientModal==="ajouter" ? "Créer le client" : "Enregistrer")}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* MODAL AJOUTER / MODIFIER COURSIER */}
+      {coursierModal && (
+        <Modal titre={coursierModal==="ajouter" ? "Ajouter un coursier" : "Modifier le coursier"} onClose={()=>setCoursierModal(null)}>
+          <div style={{ display:"grid", gap:12 }}>
+            {coursierErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{coursierErreur}</div>}
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Prénom *</label>
+                <input value={coursierForm.prenom} onChange={e=>setCoursierForm(f=>({...f,prenom:e.target.value}))}
+                  placeholder="Prénom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Nom *</label>
+                <input value={coursierForm.nom} onChange={e=>setCoursierForm(f=>({...f,nom:e.target.value}))}
+                  placeholder="Nom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Email *</label>
+              <input type="email" value={coursierForm.email} onChange={e=>setCoursierForm(f=>({...f,email:e.target.value}))}
+                placeholder="coursier@email.com" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Téléphone</label>
+                <input value={coursierForm.telephone} onChange={e=>setCoursierForm(f=>({...f,telephone:e.target.value}))}
+                  placeholder="03X XX XXX XX" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+              <div>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>CIN</label>
+                <input value={coursierForm.cin} onChange={e=>setCoursierForm(f=>({...f,cin:e.target.value}))}
+                  placeholder="Numéro CIN" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse</label>
+              <input value={coursierForm.adresse} onChange={e=>setCoursierForm(f=>({...f,adresse:e.target.value}))}
+                placeholder="Adresse" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <div>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
+                {coursierModal==="ajouter" ? "Mot de passe *" : "Nouveau mot de passe (optionnel)"}
+              </label>
+              <input type="password" value={coursierForm.password} onChange={e=>setCoursierForm(f=>({...f,password:e.target.value}))}
+                placeholder={coursierModal==="ajouter" ? "Mot de passe" : "Laisser vide pour ne pas changer"}
+                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+            </div>
+
+            <button onClick={sauvegarderCoursier} disabled={coursierEnvoi}
+              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+                borderRadius:10,padding:"11px",fontWeight:800,cursor:coursierEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
+              {coursierEnvoi ? "Enregistrement..." : (coursierModal==="ajouter" ? "Créer le coursier" : "Enregistrer")}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* ═══ CONFIRMATION SUPPRESSION COMMANDE ═══ */}
+      {confirmDeleteCmd && (
+        <Modal titre="Confirmer la suppression" onClose={()=>setConfirmDeleteCmd(null)}>
+          <p style={{ color:"#ccc",marginBottom:20 }}>
+            Supprimer la commande <strong style={{ color:"#fff" }}>#{confirmDeleteCmd}</strong> ? Cette action est irréversible.
+          </p>
+          <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+            <button onClick={()=>setConfirmDeleteCmd(null)}
+              style={{ background:"#1a1a35",color:"#aaa",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>
+              Annuler
+            </button>
+            <button onClick={()=>supprimerCommande(confirmDeleteCmd)}
+              style={{ background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",fontWeight:700,cursor:"pointer" }}>
+              Supprimer
+            </button>
+          </div>
+        </Modal>
+      )}
 
       <style>{`
         @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }

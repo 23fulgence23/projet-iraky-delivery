@@ -27,9 +27,13 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/commandes-mensuelles',  [AdminController::class, 'commandesMensuelles']);
         Route::get('/services-populaires',   [AdminController::class, 'servicesPopulaires']);
         Route::get('/dernieres-commandes',   [AdminController::class, 'dernieresCommandes']);
+        Route::get('/historique', [AdminController::class, 'historique']);
+        
 
         // Clients & Coursiers
         Route::get   ('/clients',                [AdminController::class, 'clients']);
+        Route::post  ('/clients',                [AdminController::class, 'creerClient']);
+        Route::post('/coursiers', [AdminController::class, 'creerCoursier']);
         Route::get   ('/coursiers',              [AdminController::class, 'coursiers']);
         Route::post  ('/toggle-statut/{id}',     [AdminController::class, 'toggleStatut']);
         Route::put   ('/users/{id}',             [AdminController::class, 'modifierUser']);
@@ -65,6 +69,7 @@ Route::middleware('auth:api')->group(function () {
 
         // Commandes CRUD admin ✅ nouvelles routes
         Route::get   ('/commandes',              [AdminController::class, 'toutesCommandes']);
+        Route::post  ('/commandes',              [AdminController::class, 'ajouterCommande']);
         Route::get   ('/commandes/{id}',         [AdminController::class, 'uneCommande']);
         Route::put   ('/commandes/{id}',         [AdminController::class, 'modifierCommande']);
         Route::delete('/commandes/{id}',         [AdminController::class, 'supprimerCommande']);
