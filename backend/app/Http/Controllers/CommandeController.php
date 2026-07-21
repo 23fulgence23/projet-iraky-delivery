@@ -36,16 +36,16 @@ class CommandeController extends Controller
             'statut'            => 'en_attente',
         ]);
 
-        // ✅ Notifier l'admin
-        $admin = \App\Models\User::where('role','admin')->first();
-                    if ($admin) {
-                        \App\Models\Notification::create([
-                            'user_id'     => $admin->id,
-                            'texte'       => "📦 Nouvelle commande : {$commande->service} — Client #{$user->prenom} {$user->nom}",
-                            'type'        => 'info',
-                            'commande_id' => $commande->id,
-                        ]);
-                    }
+        // ✅ Notifier TOUS les admins (pas seulement le premier)
+        $admins = \App\Models\User::where('role','admin')->get();
+        foreach ($admins as $admin) {
+            \App\Models\Notification::create([
+                'user_id'     => $admin->id,
+                'texte'       => "📦 Nouvelle commande : {$commande->service} — Client #{$user->prenom} {$user->nom}",
+                'type'        => 'info',
+                'commande_id' => $commande->id,
+            ]);
+        }
 
         return response()->json([
             'commande' => $commande->load('client','coursier')
@@ -120,9 +120,9 @@ public function prendre($id)
         'statut'      => 'negociable',
     ]);
 
-    // ✅ Notifier l'admin que le coursier a pris la mission (PAS de $note ici)
-    $admin = \App\Models\User::where('role','admin')->first();
-    if ($admin) {
+    // ✅ Notifier TOUS les admins que le coursier a pris la mission
+    $admins = \App\Models\User::where('role','admin')->get();
+    foreach ($admins as $admin) {
         \App\Models\Notification::create([
             'user_id'     => $admin->id,
             'texte'       => "🚴 {$user->prenom} {$user->nom} a pris la mission : {$commande->service}",
@@ -328,8 +328,8 @@ public function terminer(Request $request, $id)
             'commande_id' => $commande->id,
         ]);
 
-        $admin = User::where('role', 'admin')->first();
-        if ($admin) {
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
             Notification::create([
                 'user_id'     => $admin->id,
                 'texte'       => "🏁 Commande terminée : {$commande->service} — {$note}⭐",

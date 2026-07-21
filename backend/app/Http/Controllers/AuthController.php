@@ -80,9 +80,9 @@ public function register(Request $request)
 
     $user = User::create($data);
 
-    // ✅ Notifier l'admin
-    $admin = User::where('role', 'admin')->first();
-    if ($admin) {
+    // ✅ Notifier TOUS les admins (pas seulement le premier)
+    $admins = User::where('role', 'admin')->get();
+    foreach ($admins as $admin) {
         Notification::create([
             'user_id'       => $admin->id,
             'texte'         => $user->role === 'coursier'

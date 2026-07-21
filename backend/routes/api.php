@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 // ── Publiques ────────────────────────────────────
@@ -73,6 +74,12 @@ Route::middleware('auth:api')->group(function () {
         Route::get   ('/commandes/{id}',         [AdminController::class, 'uneCommande']);
         Route::put   ('/commandes/{id}',         [AdminController::class, 'modifierCommande']);
         Route::delete('/commandes/{id}',         [AdminController::class, 'supprimerCommande']);
+
+        // Support — chat client ↔ admin ✅ nouvelles routes
+        Route::get ('/support/conversations',                 [SupportController::class, 'adminConversations']);
+        Route::get ('/support/conversations/{clientId}',      [SupportController::class, 'adminMessages']);
+        Route::post('/support/conversations/{clientId}/repondre', [SupportController::class, 'adminReply']);
+        Route::get ('/support/export-pdf',                    [SupportController::class, 'exporterConversationsPdf']);
     });
 
     // ── Commandes (client/coursier) ──────────────
@@ -92,6 +99,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post  ('/commandes/{id}/messages',                       [MessageController::class, 'store']);
     Route::delete('/commandes/{commandeId}/messages/{messageId}',   [MessageController::class, 'destroy']);
     Route::put   ('/commandes/{commandeId}/messages/{messageId}',   [MessageController::class, 'update']);
+
+    // ── Support (chat client ↔ admin) ────────────
+    Route::get ('/support/messages', [SupportController::class, 'index']);
+    Route::post('/support/messages', [SupportController::class, 'store']);
 
     // ── Notifications (client/coursier) ──────────
     Route::post  ('/notifications/tous-lus',  [NotificationController::class, 'marquerTousLus']);
