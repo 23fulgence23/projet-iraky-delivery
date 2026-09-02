@@ -8,6 +8,7 @@ import {
   MdWarning, MdBarChart, MdPieChart, MdShowChart, MdDelete, MdDoneAll,MdClose,
   MdEdit, MdPersonAdd, MdAdd,
   MdHistory, MdEmojiEvents, MdMilitaryTech, MdWorkHistory, MdFilterList,
+  MdForum,
 } from "react-icons/md";
 
 const BASE_URL = "http://localhost:8000";
@@ -128,7 +129,7 @@ function DonutChart({ segments, size=120 }) {
 // ══════════════════════════════════════════════
 //  SIDEBAR — style original inchangé
 // ══════════════════════════════════════════════
-function SidebarContent({ onglet, setOnglet, stats }) {
+function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
   const items = [
     { id:"accueil",   Icon:MdDashboard,      label:"Tableau de bord",  badge:0                        },
     { id:"clients",   Icon:MdPeople,         label:"Clients",           badge:stats.clients_inactifs   },
@@ -136,6 +137,7 @@ function SidebarContent({ onglet, setOnglet, stats }) {
     { id:"commandes", Icon:MdListAlt,        label:"Commandes",         badge:0                        },
     { id:"paiements", Icon:MdAttachMoney,    label:"Abonnements",       badge:0                        },
     { id:"historique",Icon:MdHistory,        label:"Historique",        badge:0                        },
+    { id:"support",   Icon:MdForum,          label:"Support Chat",      badge:supportNonLus || 0       },
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
@@ -254,6 +256,16 @@ function DashboardAdmin() {
   const [cmdErreur, setCmdErreur]         = useState("");
   const [confirmDeleteCmd, setConfirmDeleteCmd] = useState(null);
 
+  // ── Support Chat (admin) ─────────────────────────
+  const [supportConvs, setSupportConvs]       = useState([]);   // liste des conversations (1 par client)
+  const [supportSelected, setSupportSelected] = useState(null); // client_id ouvert
+  const [supportMessages, setSupportMessages] = useState([]);   // messages du client ouvert
+  const [supportReply, setSupportReply]       = useState("");
+  const [supportEnvoi, setSupportEnvoi]       = useState(false);
+  const [supportLoading, setSupportLoading]   = useState(false);
+  const [supportPdfLoading, setSupportPdfLoading] = useState(false);
+  const supportNonLus = supportConvs.reduce((total, c) => total + (c.non_lus || 0), 0);
+
   // ── CRUD Clients + pagination ───────────────────
   const [pageClient, setPageClient]         = useState(1);
   const [pageCoursier, setPageCoursier]     = useState(1);
@@ -360,6 +372,92 @@ function DashboardAdmin() {
   useEffect(() => {
     if (onglet === "historique") fetchHistorique();
   }, [onglet, histMois, histAnnee, limMissions, limClientsTop, limAnciens]);
+
+  // ── Support Chat : liste des conversations ───────
+  const fetchSupportConvs = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/support/conversations`, { headers: getHeaders() });
+      if (res.ok) {
+        const d = await res.json();
+        if (Array.isArray(d)) setSupportConvs(d);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  // ── Support Chat : messages d'une conversation précise ──
+  const fetchSupportMessages = async (clientId) => {
+    setSupportLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/support/conversations/${clientId}`, { headers: getHeaders() });
+      if (res.ok) {
+        const d = await res.json();
+        if (Array.isArray(d)) setSupportMessages(d);
+      }
+    } catch (e) { console.error(e); }
+    setSupportLoading(false);
+  };
+
+  const ouvrirConversation = (clientId) => {
+    setSupportSelected(clientId);
+    fetchSupportMessages(clientId);
+  };
+
+  const envoyerReponseSupport = async () => {
+    if (!supportReply.trim() || !supportSelected || supportEnvoi) return;
+    setSupportEnvoi(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/support/conversations/${supportSelected}/repondre`, {
+        method: "POST",
+        headers: { ...getHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ texte: supportReply.trim() }),
+      });
+      if (res.ok) {
+        setSupportReply("");
+        fetchSupportMessages(supportSelected);
+        fetchSupportConvs();
+        showToast("Réponse envoyée");
+      } else {
+        showToast("Erreur lors de l'envoi", "error");
+      }
+    } catch (e) { console.error(e); showToast("Erreur lors de l'envoi", "error"); }
+    setSupportEnvoi(false);
+  };
+
+  // ── Support Chat : export PDF (toutes conversations, ou une seule si clientId fourni) ──
+  const exporterSupportPdf = async (clientId = null) => {
+    setSupportPdfLoading(true);
+    try {
+      const url = clientId
+        ? `${BASE_URL}/api/admin/support/export-pdf?client_id=${clientId}`
+        : `${BASE_URL}/api/admin/support/export-pdf`;
+      const res = await fetch(url, { headers: getHeaders() });
+      if (!res.ok) { showToast("Erreur lors de l'export PDF", "error"); setSupportPdfLoading(false); return; }
+      const blob = await res.blob();
+      const lien = document.createElement("a");
+      const objectUrl = window.URL.createObjectURL(blob);
+      lien.href = objectUrl;
+      lien.download = clientId
+        ? `conversation-support-client-${clientId}.pdf`
+        : `conversations-support-iraky.pdf`;
+      document.body.appendChild(lien);
+      lien.click();
+      lien.remove();
+      window.URL.revokeObjectURL(objectUrl);
+      showToast("PDF téléchargé");
+    } catch (e) { console.error(e); showToast("Erreur lors de l'export PDF", "error"); }
+    setSupportPdfLoading(false);
+  };
+
+  // ── Recharger la liste des conversations à l'ouverture de l'onglet + polling ──
+  useEffect(() => {
+    if (onglet !== "support") return;
+    fetchSupportConvs();
+    const iv = setInterval(() => {
+      fetchSupportConvs();
+      if (supportSelected) fetchSupportMessages(supportSelected);
+    }, 3000);
+    return () => clearInterval(iv);
+  }, [onglet, supportSelected]);
 
   const nbNonLus = notifs.filter(n=>!n.lu).length;
 
@@ -851,7 +949,7 @@ function DashboardAdmin() {
           borderRight:"1px solid #FFD70015",padding:"28px 0",
           position:"fixed",top:66,left:0,zIndex:50,
         }}>
-          <SidebarContent onglet={onglet} setOnglet={setOnglet} stats={stats}/>
+          <SidebarContent onglet={onglet} setOnglet={setOnglet} stats={stats} supportNonLus={supportNonLus}/>
         </aside>
 
         {/* SIDEBAR mobile */}
@@ -861,7 +959,7 @@ function DashboardAdmin() {
             <aside style={{ width:252,position:"fixed",top:66,left:0,bottom:0,
               backgroundColor:"#0a0a20",borderRight:"1px solid #FFD70015",
               padding:"28px 0",zIndex:50,overflowY:"auto" }}>
-              <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}} stats={stats}/>
+              <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}} stats={stats} supportNonLus={supportNonLus}/>
             </aside>
           </>
         )}
@@ -1450,18 +1548,31 @@ function DashboardAdmin() {
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{commandes.length} commande(s) au total</p>
 
-                {/* 3 box statuts */}
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:14,marginBottom:24 }}>
+                {/* 3 box statuts — même style que les cartes KPI de l'accueil */}
+                <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:16,marginBottom:24 }}>
                   {[
-                    { label:"En attente", val:commandes.filter(c=>c.statut==="en_attente").length, color:"#f59e0b" },
-                    { label:"Acceptées",  val:commandes.filter(c=>c.statut==="accepte").length,    color:"#10b981" },
-                    { label:"Terminées",  val:commandes.filter(c=>c.statut==="termine").length,    color:"#8b5cf6" },
+                    { label:"EN ATTENTE",     val:commandes.filter(c=>c.statut==="en_attente").length, sub:"à traiter",       Icon:MdSchedule,    color:"#f59e0b" },
+                    { label:"EN NÉGOCIATION", val:commandes.filter(c=>c.statut==="negociable").length, sub:"accord en cours", Icon:MdForum,       color:"#3b82f6" },
+                    { label:"ACCEPTÉES",      val:commandes.filter(c=>c.statut==="accepte").length,    sub:"en cours",        Icon:MdCheckCircle, color:"#10b981" },
+                    { label:"TERMINÉES",      val:commandes.filter(c=>c.statut==="termine").length,    sub:"missions closes", Icon:MdDoneAll,     color:"#8b5cf6" },
                   ].map(s=>(
-                    <div key={s.label} style={{ backgroundColor:"#0f1128",borderRadius:12,
-                      padding:"18px 20px",border:`1px solid ${s.color}33`,
-                      display:"flex",flexDirection:"column",gap:4 }}>
-                      <div style={{ color:s.color,fontWeight:800,fontSize:28 }}>{s.val}</div>
-                      <div style={{ color:"#666",fontSize:12 }}>{s.label}</div>
+                    <div key={s.label} style={{
+                      ...card, display:"flex",alignItems:"center",gap:16,
+                      border:`1px solid ${s.color}33`, boxShadow:`0 4px 20px ${s.color}15`,
+                      transition:"transform 0.2s,box-shadow 0.2s",
+                    }}
+                      onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-4px)"; e.currentTarget.style.boxShadow=`0 12px 32px ${s.color}30`; }}
+                      onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)";    e.currentTarget.style.boxShadow=`0 4px 20px ${s.color}15`; }}>
+                      <div style={{ width:52,height:52,borderRadius:14,backgroundColor:`${s.color}18`,
+                        display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+                        boxShadow:`0 0 16px ${s.color}22` }}>
+                        <s.Icon style={{ color:s.color,fontSize:26 }}/>
+                      </div>
+                      <div>
+                        <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
+                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{s.label}</div>
+                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1876,6 +1987,179 @@ function DashboardAdmin() {
                           </div>
                         ))}
                       </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═══ SUPPORT CHAT ═══ */}
+            {onglet==="support" && (
+              <div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                  flexWrap:"wrap", gap:12, marginBottom:20 }}>
+                  <h4 style={{ color:"#FFD700",fontWeight:800,fontSize:20,
+                    display:"flex",alignItems:"center",gap:12, margin:0 }}>
+                    <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
+                      border:"1px solid #FFD70033",display:"flex",alignItems:"center",
+                      justifyContent:"center",flexShrink:0 }}>
+                      <MdForum style={{ color:"#FFD700",fontSize:22 }}/>
+                    </div>
+                    Support Chat
+                    {supportNonLus > 0 && (
+                      <span style={{ background:"#ef4444",color:"#fff",borderRadius:20,
+                        padding:"3px 10px",fontSize:12,fontWeight:800 }}>{supportNonLus} non lu(s)</span>
+                    )}
+                  </h4>
+                  <button onClick={()=>exporterSupportPdf(null)} disabled={supportPdfLoading}
+                    style={{ backgroundColor:"#8b5cf618", border:"1px solid #8b5cf644",
+                      color:"#8b5cf6", borderRadius:10, padding:"10px 18px", fontWeight:700,
+                      fontSize:13, cursor: supportPdfLoading ? "not-allowed" : "pointer",
+                      display:"flex", alignItems:"center", gap:8, opacity: supportPdfLoading ? 0.6 : 1 }}>
+                    {supportPdfLoading
+                      ? <div style={{ width:14,height:14,border:"2px solid #8b5cf6",
+                          borderTop:"2px solid transparent",borderRadius:"50%",
+                          animation:"spin 0.6s linear infinite" }}/>
+                      : <MdHistory style={{ fontSize:16 }}/>
+                    }
+                    Exporter tout en PDF ({supportConvs.length} conversation{supportConvs.length>1?"s":""})
+                  </button>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:18,
+                  height:600 }} className="support-grid">
+
+                  {/* Liste des conversations */}
+                  <div style={{ ...card, padding:0, overflowY:"auto" }}>
+                    {supportConvs.length === 0 ? (
+                      <div style={{ padding:32, textAlign:"center", color:"#555", fontSize:13 }}>
+                        Aucune conversation pour le moment.
+                      </div>
+                    ) : (
+                      supportConvs.map(conv => (
+                        <div key={conv.client_id}
+                          onClick={()=>ouvrirConversation(conv.client_id)}
+                          style={{
+                            padding:"14px 16px", cursor:"pointer",
+                            borderBottom:"1px solid #ffffff0a",
+                            backgroundColor: supportSelected === conv.client_id ? "#FFD70012" : "transparent",
+                            borderLeft: supportSelected === conv.client_id ? "3px solid #FFD700" : "3px solid transparent",
+                            transition:"all 0.15s",
+                          }}
+                          onMouseEnter={e=>{ if(supportSelected!==conv.client_id) e.currentTarget.style.backgroundColor="#ffffff08"; }}
+                          onMouseLeave={e=>{ if(supportSelected!==conv.client_id) e.currentTarget.style.backgroundColor="transparent"; }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8 }}>
+                            <div style={{ color:"#fff", fontWeight:700, fontSize:13.5 }}>
+                              {conv.client?.prenom} {conv.client?.nom}
+                            </div>
+                            {conv.non_lus > 0 && (
+                              <span style={{ background:"#ef4444", color:"#fff", borderRadius:20,
+                                minWidth:18, height:18, fontSize:10, fontWeight:800,
+                                display:"flex", alignItems:"center", justifyContent:"center", padding:"0 5px" }}>
+                                {conv.non_lus}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ color:"#777", fontSize:11.5, marginTop:3,
+                            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                            {conv.sender_role === "client" ? "" : "↳ "}{conv.dernier_message}
+                          </div>
+                          <div style={{ color:"#444", fontSize:10, marginTop:3 }}>
+                            {new Date(conv.date).toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Conversation ouverte */}
+                  <div style={{ ...card, padding:0, display:"flex", flexDirection:"column" }}>
+                    {!supportSelected ? (
+                      <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
+                        <MdForum style={{ fontSize:44, color:"#FFD70044", marginBottom:10 }}/>
+                        <p style={{ fontSize:13 }}>Sélectionnez une conversation à gauche</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Header conversation */}
+                        {(() => {
+                          const conv = supportConvs.find(c => c.client_id === supportSelected);
+                          return (
+                            <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
+                              display:"flex", alignItems:"center", justifyContent:"space-between", gap:10 }}>
+                              <div>
+                                <div style={{ color:"#fff", fontWeight:800, fontSize:14 }}>
+                                  {conv?.client?.prenom} {conv?.client?.nom}
+                                </div>
+                                <div style={{ color:"#777", fontSize:11.5 }}>
+                                  {conv?.client?.email} {conv?.client?.telephone ? `· ${conv.client.telephone}` : ""}
+                                </div>
+                              </div>
+                              <button onClick={()=>exporterSupportPdf(supportSelected)} disabled={supportPdfLoading}
+                                style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f644",
+                                  color:"#3b82f6", borderRadius:8, padding:"7px 12px", fontWeight:700,
+                                  fontSize:11.5, cursor: supportPdfLoading ? "not-allowed" : "pointer",
+                                  display:"flex", alignItems:"center", gap:6, whiteSpace:"nowrap",
+                                  opacity: supportPdfLoading ? 0.6 : 1 }}>
+                                <MdHistory style={{ fontSize:14 }}/> PDF de cette conversation
+                              </button>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Messages */}
+                        <div style={{ flex:1, overflowY:"auto", padding:16,
+                          display:"flex", flexDirection:"column", gap:10 }}>
+                          {supportLoading ? (
+                            <div style={{ margin:"auto", color:"#555", fontSize:13 }}>Chargement...</div>
+                          ) : (
+                            supportMessages.map((m, i) => {
+                              const estClient = m.sender_role === "client";
+                              const estBot = !estClient && !m.sender_id;
+                              return (
+                                <div key={m.id || i} style={{ display:"flex",
+                                  justifyContent: estClient ? "flex-start" : "flex-end" }}>
+                                  <div style={{
+                                    backgroundColor: estClient ? "#1a1a35" : (estBot ? "#8b5cf618" : "#FFD70018"),
+                                    border:`1px solid ${estClient ? "#ffffff15" : (estBot ? "#8b5cf644" : "#FFD70044")}`,
+                                    borderRadius: estClient ? "16px 16px 16px 4px" : "16px 16px 4px 16px",
+                                    padding:"9px 14px", maxWidth:"75%",
+                                  }}>
+                                    {!estClient && (
+                                      <div style={{ color: estBot ? "#8b5cf6" : "#FFD700", fontSize:10,
+                                        fontWeight:700, marginBottom:4 }}>
+                                        {estBot ? "🤖 Assistant automatique" : "🧑‍💼 Vous (admin)"}
+                                      </div>
+                                    )}
+                                    <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                                    <div style={{ color:"#666", fontSize:10, marginTop:3, textAlign:"right" }}>
+                                      {new Date(m.created_at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        {/* Répondre */}
+                        <div style={{ padding:"12px 16px", borderTop:"1px solid #FFD70018",
+                          display:"flex", gap:10 }}>
+                          <input value={supportReply} onChange={e=>setSupportReply(e.target.value)}
+                            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportReply.trim()&&envoyerReponseSupport()}
+                            placeholder="Répondre au client..."
+                            style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70033",
+                              color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>
+                          <button onClick={envoyerReponseSupport}
+                            disabled={!supportReply.trim() || supportEnvoi}
+                            style={{ backgroundColor:"#FFD700", color:"#000", border:"none",
+                              borderRadius:12, padding:"10px 18px", fontWeight:800, fontSize:13,
+                              cursor: supportReply.trim() ? "pointer" : "not-allowed",
+                              opacity: supportReply.trim() ? 1 : 0.5 }}>
+                            {supportEnvoi ? "..." : "Envoyer"}
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -2638,6 +2922,7 @@ function DashboardAdmin() {
           .stats-grid{ grid-template-columns:repeat(2,1fr) !important; }
           .charts-grid{ grid-template-columns:1fr !important; }
           .chart-span2{ grid-column:span 1 !important; }
+          .support-grid{ grid-template-columns:1fr !important; height:auto !important; }
         }
         @media(max-width:480px){ .stats-grid{ grid-template-columns:repeat(2,1fr) !important; } }
         *{ box-sizing:border-box; }

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import Demarche from "./Demarche";
 import Partenariats from "./Partenariats";
+import "../Theme.css";
+import "../App.css";
 
 function APropos() {
   const [visible, setVisible] = useState(false);
@@ -9,43 +11,40 @@ function APropos() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
 
   const cards = [
-    { icon: "fas fa-briefcase", title: "Emploi local", desc: "Nous créons des opportunités d'emploi pour les jeunes coursiers de Toliara." },
-    { icon: "fas fa-clock", title: "Gain de temps", desc: "Plus besoin de faire la queue. Notre coursier s'occupe de tout à votre place." },
-    { icon: "fas fa-coins", title: "Prix abordable", desc: "Un service complet à seulement 5 000 Ar par course, accessible à tous." },
-    { icon: "fas fa-shield-alt", title: "Service fiable", desc: "Des coursiers vérifiés et de confiance pour chaque mission." },
+    { icon: "fas fa-briefcase", title: "Emploi local", desc: "Des opportunités concrètes pour les jeunes coursiers de Toliara." },
+    { icon: "fas fa-clock", title: "Gain de temps", desc: "Plus besoin de faire la queue. Notre coursier s'en charge à votre place." },
+    { icon: "fas fa-coins", title: "Prix abordable", desc: "Un service complet dès 5 000 Ar la course, accessible à tous." },
+    { icon: "fas fa-shield-alt", title: "Service fiable", desc: "Des coursiers vérifiés, identifiés et suivis en temps réel." },
   ];
 
   return (
     <section id="apropos">
-
-      {/* À propos principal */}
-      <div
-        ref={ref}
-        style={{ backgroundColor: "#0d0d25", padding: "100px 0" }}
-      >
+      <div ref={ref} style={{ backgroundColor: "var(--iraky-deep)", padding: "110px 0" }}>
         <div className="container">
 
           <div
-            className="text-center mb-5"
+            className="text-center mb-5 mx-auto"
             style={{
+              maxWidth: "620px",
               opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(30px)",
+              transform: visible ? "translateY(0)" : "translateY(20px)",
               transition: "all 0.7s ease",
             }}
           >
-            <h2 className="fw-bold" style={{ color: "#FFD700", fontSize: "40px" }}>
+            <span className="iraky-eyebrow justify-content-center mb-3">Qui sommes-nous</span>
+            <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
               À propos de nous
             </h2>
-            <p style={{ color: "#aaaaaa", fontSize: "17px", maxWidth: "600px", margin: "0 auto" }}>
-              IRAKY Delivery est une plateforme numérique qui met en relation
-              les habitants de Toliara avec des coursiers locaux de confiance.
+            <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
+              IRAKY Delivery met en relation les habitants de Toliara avec des
+              coursiers locaux de confiance, pour toutes les démarches du quotidien.
             </p>
           </div>
 
@@ -56,40 +55,23 @@ function APropos() {
                 className="col-md-6 col-lg-3"
                 style={{
                   opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(40px)",
-                  transition: `all 0.7s ease ${index * 0.15}s`,
+                  transform: visible ? "translateY(0)" : "translateY(28px)",
+                  transition: `all 0.6s ease ${index * 0.1}s`,
                 }}
               >
-                <div
-                  className="card h-100 text-center p-4 border-0"
-                  style={{
-                    backgroundColor: "#1a1a35",
-                    borderRadius: "16px",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    cursor: "default",
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "translateY(-10px)";
-                    e.currentTarget.style.boxShadow = "0 20px 40px #FFD70022";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
+                <div className="iraky-card h-100 text-center p-4" style={{ cursor: "default" }}>
                   <div
                     className="mx-auto mb-3 d-flex align-items-center justify-content-center"
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      borderRadius: "50%",
-                      backgroundColor: "#FFD70022",
-                    }}
+                    style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: "var(--iraky-gold-soft)" }}
                   >
-                    <i className={card.icon} style={{ color: "#FFD700", fontSize: "24px" }}></i>
+                    <i className={card.icon} style={{ color: "var(--iraky-gold)", fontSize: "22px" }}></i>
                   </div>
-                  <h5 className="fw-bold" style={{ color: "#ffffff" }}>{card.title}</h5>
-                  <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{card.desc}</p>
+                  <h5 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "16px" }}>
+                    {card.title}
+                  </h5>
+                  <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", lineHeight: 1.6 }}>
+                    {card.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -98,12 +80,8 @@ function APropos() {
         </div>
       </div>
 
-      {/* Démarche incluse */}
       <Demarche />
-
-      {/* Partenariats inclus */}
       <Partenariats />
-
     </section>
   );
 }

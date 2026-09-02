@@ -1,7 +1,62 @@
+/* ═══════════════════════════════════════════════════════════
+   IRAKY DELIVERY — App.css
+   Contient le mode CLAIR (le mode SOMBRE par défaut vit dans
+   theme.css). On garde exactement les mêmes noms de variables
+   --iraky-* que theme.css : aucun composant n'a besoin d'être
+   modifié pour re-thémer, seul l'attribut data-theme sur <html>
+   change (géré par le bouton de bascule dans Navbar.js).
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Mode clair ──────────────────────────────────────────── */
+:root[data-theme="light"] {
+  /* Fond */
+  --iraky-void: #FAF9F4;
+  --iraky-deep: #F1EFE6;
+  --iraky-surface: #FFFFFF;
+  --iraky-surface-2: #FBFAF4;
+
+  /* Or — assombri pour rester lisible sur fond clair */
+  --iraky-gold: #C99A00;
+  --iraky-gold-deep: #A67C00;
+  --iraky-gold-soft: rgba(201, 154, 0, 0.10);
+  --iraky-gold-line: rgba(201, 154, 0, 0.30);
+
+  /* Vert "route" — assombri pour le même motif de contraste */
+  --iraky-route: #0E9D66;
+  --iraky-route-soft: rgba(14, 157, 102, 0.10);
+
+  /* Texte */
+  --iraky-ink: #17171F;
+  --iraky-muted: #5C5C72;
+  --iraky-muted-dim: #8B8BA0;
+
+  /* Navbar & cartes */
+  --iraky-nav-bg: rgba(250, 249, 244, 0.65);
+  --iraky-nav-bg-scrolled: rgba(250, 249, 244, 0.95);
+  --iraky-nav-border: rgba(201, 154, 0, 0.08);
+  --iraky-nav-border-scrolled: rgba(201, 154, 0, 0.22);
+  --iraky-card-border: rgba(23, 23, 31, 0.08);
+  --iraky-card-border-hover: var(--iraky-gold-line);
+  --iraky-card-shadow: 0 16px 36px rgba(23, 23, 31, 0.10);
+  --iraky-input-bg: #FFFFFF;
+}
+
+/* Le bouton "gold" garde toujours un texte sombre lisible, quel que soit le mode */
+:root[data-theme="light"] .iraky-btn-gold { color: #1a1200; }
+
+/* ── Mise en page globale ────────────────────────────────── */
+body {
+  background-color: var(--iraky-void, #07070f);
+}
+
 .App {
   text-align: center;
 }
 
+/* ── Legacy CRA (écran de démarrage React par défaut) ─────
+   Conservé au cas où il serait encore utilisé ailleurs dans
+   le projet (ex. écran de chargement) — sans impact sur le
+   site vitrine IRAKY, qui ne référence plus ces classes. ── */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -29,10 +84,6 @@
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

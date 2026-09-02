@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
 import jiramaImg from "../../images/jirama.jpg";
@@ -36,6 +37,12 @@ import {
   MdDoneAll,
   MdSend,
   MdStar,
+  MdDelete,
+  MdArrowBack,
+  MdExpandMore,
+  MdInfo,
+  MdCheckCircle,
+  MdSupportAgent,
 } from "react-icons/md";
 // ══════════════════════════════════════════════
 //  DONNÉES
@@ -199,12 +206,32 @@ function StatutBadge({ statut }) {
 //  SidebarContent
 // ══════════════════════════════════════════════
 function SidebarContent({ onglet, setOnglet, profil, commandes }) {
+  let suiviMasques = [];
+  try {
+    const brutS = localStorage.getItem("suivi_masques");
+    suiviMasques = brutS ? JSON.parse(brutS) : [];
+  } catch {}
+
   const enCours = commandes.filter(c =>
-    ["en_attente","negociable","accepte"].includes(c.statut)
+    ["en_attente","negociable","accepte"].includes(c.statut) && !suiviMasques.includes(c.id)
   ).length;
 
+  let historiqueMasques = [];
+  try {
+    const brutH = localStorage.getItem("historique_masques");
+    historiqueMasques = brutH ? JSON.parse(brutH) : [];
+  } catch {}
+
+  const nbCommandes = commandes.filter(c => !historiqueMasques.includes(c.id)).length;
+
+  let messagesMasques = [];
+  try {
+    const brut = localStorage.getItem("messages_masques");
+    messagesMasques = brut ? JSON.parse(brut) : [];
+  } catch {}
+
   const nbMessages = commandes.filter(c =>
-    c.coursier && c.statut !== "en_attente"
+    c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)
   ).length;
 
   const items = [
@@ -279,13 +306,26 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
               <span style={{ background:"#3b82f6", color:"#fff", borderRadius:12,
                 padding:"1px 8px", fontSize:11, fontWeight:800 }}>{nbMessages}</span>
             )}
+
+            {/* Badge mes commandes */}
+            {item.id==="historique" && nbCommandes>0 && (
+              <span style={{ background:"#10b981", color:"#000", borderRadius:12,
+                padding:"1px 8px", fontSize:11, fontWeight:800 }}>{nbCommandes}</span>
+            )}
           </div>
         ))}
       </div>
 
       {/* bouton déconnexion */}
       <div style={{ padding:16 }}>
-        <button onClick={() => { localStorage.clear(); window.location.href="/connexion"; }}
+        <button onClick={() => {
+            const CLES_A_GARDER = ["suivi_masques", "historique_masques", "messages_masques", "messages_effaces"];
+            const sauvegarde = {};
+            CLES_A_GARDER.forEach(cle => { const v = localStorage.getItem(cle); if (v) sauvegarde[cle] = v; });
+            localStorage.clear();
+            Object.entries(sauvegarde).forEach(([cle, v]) => localStorage.setItem(cle, v));
+            window.location.href = "/connexion";
+          }}
           style={{
             width:"100%", padding:"10px", borderRadius:12,
             border:"1px solid #ef444430", backgroundColor:"#ef444410",
@@ -316,6 +356,120 @@ const [notifs, setNotifs] = useState([]);
   const [noteCmd, setNoteCmd]         = useState(null);
   const [noteTmp, setNoteTmp]         = useState(0);
   const [confirmDel, setConfirmDel]   = useState(null);
+
+  // ── Masquage LOCAL du suivi (client uniquement — la commande
+  // reste intacte en base pour que l'admin garde tout l'historique) ──
+  const [suiviMasques, setSuiviMasques] = useState(() => {
+    try {
+      const brut = localStorage.getItem("suivi_masques");
+      return brut ? JSON.parse(brut) : [];
+    } catch { return []; }
+  });
+  const demanderRetraitSuivi = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Retirer de mon suivi",
+      html: `Voulez-vous vraiment retirer cette commande de votre suivi en temps réel ?<br/><br/>
+        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
+        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
+        Elle restera toutefois visible et suivie normalement côté administration.`,
+      background: "#131330",
+      color: "#fff",
+      iconColor: "#ef4444",
+      showCancelButton: true,
+      confirmButtonText: "Retirer définitivement",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#333355",
+      reverseButtons: true,
+      customClass: { popup: "swal-iraky" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setSuiviMasques(prev => {
+          const next = [...prev, id];
+          try { localStorage.setItem("suivi_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        showToast("Retirée définitivement de votre suivi");
+      }
+    });
+  };
+
+  // ── Masquage LOCAL de "Mes commandes" ────────────
+  const [historiqueMasques, setHistoriqueMasques] = useState(() => {
+    try {
+      const brut = localStorage.getItem("historique_masques");
+      return brut ? JSON.parse(brut) : [];
+    } catch { return []; }
+  });
+
+  const demanderRetraitHistorique = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Retirer de mes commandes",
+      html: `Voulez-vous vraiment retirer cette commande de votre historique ?<br/><br/>
+        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
+        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
+        Elle restera toutefois visible et suivie normalement côté administration.`,
+      background: "#131330",
+      color: "#fff",
+      iconColor: "#ef4444",
+      showCancelButton: true,
+      confirmButtonText: "Retirer définitivement",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#333355",
+      reverseButtons: true,
+      customClass: { popup: "swal-iraky" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setHistoriqueMasques(prev => {
+          const next = [...prev, id];
+          try { localStorage.setItem("historique_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        showToast("Retirée définitivement de vos commandes");
+      }
+    });
+  };
+
+  // ── Masquage LOCAL de "Mes messages" ─────────────
+  const [messagesMasques, setMessagesMasques] = useState(() => {
+    try {
+      const brut = localStorage.getItem("messages_masques");
+      return brut ? JSON.parse(brut) : [];
+    } catch { return []; }
+  });
+
+  const demanderRetraitMessage = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Retirer cette conversation",
+      html: `Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/>
+        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
+        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
+        Elle restera toutefois visible et suivie normalement côté administration.`,
+      background: "#131330",
+      color: "#fff",
+      iconColor: "#ef4444",
+      showCancelButton: true,
+      confirmButtonText: "Retirer définitivement",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#333355",
+      reverseButtons: true,
+      customClass: { popup: "swal-iraky" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setMessagesMasques(prev => {
+          const next = [...prev, id];
+          try { localStorage.setItem("messages_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        showToast("Conversation retirée définitivement");
+      }
+    });
+  };
   const [toast, setToast]             = useState(null);
   const [serviceHov, setServiceHov]   = useState(null);
   const [moyenHov, setMoyenHov]       = useState(null);
@@ -324,6 +478,126 @@ const [notifs, setNotifs] = useState([]);
   const [chatCommande, setChatCommande] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatMsg, setChatMsg]           = useState("");
+
+  // ══════ Aide & Support : chat client ↔ support (réel, connecté à la BDD) ══════
+  const [aideVue, setAideVue]               = useState("menu"); // menu | chat | guide
+  const [supportMessages, setSupportMessages] = useState([]);
+  const [supportMsg, setSupportMsg]           = useState("");
+  const [supportLoading, setSupportLoading]   = useState(false);
+  const [supportEnvoi, setSupportEnvoi]       = useState(false);
+  const [supportTyping, setSupportTyping]     = useState(false); // ✅ indicateur "l'assistant écrit..."
+  const supportEndRef                         = useRef(null);
+  const [guideOuvert, setGuideOuvert]         = useState(0);
+
+  const chargerSupportMessages = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8000/api/support/messages", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setSupportMessages(data);
+    } catch (err) {
+      console.error("Erreur chargement support :", err);
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (aideVue !== "chat") return;
+    setSupportLoading(true);
+    chargerSupportMessages();
+    const interval = setInterval(chargerSupportMessages, 3000); // ✅ polling temps réel
+    return () => clearInterval(interval);
+  }, [aideVue]);
+
+  useEffect(() => {
+    if (aideVue === "chat") supportEndRef.current?.scrollIntoView({ behavior:"smooth" });
+  }, [supportMessages, aideVue]);
+
+  const envoyerSupportMsg = async () => {
+    if (!supportMsg.trim() || supportEnvoi) return;
+    const texte = supportMsg.trim();
+    const msgTemp = {
+      id: `tmp-${Date.now()}`,
+      texte,
+      sender_role: "client",
+      created_at: new Date().toISOString(),
+      envoi: true,
+    };
+    setSupportMessages(prev => [...prev, msgTemp]);
+    setSupportMsg("");
+    setSupportEnvoi(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8000/api/support/messages", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ texte }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...data.message, envoi:false } : m));
+
+        // ✅ Si une réponse automatique existe, on simule une brève
+        //    frappe ("l'assistant écrit...") avant de l'afficher —
+        //    plus naturel qu'une apparition instantanée.
+        if (data.bot) {
+          setSupportTyping(true);
+          setTimeout(() => {
+            setSupportTyping(false);
+            setSupportMessages(prev => [...prev, { ...data.bot, bot:true }]);
+          }, 900);
+        }
+      } else {
+        setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...m, echec:true, envoi:false } : m));
+      }
+    } catch (err) {
+      setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...m, echec:true, envoi:false } : m));
+      console.error("Erreur envoi support :", err);
+    } finally {
+      setSupportEnvoi(false);
+    }
+  };
+
+  // ══════ Guide interactif — contenu 100% aligné sur les fonctionnalités réelles d'IRAKY Delivery ══════
+  const GUIDE_SECTIONS = [
+    {
+      Icon: MdAddCircle, color:"#FFD700",
+      titre: "Créer une nouvelle commande",
+      texte: "Depuis l'onglet « Nouvelle commande », choisissez un service (Achat, Facture JIRAMA, Banque BFV, Légalisation, Éducation, Livraison, Bazary…), précisez votre besoin puis sélectionnez un moyen de transport (Piéton, Vélo, Moto, Voiture). Votre commande apparaît ensuite en statut « En attente » jusqu'à ce qu'un coursier disponible la prenne en charge.",
+    },
+    {
+      Icon: MdLocationOn, color:"#3b82f6",
+      titre: "Suivre une commande en temps réel",
+      texte: "L'onglet « Suivi en temps réel » affiche toutes vos commandes actives (en attente, en négociation, acceptées). Vous pouvez y échanger avec le coursier, accepter les conditions, et suivre l'avancement jusqu'à la livraison. Une fois le service terminé, marquez la commande comme terminée pour noter automatiquement le coursier.",
+    },
+    {
+      Icon: MdChat, color:"#8b5cf6",
+      titre: "Messagerie avec les coursiers",
+      texte: "Dès qu'un coursier prend votre commande, une conversation s'ouvre dans « Mes messages ». Vous pouvez discuter des détails du service, envoyer des précisions, et supprimer un message ou une conversation entière si besoin — la suppression est définitive et reste liée à votre compte, même après déconnexion.",
+    },
+    {
+      Icon: MdListAlt, color:"#10b981",
+      titre: "Historique des commandes",
+      texte: "« Mes commandes » regroupe l'historique complet : commandes terminées, refusées ou annulées. Vous pouvez retirer une commande de votre liste à tout moment (elle reste néanmoins visible côté administration à des fins de suivi).",
+    },
+    {
+      Icon: MdNotifications, color:"#f59e0b",
+      titre: "Notifications",
+      texte: "La cloche en haut du tableau de bord vous informe en temps réel : nouvelle offre d'un coursier, message reçu, commande terminée. Cliquez sur une notification pour accéder directement à la commande ou conversation concernée.",
+    },
+    {
+      Icon: MdPerson, color:"#ef4444",
+      titre: "Mon profil",
+      texte: "Consultez et gérez vos informations personnelles (nom, téléphone, email) depuis l'onglet « Profil ». C'est aussi ici que vous retrouverez vos statistiques : nombre de commandes, note moyenne, etc.",
+    },
+  ];
   const [chatLoading, setChatLoading]   = useState(false);
   const messagesEndRef                  = useRef(null);
 
@@ -334,6 +608,31 @@ const [notifs, setNotifs] = useState([]);
   
   const [selectedMsgs, setSelectedMsgs] = useState(new Set());
   const [modeSelection, setModeSelection] = useState(false);
+
+  // ✅ Messages supprimés par le client — persistés en localStorage
+  //    pour qu'ils ne réapparaissent jamais après déconnexion/reconnexion
+  //    (même principe que "messages_masques" pour les conversations).
+  const [messagesEffaces, setMessagesEffaces] = useState(() => {
+    try {
+      const brut = localStorage.getItem("messages_effaces");
+      return brut ? JSON.parse(brut) : {};
+    } catch { return {}; }
+  });
+
+  const ajouterMessagesEffaces = (commandeId, ids) => {
+    setMessagesEffaces(prev => {
+      const existants = prev[commandeId] || [];
+      const next = { ...prev, [commandeId]: [...new Set([...existants, ...ids])] };
+      try { localStorage.setItem("messages_effaces", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const filtrerMessagesEffaces = (commandeId, data) => {
+    const effaces = messagesEffaces[commandeId] || [];
+    if (effaces.length === 0) return data;
+    return data.filter(m => !effaces.includes(m.id));
+  };
 
 // ✅ Après — chargé depuis localStorage + API /me
 const [profil, setProfil] = useState({
@@ -353,7 +652,14 @@ useEffect(() => {
   fetch("http://localhost:8000/api/me", {
     headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
   })
-    .then(res => { if (res.status === 401) { localStorage.clear(); window.location.href="/connexion"; } return res.json(); })
+    .then(res => { if (res.status === 401) {
+        const CLES_A_GARDER = ["suivi_masques", "historique_masques", "messages_masques", "messages_effaces"];
+        const sauvegarde = {};
+        CLES_A_GARDER.forEach(cle => { const v = localStorage.getItem(cle); if (v) sauvegarde[cle] = v; });
+        localStorage.clear();
+        Object.entries(sauvegarde).forEach(([cle, v]) => localStorage.setItem(cle, v));
+        window.location.href = "/connexion";
+      } return res.json(); })
     .then(data => {
       if (!data) return;
       const p = {
@@ -382,7 +688,7 @@ const ouvrirChat = async (cmd) => {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     });
     const data = await res.json();
-    if (Array.isArray(data)) setChatMessages(data);
+    if (Array.isArray(data)) setChatMessages(filtrerMessagesEffaces(cmd.id, data));
   } catch (err) {
     console.error("Erreur messages :", err);
   }
@@ -498,14 +804,14 @@ useEffect(() => {
     fetch(`http://localhost:8000/api/commandes/${chatCommande.id}/messages`, {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
-      if (Array.isArray(data)) setChatMessages(data);
+      if (Array.isArray(data)) setChatMessages(filtrerMessagesEffaces(chatCommande.id, data));
     }).catch(()=>{});
   };
 
   fetchMessages();
   const interval = setInterval(fetchMessages, 2000); // ✅ toutes les 2s
   return () => clearInterval(interval);
-}, [chatCommande]);
+}, [chatCommande, messagesEffaces]);
 
   const tarifSel = moyens.find(m=>m.id===form.moyen)?.tarif || 0;
 
@@ -754,7 +1060,7 @@ const noterCoursier = async (id, note) => {
                             { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" } }
                           );
                           const data = await res.json();
-                          if (Array.isArray(data)) setChatMessages(data);
+                          if (Array.isArray(data)) setChatMessages(filtrerMessagesEffaces(cmd.id, data));
                         } catch {}
 
                         setOnglet("messages");
@@ -1258,7 +1564,7 @@ const noterCoursier = async (id, note) => {
             </h4>
                 <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>{commandes.length} commande(s) au total</p>
 
-                {commandes.length===0 && (
+                {commandes.filter(c=>!historiqueMasques.includes(c.id)).length===0 && (
                   <div style={{ ...card, textAlign:"center", color:"#666", padding:48 }}>
                     <div style={{ fontSize:48, marginBottom:12 }}>📭</div>
                     Aucune commande pour l'instant.
@@ -1269,7 +1575,7 @@ const noterCoursier = async (id, note) => {
                   </div>
                 )}
 
-                {commandes.map(cmd => {
+                {commandes.filter(c=>!historiqueMasques.includes(c.id)).map(cmd => {
                   const svc = SERVICES.find(s=>s.label===cmd.service);
                   const moy = moyens.find(m=>m.label===cmd.moyen);
                   return (
@@ -1323,7 +1629,17 @@ const noterCoursier = async (id, note) => {
                           </div>
                         </div>
                         <div style={{ textAlign:"right", flexShrink:0 }}>
-                          <StatutBadge statut={cmd.statut}/>
+                          <div style={{ display:"flex", alignItems:"center", gap:8, justifyContent:"flex-end" }}>
+                            <StatutBadge statut={cmd.statut}/>
+                            <button
+                              onClick={e=>{ e.stopPropagation(); demanderRetraitHistorique(cmd.id); }}
+                              title="Retirer de mes commandes (reste visible côté admin)"
+                              style={{ background:"#ef444415", border:"1px solid #ef444430",
+                                color:"#ef6666", borderRadius:8, width:28, height:28, cursor:"pointer",
+                                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                              <MdDelete style={{ fontSize:14 }}/>
+                            </button>
+                          </div>
                           <div style={{ color:"#FFD700", fontWeight:800, marginTop:8, fontSize:16 }}>
                             {cmd.tarif.toLocaleString()} Ar
                           </div>
@@ -1380,14 +1696,14 @@ const noterCoursier = async (id, note) => {
       Vos conversations avec les coursiers
     </p>
 
-    {commandes.filter(c => c.coursier && c.statut !== "en_attente").length === 0 ? (
+    {commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).length === 0 ? (
       <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
         <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
         <p>Aucune conversation active.</p>
         <p style={{ fontSize:13 }}>Vos messages apparaîtront ici lorsqu'un coursier prend votre commande.</p>
       </div>
     ) : (
-      commandes.filter(c => c.coursier && c.statut !== "en_attente").map(cmd => (
+      commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).map(cmd => (
         <div key={cmd.id}
           onClick={() => { setChatCommande(cmd); setChatMessages([]); }}
           style={{ ...card, marginBottom:14, cursor:"pointer",
@@ -1420,6 +1736,15 @@ const noterCoursier = async (id, note) => {
                 fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
                 <MdChat style={{ fontSize:16 }}/> Ouvrir
               </div>
+              {/* supprimer */}
+              <button
+                onClick={e=>{ e.stopPropagation(); demanderRetraitMessage(cmd.id); }}
+                title="Supprimer cette conversation (reste visible côté admin)"
+                style={{ background:"#ef444415", border:"1px solid #ef444430",
+                  color:"#ef6666", borderRadius:8, width:28, height:28, cursor:"pointer",
+                  display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <MdDelete style={{ fontSize:14 }}/>
+              </button>
             </div>
           </div>
         </div>
@@ -1530,6 +1855,10 @@ const noterCoursier = async (id, note) => {
                       headers: { "Authorization": `Bearer ${token}` },
                     })
                   ));
+                  // ✅ Persiste la suppression côté client (localStorage) pour
+                  //    que ces messages ne reviennent jamais, même si l'API
+                  //    les renvoie encore après déconnexion/reconnexion.
+                  ajouterMessagesEffaces(chatCommande.id, [...selectedMsgs]);
                   setChatMessages(prev => prev.filter(m => !selectedMsgs.has(m.id)));
                   setSelectedMsgs(new Set());
                   setModeSelection(false);
@@ -1668,13 +1997,19 @@ const noterCoursier = async (id, note) => {
     </h4>
     <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>Commandes actives en ce moment</p>
 
-    {commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length === 0 ? (
+    {(() => {
+      // ✅ Exclut aussi les commandes masquées localement par le client
+      // (n'affecte que cet affichage — la BDD et l'admin ne sont jamais touchés)
+      const suiviActif = commandes.filter(c =>
+        ["en_attente","negociable","accepte"].includes(c.statut) && !suiviMasques.includes(c.id)
+      );
+      return suiviActif.length === 0 ? (
       <div style={{ ...card, textAlign:"center", color:"#666", padding:48 }}>
         <div style={{ fontSize:48, marginBottom:12 }}>🏁</div>
         Aucune commande active en ce moment.
       </div>
     ) : (
-      commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).map(cmd => {
+      suiviActif.map(cmd => {
         const steps = ["en_attente","negociable","accepte","termine"];
         const idx   = steps.indexOf(cmd.statut);
         return (
@@ -1687,7 +2022,17 @@ const noterCoursier = async (id, note) => {
                   {cmd.moyen} · 📢 {cmd.heure_publication} · 🕐 {cmd.heure_debut} → {cmd.heure_livraison}
                 </div>
               </div>
-              <StatutBadge statut={cmd.statut}/>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <StatutBadge statut={cmd.statut}/>
+                <button
+                  onClick={()=>demanderRetraitSuivi(cmd.id)}
+                  title="Retirer de mon suivi (reste visible côté admin)"
+                  style={{ background:"#ef444415", border:"1px solid #ef444430",
+                    color:"#ef6666", borderRadius:8, width:32, height:32, cursor:"pointer",
+                    display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <MdDelete style={{ fontSize:16 }}/>
+                </button>
+              </div>
             </div>
 
             {/* Barre progression */}
@@ -1754,7 +2099,21 @@ const noterCoursier = async (id, note) => {
 {cmd.statut === "accepte" && (
   <button
     onClick={async () => {
-      if (!window.confirm(`Confirmer la fin de la mission "${cmd.service}" ?\nLe coursier recevra 1 étoile automatiquement.`)) return;
+      const { isConfirmed } = await Swal.fire({
+        title: "Terminer la mission ?",
+        html: `Confirmer la fin de la mission <b>"${cmd.service}"</b> ?<br/>
+          Le coursier recevra 1 étoile automatiquement.`,
+        background: "#131330",
+        color: "#fff",
+        showCancelButton: true,
+        confirmButtonText: "Oui, terminer",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#10b981",
+        cancelButtonColor: "#333355",
+        reverseButtons: true,
+        customClass: { popup: "swal-iraky" },
+      });
+      if (!isConfirmed) return;
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
@@ -1822,7 +2181,8 @@ const noterCoursier = async (id, note) => {
           </div>
         );
       })
-    )}
+    );
+    })()}
   </div>
 )}
 
@@ -1966,6 +2326,7 @@ const noterCoursier = async (id, note) => {
                         Comment pouvons-nous vous aider ?
                       </p>
 
+                      {aideVue === "menu" && (<>
                       {/* 4 boxes react-icons */}
                       <div style={{
                         display:"grid",
@@ -1974,12 +2335,18 @@ const noterCoursier = async (id, note) => {
                         marginBottom:32,
                       }} className="aide-grid">
                         {[
-                          { Icon:MdPhone,    title:"Nous appeler",   desc:"+261 38 21 266 83",         color:"#10b981", bg:"#10b98115", action:"Appeler maintenant →" },
-                          { Icon:MdChat,     title:"Chat en direct", desc:"Réponse en moins de 5 min", color:"#3b82f6", bg:"#3b82f615", action:"Démarrer le chat →"   },
-                          { Icon:MdEmail,    title:"Email support",  desc:"irakydelivery@gmail.com",   color:"#8b5cf6", bg:"#8b5cf615", action:"Envoyer un email →"    },
-                          { Icon:MdMenuBook, title:"Guide complet",  desc:"Tutoriels pas à pas",       color:"#f59e0b", bg:"#f59e0b15", action:"Lire le guide →"       },
+                          { Icon:MdPhone,    title:"Nous appeler",   desc:"+261 38 21 266 83",         color:"#10b981", bg:"#10b98115", action:"Appeler maintenant →",
+                            onClick:() => { window.location.href = "tel:+261382126683"; } },
+                          { Icon:MdChat,     title:"Chat en direct", desc:"Réponse en moins de 5 min", color:"#3b82f6", bg:"#3b82f615", action:"Démarrer le chat →",
+                            onClick:() => setAideVue("chat") },
+                          { Icon:MdEmail,    title:"Email support",  desc:"irakydelivery@gmail.com",   color:"#8b5cf6", bg:"#8b5cf615", action:"Envoyer un email →",
+                            onClick:() => { window.location.href = `mailto:irakydelivery@gmail.com?subject=${encodeURIComponent("Support IRAKY Delivery - "+(profil.nom||""))}`; } },
+                          { Icon:MdMenuBook, title:"Guide complet",  desc:"Tutoriels pas à pas",       color:"#f59e0b", bg:"#f59e0b15", action:"Lire le guide →",
+                            onClick:() => { setGuideOuvert(0); setAideVue("guide"); } },
                         ].map((item, i) => (
                           <div key={i}
+                            onClick={item.onClick}
+                            className="aide-card-anim"
                             style={{
                               backgroundColor:"#131330",
                               borderRadius:16,
@@ -1989,14 +2356,15 @@ const noterCoursier = async (id, note) => {
                               transition:"all 0.3s ease",
                               position:"relative",
                               overflow:"hidden",
+                              animationDelay:`${i*0.08}s`,
                             }}
                             onMouseEnter={e => {
-                              e.currentTarget.style.transform = "translateY(-6px)";
+                              e.currentTarget.style.transform = "translateY(-6px) scale(1.015)";
                               e.currentTarget.style.boxShadow = `0 16px 40px ${item.color}30`;
                               e.currentTarget.style.borderColor = `${item.color}66`;
                             }}
                             onMouseLeave={e => {
-                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.transform = "translateY(0) scale(1)";
                               e.currentTarget.style.boxShadow = "none";
                               e.currentTarget.style.borderColor = `${item.color}30`;
                             }}
@@ -2071,6 +2439,215 @@ const noterCoursier = async (id, note) => {
                           </details>
                         ))}
                       </div>
+                      </>)}
+
+                      {/* ══════════════ CHAT SUPPORT — réel, connecté à la BDD ══════════════ */}
+                      {aideVue === "chat" && (
+                        <div className="aide-fade-in" style={{
+                          backgroundColor:"#131330", borderRadius:18,
+                          border:"1px solid #3b82f630", overflow:"hidden",
+                          boxShadow:"0 16px 44px #3b82f620",
+                          display:"flex", flexDirection:"column",
+                        }}>
+                          {/* Header */}
+                          <div style={{
+                            display:"flex", alignItems:"center", gap:12,
+                            padding:"16px 18px", borderBottom:"1px solid #3b82f625",
+                            background:"linear-gradient(135deg,#3b82f618,#8b5cf610)",
+                          }}>
+                            <button onClick={()=>setAideVue("menu")}
+                              style={{ background:"#ffffff10", border:"1px solid #ffffff20",
+                                borderRadius:10, width:34, height:34, cursor:"pointer",
+                                display:"flex", alignItems:"center", justifyContent:"center",
+                                color:"#fff", flexShrink:0 }}>
+                              <MdArrowBack style={{ fontSize:18 }}/>
+                            </button>
+                            <div style={{ width:40, height:40, borderRadius:"50%",
+                              background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                              display:"flex", alignItems:"center", justifyContent:"center",
+                              flexShrink:0, boxShadow:"0 0 0 3px #3b82f620" }}>
+                              <MdSupportAgent style={{ color:"#fff", fontSize:20 }}/>
+                            </div>
+                            <div style={{ flex:1 }}>
+                              <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>Support IRAKY Delivery</div>
+                              <div style={{ color:"#3b82f6", fontSize:11, display:"flex", alignItems:"center", gap:5 }}>
+                                <span className="aide-dot-online"/> En ligne · répond sous 5 min
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Messages */}
+                          <div style={{ height:320, overflowY:"auto", padding:16,
+                            display:"flex", flexDirection:"column", gap:10 }}>
+                            {supportLoading && supportMessages.length === 0 && (
+                              <div style={{ margin:"auto", color:"#555", fontSize:13, display:"flex",
+                                flexDirection:"column", alignItems:"center", gap:10 }}>
+                                <div style={{ width:22, height:22, border:"3px solid #3b82f640",
+                                  borderTop:"3px solid #3b82f6", borderRadius:"50%",
+                                  animation:"spin 0.7s linear infinite" }}/>
+                                Chargement de la conversation...
+                              </div>
+                            )}
+                            {!supportLoading && supportMessages.length === 0 && (
+                              <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
+                                <MdSupportAgent style={{ fontSize:40, color:"#3b82f660", marginBottom:8 }}/>
+                                <p style={{ fontSize:13 }}>Bonjour {profil.nom} 👋<br/>Posez-nous votre question, notre équipe vous répond ici.</p>
+                              </div>
+                            )}
+                            {supportMessages.map((m, i) => {
+                              const isClient = m.sender_role === "client"
+                                || (profil.id && parseInt(m.sender_id) === parseInt(profil.id));
+                              const estBot = !isClient && (m.bot || m.sender_id === null || m.sender_id === undefined);
+                              return (
+                                <div key={m.id || i} className="aide-msg-in"
+                                  style={{ display:"flex", justifyContent: isClient ? "flex-end" : "flex-start" }}>
+                                  {!isClient && (
+                                    <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                                      background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                                      display:"flex", alignItems:"center", justifyContent:"center",
+                                      marginRight:6, alignSelf:"flex-end" }}>
+                                      <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                                    </div>
+                                  )}
+                                  <div style={{
+                                    backgroundColor: isClient ? "#3b82f622" : "#1a1a35",
+                                    border:`1px solid ${m.echec ? "#ef4444" : isClient ? "#3b82f644" : "#ffffff15"}`,
+                                    borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                                    padding:"9px 14px", maxWidth:"75%", opacity: m.envoi ? 0.6 : 1,
+                                  }}>
+                                    {estBot && (
+                                      <div style={{ color:"#3b82f6", fontSize:10, fontWeight:700,
+                                        marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>
+                                        🤖 Assistant automatique
+                                      </div>
+                                    )}
+                                    <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                                    <div style={{ color: m.echec ? "#ef6666" : "#666", fontSize:10, marginTop:3,
+                                      textAlign:"right" }}>
+                                      {m.echec ? "Échec de l'envoi" : (m.time || (m.created_at
+                                        ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
+                                        : "..."))}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {supportTyping && (
+                              <div className="aide-msg-in" style={{ display:"flex", justifyContent:"flex-start" }}>
+                                <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                                  background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                                  display:"flex", alignItems:"center", justifyContent:"center",
+                                  marginRight:6, alignSelf:"flex-end" }}>
+                                  <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                                </div>
+                                <div style={{ backgroundColor:"#1a1a35", border:"1px solid #ffffff15",
+                                  borderRadius:"16px 16px 16px 4px", padding:"12px 16px",
+                                  display:"flex", gap:4, alignItems:"center" }}>
+                                  <span className="aide-typing-dot"/>
+                                  <span className="aide-typing-dot" style={{ animationDelay:"0.15s" }}/>
+                                  <span className="aide-typing-dot" style={{ animationDelay:"0.3s" }}/>
+                                </div>
+                              </div>
+                            )}
+                            <div ref={supportEndRef}/>
+                          </div>
+
+                          {/* Input */}
+                          <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
+                            display:"flex", gap:10 }}>
+                            <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
+                              onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
+                              placeholder="Écrivez votre message au support..."
+                              style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #3b82f640",
+                                color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
+                                transition:"border-color 0.2s" }}
+                              onFocus={e=>e.target.style.borderColor="#3b82f6"}
+                              onBlur={e=>e.target.style.borderColor="#3b82f640"}
+                            />
+                            <button onClick={envoyerSupportMsg}
+                              disabled={!supportMsg.trim() || supportEnvoi}
+                              style={{
+                                background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                                color:"#fff", border:"none", borderRadius:12, padding:"10px 16px",
+                                cursor: supportMsg.trim() && !supportEnvoi ? "pointer" : "not-allowed",
+                                opacity: supportMsg.trim() ? 1 : 0.4,
+                                display:"flex", alignItems:"center", justifyContent:"center",
+                                minWidth:44, transition:"transform 0.15s",
+                              }}
+                              onMouseEnter={e=>{ if(supportMsg.trim()) e.currentTarget.style.transform="scale(1.06)"; }}
+                              onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
+                              {supportEnvoi
+                                ? <div style={{ width:16, height:16, border:"2px solid #fff",
+                                    borderTop:"2px solid transparent", borderRadius:"50%",
+                                    animation:"spin 0.6s linear infinite" }}/>
+                                : <MdSend style={{ fontSize:18 }}/>
+                              }
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ══════════════ GUIDE INTERACTIF ══════════════ */}
+                      {aideVue === "guide" && (
+                        <div className="aide-fade-in">
+                          <button onClick={()=>setAideVue("menu")}
+                            style={{ background:"#ffffff10", border:"1px solid #ffffff20",
+                              borderRadius:10, padding:"8px 16px", cursor:"pointer",
+                              color:"#fff", display:"flex", alignItems:"center", gap:8,
+                              fontSize:12, marginBottom:18 }}>
+                            <MdArrowBack style={{ fontSize:16 }}/> Retour
+                          </button>
+
+                          <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,#131330)",
+                            border:"1px solid #f59e0b30", display:"flex", alignItems:"center", gap:14 }}>
+                            <MdInfo style={{ color:"#f59e0b", fontSize:28, flexShrink:0 }}/>
+                            <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>
+                              Ce guide couvre toutes les fonctionnalités de votre espace client IRAKY Delivery.
+                              Cliquez sur une section pour dérouler les explications.
+                            </div>
+                          </div>
+
+                          {GUIDE_SECTIONS.map((s, i) => {
+                            const ouvert = guideOuvert === i;
+                            return (
+                              <div key={i} className="aide-card-anim" style={{
+                                animationDelay:`${i*0.06}s`,
+                                backgroundColor:"#131330", borderRadius:14,
+                                border:`1px solid ${ouvert ? s.color+"55" : "#ffffff15"}`,
+                                marginBottom:12, overflow:"hidden",
+                                transition:"border-color 0.25s",
+                              }}>
+                                <div onClick={()=>setGuideOuvert(ouvert ? -1 : i)}
+                                  style={{ display:"flex", alignItems:"center", gap:14,
+                                    padding:"16px 18px", cursor:"pointer" }}>
+                                  <div style={{ width:42, height:42, borderRadius:12, flexShrink:0,
+                                    backgroundColor:`${s.color}18`, border:`1px solid ${s.color}33`,
+                                    display:"flex", alignItems:"center", justifyContent:"center" }}>
+                                    <s.Icon style={{ color:s.color, fontSize:20 }}/>
+                                  </div>
+                                  <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
+                                    {s.titre}
+                                  </div>
+                                  <MdExpandMore style={{ color: ouvert ? s.color : "#666", fontSize:22,
+                                    transition:"transform 0.3s", transform: ouvert ? "rotate(180deg)" : "rotate(0)" }}/>
+                                </div>
+                                <div style={{
+                                  maxHeight: ouvert ? 200 : 0,
+                                  opacity: ouvert ? 1 : 0,
+                                  transition:"max-height 0.35s ease, opacity 0.3s ease",
+                                  overflow:"hidden",
+                                }}>
+                                  <div style={{ padding:"0 18px 18px 74px", color:"#999",
+                                    fontSize:13, lineHeight:1.7, display:"flex", gap:8 }}>
+                                    <MdCheckCircle style={{ color:s.color, fontSize:15, flexShrink:0, marginTop:2 }}/>
+                                    <span>{s.texte}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -2198,6 +2775,7 @@ const noterCoursier = async (id, note) => {
         </Modal>
       )}
 
+
  <style>{`
   @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }
   @keyframes modalIn { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
@@ -2230,6 +2808,31 @@ const noterCoursier = async (id, note) => {
   details summary::-webkit-details-marker { display:none; }
 
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+  /* ══ Aide & Support ══ */
+  .aide-card-anim { opacity:0; animation: aideCardIn 0.5s ease forwards; }
+  @keyframes aideCardIn { from{opacity:0; transform:translateY(18px) scale(0.97)} to{opacity:1; transform:translateY(0) scale(1)} }
+
+  .aide-fade-in { opacity:0; animation: aideFadeIn 0.35s ease forwards; }
+  @keyframes aideFadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+  .aide-msg-in { opacity:0; animation: aideMsgIn 0.3s ease forwards; }
+  @keyframes aideMsgIn { from{opacity:0; transform:translateY(10px) scale(0.98)} to{opacity:1; transform:translateY(0) scale(1)} }
+
+  .aide-dot-online { display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:#3b82f6; box-shadow:0 0 0 0 #3b82f680; animation: aidePulse 1.6s infinite; }
+  @keyframes aidePulse {
+    0%   { box-shadow:0 0 0 0 #3b82f660; }
+    70%  { box-shadow:0 0 0 6px #3b82f600; }
+    100% { box-shadow:0 0 0 0 #3b82f600; }
+  }
+
+  .aide-typing-dot { width:6px; height:6px; border-radius:50%; background:#3b82f6;
+    display:inline-block; animation: aideTypingBounce 1s infinite ease-in-out; }
+  @keyframes aideTypingBounce {
+    0%, 60%, 100% { transform:translateY(0); opacity:0.5; }
+    30%           { transform:translateY(-5px); opacity:1; }
+  }
 `}</style>
     </div>
   );

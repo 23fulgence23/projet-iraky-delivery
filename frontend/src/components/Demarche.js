@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import "../Theme.css";
+import "../App.css";
 
 function Demarche() {
   const [visible, setVisible] = useState(false);
@@ -15,189 +17,116 @@ function Demarche() {
   }, []);
 
   const demarcheCoursier = [
-    {
-      step: "01",
-      icon: "fas fa-user-plus",
-      title: "Inscription",
-      desc: "Créez votre compte coursier et rejoignez la plateforme IRAKY Delivery.",
-      badge: null,
-    },
-    {
-      step: "02",
-      icon: "fas fa-hand-holding-usd",
-      title: "Droit d'entrée",
+    { step: "01", icon: "fas fa-user-plus", title: "Inscription",
+      desc: "Créez votre compte coursier et rejoignez la plateforme IRAKY Delivery.", badge: null },
+    { step: "02", icon: "fas fa-hand-holding-usd", title: "Droit d'entrée",
       desc: "Payez le droit d'entrée unique pour activer votre compte coursier.",
-      badge: "10 000 Ar",
-      badgeColor: "#FFD700",
-    },
-    {
-      step: "03",
-      icon: "fas fa-calendar-check",
-      title: "Abonnement mensuel",
-      desc: "Payez votre premier abonnement mensuel pour accéder aux offres clients.",
-      badge: "10 000 Ar/mois",
-      badgeColor: "#FFD700",
-    },
-    {
-      step: "04",
-      icon: "fas fa-list-alt",
-      title: "Voir les offres",
-      desc: "Accédez à votre espace et consultez toutes les demandes des clients disponibles.",
-      badge: null,
-    },
-    {
-      step: "05",
-      icon: "fas fa-motorcycle",
-      title: "Accepter une mission",
-      desc: "Choisissez librement les courses que vous souhaitez effectuer.",
-      badge: null,
-    },
-    {
-      step: "06",
-      icon: "fas fa-exclamation-triangle",
-      title: "Renouveler l'abonnement",
-      desc: "Renouvelez votre abonnement chaque mois. Sinon votre compte sera désactivé automatiquement.",
-      badge: "⚠️ Obligatoire",
-      badgeColor: "#dc3545",
-    },
+      badge: "10 000 Ar", badgeColor: "var(--iraky-gold)" },
+    { step: "03", icon: "fas fa-calendar-check", title: "Abonnement mensuel",
+      desc: "Payez votre premier abonnement pour accéder aux offres clients.",
+      badge: "10 000 Ar/mois", badgeColor: "var(--iraky-gold)" },
+    { step: "04", icon: "fas fa-list-alt", title: "Voir les offres",
+      desc: "Consultez toutes les demandes des clients disponibles près de vous.", badge: null },
+    { step: "05", icon: "fas fa-motorcycle", title: "Accepter une mission",
+      desc: "Choisissez librement les courses que vous souhaitez effectuer.", badge: null },
+    { step: "06", icon: "fas fa-exclamation-triangle", title: "Renouveler l'abonnement",
+      desc: "Chaque mois, sinon votre compte est désactivé automatiquement.",
+      badge: "Obligatoire", badgeColor: "#EF4444" },
   ];
 
   return (
-    <section
-      id="demarche"
-      ref={ref}
-      style={{ backgroundColor: "#0a0a1e", padding: "100px 0" }}
-    >
+    <section id="demarche" ref={ref} style={{ backgroundColor: "var(--iraky-void)", padding: "110px 0" }}>
       <div className="container">
 
-        {/* Titre */}
-        <div
-          className="text-center mb-5"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(30px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <h2 className="fw-bold" style={{ color: "#FFD700", fontSize: "40px" }}>
+        <div className="text-center mb-5 mx-auto" style={{
+          maxWidth: "560px",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(20px)",
+          transition: "all 0.7s ease",
+        }}>
+          <span className="iraky-eyebrow justify-content-center mb-3">Le parcours</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
             Comment ça marche ?
           </h2>
-          <p style={{ color: "#aaaaaa", fontSize: "17px" }}>
-            Choisissez votre profil et découvrez les étapes
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
+            Choisissez votre profil et découvrez les étapes.
           </p>
         </div>
 
-        {/* Tabs Client / Coursier */}
-        <div className="d-flex justify-content-center gap-3 mb-5">
-          <button
-            onClick={() => setActiveTab("client")}
-            className="btn fw-bold px-5 py-2"
-            style={{
-              backgroundColor: activeTab === "client" ? "#FFD700" : "transparent",
-              color: activeTab === "client" ? "#000" : "#FFD700",
-              border: "2px solid #FFD700",
-              borderRadius: "25px",
-              fontSize: "16px",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <i className="fas fa-user me-2"></i>
-            Je suis Client
-          </button>
-          <button
-            onClick={() => setActiveTab("coursier")}
-            className="btn fw-bold px-5 py-2"
-            style={{
-              backgroundColor: activeTab === "coursier" ? "#FFD700" : "transparent",
-              color: activeTab === "coursier" ? "#000" : "#FFD700",
-              border: "2px solid #FFD700",
-              borderRadius: "25px",
-              fontSize: "16px",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <i className="fas fa-motorcycle me-2"></i>
-            Je suis Coursier
-          </button>
+        {/* Toggle segmenté */}
+        <div className="d-flex justify-content-center mb-5">
+          <div style={{
+            display: "inline-flex", backgroundColor: "var(--iraky-surface)",
+            borderRadius: "999px", padding: "5px", border: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            {[{ id: "client", label: "Je suis Client", icon: "fas fa-user" },
+              { id: "coursier", label: "Je suis Coursier", icon: "fas fa-motorcycle" }].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="btn fw-bold"
+                style={{
+                  backgroundColor: activeTab === tab.id ? "var(--iraky-gold)" : "transparent",
+                  color: activeTab === tab.id ? "#0a0a1e" : "var(--iraky-muted)",
+                  border: "none",
+                  borderRadius: "999px",
+                  fontSize: "14.5px",
+                  padding: "10px 26px",
+                  fontFamily: "var(--f-body)",
+                  transition: "all 0.25s ease",
+                }}
+              >
+                <i className={tab.icon} style={{ marginRight: "8px" }}></i>
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Contenu */}
         {activeTab === "client" ? (
 
-          /* CLIENT — image gauche + description droite */
-          <div
-            className="row align-items-center g-5"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(40px)",
-              transition: "all 0.7s ease",
-            }}
-          >
-            {/* Image gauche */}
-            <div className="col-lg-6 text-center">
+          <div className="row align-items-center g-5" style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(30px)",
+            transition: "all 0.6s ease",
+          }}>
+            <div className="col-lg-6 text-center position-relative">
               <img
                 src={require("../images/client.jpg")}
-                alt="Client IRAKY"
+                alt="Client IRAKY Delivery"
                 style={{
-                  width: "100%",
-                  maxWidth: "450px",
-                  borderRadius: "20px",
-                  boxShadow: "0 0 50px #FFD70033",
+                  width: "100%", maxWidth: "440px", borderRadius: "22px",
+                  boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(255,215,0,0.16)",
                 }}
               />
             </div>
 
-            {/* Description droite */}
             <div className="col-lg-6">
-              <span
-                className="badge mb-3 px-3 py-2"
-                style={{
-                  backgroundColor: "#FFD70022",
-                  color: "#FFD700",
-                  fontSize: "13px",
-                }}
-              >
-                ✅ Inscription 100% gratuite
+              <span style={{
+                display: "inline-block", backgroundColor: "var(--iraky-route-soft)",
+                color: "var(--iraky-route)", fontFamily: "var(--f-mono)", fontSize: "12px",
+                padding: "6px 14px", borderRadius: "999px", marginBottom: "16px",
+              }}>
+                ✓ INSCRIPTION 100% GRATUITE
               </span>
-              <h3 className="fw-bold mb-3" style={{ color: "#ffffff" }}>
+              <h3 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "26px" }}>
                 Comment commander un coursier ?
               </h3>
-              <p style={{ color: "#aaaaaa", fontSize: "16px", lineHeight: "1.9" }}>
-                Inscrivez-vous gratuitement sur IRAKY Delivery, connectez-vous
-                à votre espace personnel, puis remplissez un simple formulaire
-                de demande en indiquant le type de service souhaité, votre
-                adresse et une description. Soumettez votre demande et un
-                coursier disponible l'acceptera rapidement. Vous serez notifié
-                dès que la mission est terminée, le tout à seulement{" "}
-                <span style={{ color: "#FFD700", fontWeight: "bold" }}>
-                  5 000 Ar
-                </span>.
+              <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "15.5px", lineHeight: "1.85" }}>
+                Inscrivez-vous gratuitement, connectez-vous à votre espace
+                personnel, puis remplissez une demande en indiquant le service
+                souhaité, votre adresse et une description. Un coursier
+                disponible l'accepte rapidement, et vous êtes notifié dès la
+                mission terminée — le tout dès{" "}
+                <strong style={{ color: "var(--iraky-gold)" }}>5 000 Ar</strong>.
               </p>
-              <div className="d-flex gap-3 mt-4">
-                <button
-                  className="btn fw-bold px-4 py-2"
-                  style={{
-                    backgroundColor: "#FFD700",
-                    color: "#000",
-                    borderRadius: "25px",
-                    fontSize: "15px",
-                  }}
-                >
-                  <i className="fas fa-user-plus me-2"></i>
-                  S'inscrire gratuitement
+              <div className="d-flex gap-3 mt-4 flex-wrap">
+                <button className="iraky-btn-gold">
+                  <i className="fas fa-user-plus me-2"></i>S'inscrire gratuitement
                 </button>
-                <button
-                  className="btn fw-bold px-4 py-2"
-                  style={{
-                    border: "2px solid #FFD700",
-                    color: "#FFD700",
-                    backgroundColor: "transparent",
-                    borderRadius: "25px",
-                    fontSize: "15px",
-                  }}
-                >
-                  <i className="fas fa-sign-in-alt me-2"></i>
-                  Se connecter
+                <button className="iraky-btn-ghost">
+                  <i className="fas fa-sign-in-alt me-2"></i>Se connecter
                 </button>
               </div>
             </div>
@@ -205,81 +134,54 @@ function Demarche() {
 
         ) : (
 
-          /* COURSIER — étapes */
-          <div className="row g-4 justify-content-center">
-            {demarcheCoursier.map((step, index) => (
-              <div
-                key={index}
-                className="col-md-6 col-lg-4"
-                style={{
+          <div className="position-relative">
+            {/* Ligne de trajet reliant les étapes — visible en grand écran uniquement */}
+            <svg className="d-none d-lg-block" style={{
+              position: "absolute", top: "44px", left: "8%", width: "84%", height: "2px", zIndex: 0,
+            }} viewBox="0 0 100 2" preserveAspectRatio="none">
+              <line x1="0" y1="1" x2="100" y2="1" stroke="var(--iraky-gold-line)" strokeWidth="2"
+                strokeDasharray="0.5 2.5" className="iraky-route-path" />
+            </svg>
+
+            <div className="row g-4 justify-content-center position-relative" style={{ zIndex: 1 }}>
+              {demarcheCoursier.map((step, index) => (
+                <div key={index} className="col-md-6 col-lg-4" style={{
                   opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(40px)",
-                  transition: `all 0.6s ease ${index * 0.15}s`,
-                }}
-              >
-                <div
-                  className="p-4 h-100"
-                  style={{
-                    backgroundColor: "#1a1a35",
-                    borderRadius: "16px",
-                    borderTop: "3px solid #FFD700",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    cursor: "default",
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "translateY(-8px)";
-                    e.currentTarget.style.boxShadow = "0 15px 35px #FFD70022";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  <div className="d-flex align-items-center gap-3 mb-3">
-                    <span
-                      style={{
-                        backgroundColor: "#FFD70022",
-                        color: "#FFD700",
-                        fontWeight: "bold",
-                        fontSize: "18px",
-                        width: "45px",
-                        height: "45px",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {step.step}
-                    </span>
-                    <i
-                      className={step.icon}
-                      style={{ color: "#FFD700", fontSize: "22px" }}
-                    ></i>
-                    {step.badge && (
-                      <span
-                        className="badge ms-auto"
-                        style={{
-                          backgroundColor: step.badgeColor,
-                          color: step.badgeColor === "#FFD700" ? "#000" : "#fff",
-                          fontSize: "11px",
-                          padding: "5px 10px",
-                          borderRadius: "10px",
-                        }}
-                      >
-                        {step.badge}
+                  transform: visible ? "translateY(0)" : "translateY(28px)",
+                  transition: `all 0.55s ease ${index * 0.1}s`,
+                }}>
+                  <div className="iraky-card p-4 h-100" style={{ cursor: "default" }}>
+                    <div className="d-flex align-items-center gap-3 mb-3">
+                      <span style={{
+                        fontFamily: "var(--f-mono)", backgroundColor: "var(--iraky-gold-soft)",
+                        color: "var(--iraky-gold)", fontWeight: 700, fontSize: "16px",
+                        width: "42px", height: "42px", borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        border: "1px solid rgba(255,215,0,0.25)",
+                      }}>
+                        {step.step}
                       </span>
-                    )}
+                      <i className={step.icon} style={{ color: "var(--iraky-gold)", fontSize: "19px" }}></i>
+                      {step.badge && (
+                        <span className="ms-auto" style={{
+                          backgroundColor: step.badgeColor, color: step.badgeColor === "var(--iraky-gold)" ? "#0a0a1e" : "#fff",
+                          fontSize: "10.5px", fontWeight: 700, padding: "5px 10px", borderRadius: "10px",
+                          fontFamily: "var(--f-mono)",
+                        }}>
+                          {step.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h6 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "15px" }}>
+                      {step.title}
+                    </h6>
+                    <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", marginBottom: 0, lineHeight: 1.6 }}>
+                      {step.desc}
+                    </p>
                   </div>
-                  <h6 className="fw-bold mb-2" style={{ color: "#ffffff" }}>
-                    {step.title}
-                  </h6>
-                  <p style={{ color: "#aaaaaa", fontSize: "14px", marginBottom: 0 }}>
-                    {step.desc}
-                  </p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
         )}

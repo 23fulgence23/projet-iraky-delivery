@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import "../Theme.css";
+import "../App.css";
 
 function Partenariats() {
   const [visible, setVisible] = useState(false);
@@ -23,70 +25,43 @@ function Partenariats() {
   ];
 
   return (
-    <section
-      id="partenariats"
-      ref={ref}
-      style={{ backgroundColor: "#0d0d25", padding: "100px 0" }}
-    >
+    <section id="partenariats" ref={ref} style={{ backgroundColor: "var(--iraky-deep)", padding: "110px 0" }}>
       <div className="container">
 
-        <div
-          className="text-center mb-5"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(30px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <h2 className="fw-bold" style={{ color: "#FFD700", fontSize: "40px" }}>
+        <div className="text-center mb-5 mx-auto" style={{
+          maxWidth: "520px",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(20px)",
+          transition: "all 0.7s ease",
+        }}>
+          <span className="iraky-eyebrow justify-content-center mb-3">Écosystème local</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
             Nos Partenaires
           </h2>
-          <p style={{ color: "#aaaaaa", fontSize: "17px" }}>
-            Ils nous font confiance à Toliara
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
+            Ils nous font confiance à Toliara.
           </p>
         </div>
 
         <div className="row g-4 justify-content-center">
           {partenaires.map((p, index) => (
-            <div
-              key={index}
-              className="col-6 col-md-4 col-lg-2"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(30px)",
-                transition: `all 0.6s ease ${index * 0.1}s`,
-              }}
-            >
-              <div
-                className="text-center p-3 border-0"
-                style={{
-                  backgroundColor: "#1a1a35",
-                  borderRadius: "16px",
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  cursor: "default",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow = "0 15px 35px #FFD70022";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                <div
-                  className="mx-auto mb-2 d-flex align-items-center justify-content-center"
-                  style={{
-                    width: "55px",
-                    height: "55px",
-                    borderRadius: "50%",
-                    backgroundColor: "#FFD70022",
-                  }}
-                >
-                  <i className={p.icon} style={{ color: "#FFD700", fontSize: "22px" }}></i>
+            <div key={index} className="col-6 col-md-4 col-lg-2" style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(20px)",
+              transition: `all 0.55s ease ${index * 0.07}s`,
+            }}>
+              <div className="iraky-card text-center p-3" style={{ cursor: "default" }}>
+                <div className="mx-auto mb-2 d-flex align-items-center justify-content-center" style={{
+                  width: "52px", height: "52px", borderRadius: "14px", backgroundColor: "var(--iraky-gold-soft)",
+                }}>
+                  <i className={p.icon} style={{ color: "var(--iraky-gold)", fontSize: "20px" }}></i>
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#ffffff" }}>{p.nom}</h6>
-                <small style={{ color: "#aaaaaa" }}>{p.desc}</small>
+                <h6 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "14px", marginBottom: "2px" }}>
+                  {p.nom}
+                </h6>
+                <small style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted-dim)", fontSize: "11px" }}>
+                  {p.desc}
+                </small>
               </div>
             </div>
           ))}

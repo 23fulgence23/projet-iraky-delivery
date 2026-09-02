@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef  } from "react";
+import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
 import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
 import {
@@ -8,6 +9,7 @@ import {
   MdLocalShipping, MdCampaign, MdThumbUp, MdClose,
   MdDirectionsBike, MdStar, MdStarBorder, MdWork,
   MdPhone, MdEmail, MdBadge, MdVerified,MdDoneAll,
+  MdDelete, MdArrowBack, MdSupportAgent, MdInfo, MdMenuBook, MdExpandMore,
 } from "react-icons/md";
 
 // ══════════════════════════════════════════════
@@ -137,6 +139,18 @@ function Modal({ children, onClose, size = "md" }) {
 //  SIDEBAR
 // ══════════════════════════════════════════════
 function SidebarContent({ onglet, setOnglet, profil, missions }) {
+  let missionsMasques = [];
+  try {
+    const brutM = localStorage.getItem("coursier_missions_masques");
+    missionsMasques = brutM ? JSON.parse(brutM) : [];
+  } catch {}
+
+  let messagesMasquesCoursier = [];
+  try {
+    const brutMsg = localStorage.getItem("coursier_messages_masques");
+    messagesMasquesCoursier = brutMsg ? JSON.parse(brutMsg) : [];
+  } catch {}
+
   const items = [
     { id: "accueil",      Icon: MdDashboard,      label: "Tableau de bord"      },
     { id: "missions",     Icon: MdDeliveryDining, label: "Missions disponibles" },
@@ -145,9 +159,9 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
     { id: "profil",       Icon: MdPerson,         label: "Mon profil"           },
     { id: "aide",         Icon: MdHelp,           label: "Aide & Support"       },
   ];
-  const enCours = missions.filter(m => ["negociable","accepte"].includes(m.statut)).length;
+  const enCours = missions.filter(m => ["negociable","accepte"].includes(m.statut) && !missionsMasques.includes(m.id)).length;
   // ✅ nbMessages DANS le composant
-  const nbMessages = missions.filter(m => m.statut !== "en_attente").length;
+  const nbMessages = missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length;
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -196,7 +210,14 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
       </div>
 
       <div style={{ padding: 16 }}>
-        <button onClick={() => { localStorage.clear(); window.location.href = "/connexion"; }}
+        <button onClick={() => {
+            const CLES_A_GARDER = ["coursier_missions_masques", "coursier_messages_masques"];
+            const sauvegarde = {};
+            CLES_A_GARDER.forEach(cle => { const v = localStorage.getItem(cle); if (v) sauvegarde[cle] = v; });
+            localStorage.clear();
+            Object.entries(sauvegarde).forEach(([cle, v]) => localStorage.setItem(cle, v));
+            window.location.href = "/connexion";
+          }}
           style={{
             width: "100%", padding: "10px", borderRadius: 12,
             border: "1px solid #ef444430", backgroundColor: "#ef444410",
@@ -240,6 +261,122 @@ function DashboardCoursier() {
   });
   const [profilLoading, setProfilLoading] = useState(true);
 
+  // ── Aide & Support (identique au dashboard client, contenu adapté coursier) ──
+  const [aideVue, setAideVue]                 = useState("menu"); // menu | chat | guide
+  const [supportMessages, setSupportMessages] = useState([]);
+  const [supportMsg, setSupportMsg]           = useState("");
+  const [supportLoading, setSupportLoading]   = useState(false);
+  const [supportEnvoi, setSupportEnvoi]       = useState(false);
+  const [supportTyping, setSupportTyping]     = useState(false);
+  const supportEndRef                         = useRef(null);
+  const [guideOuvert, setGuideOuvert]         = useState(0);
+
+  const chargerSupportMessages = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${BASE_URL}/api/support/messages`, {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setSupportMessages(data);
+    } catch (err) {
+      console.error("Erreur chargement support :", err);
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (aideVue !== "chat") return;
+    setSupportLoading(true);
+    chargerSupportMessages();
+    const interval = setInterval(chargerSupportMessages, 3000);
+    return () => clearInterval(interval);
+  }, [aideVue]);
+
+  useEffect(() => {
+    if (aideVue === "chat") supportEndRef.current?.scrollIntoView({ behavior:"smooth" });
+  }, [supportMessages, aideVue]);
+
+  const envoyerSupportMsg = async () => {
+    if (!supportMsg.trim() || supportEnvoi) return;
+    const texte = supportMsg.trim();
+    const msgTemp = {
+      id: `tmp-${Date.now()}`,
+      texte,
+      sender_role: "client", // même colonne backend, générique à tout utilisateur connecté
+      created_at: new Date().toISOString(),
+      envoi: true,
+    };
+    setSupportMessages(prev => [...prev, msgTemp]);
+    setSupportMsg("");
+    setSupportEnvoi(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${BASE_URL}/api/support/messages`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ texte }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...data.message, envoi:false } : m));
+        if (data.bot) {
+          setSupportTyping(true);
+          setTimeout(() => {
+            setSupportTyping(false);
+            setSupportMessages(prev => [...prev, { ...data.bot, bot:true }]);
+          }, 900);
+        }
+      } else {
+        setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...m, echec:true, envoi:false } : m));
+      }
+    } catch (err) {
+      setSupportMessages(prev => prev.map(m => m.id === msgTemp.id ? { ...m, echec:true, envoi:false } : m));
+      console.error("Erreur envoi support :", err);
+    } finally {
+      setSupportEnvoi(false);
+    }
+  };
+
+  // ══════ Guide interactif — contenu aligné sur les fonctionnalités réelles de l'espace coursier ══════
+  const GUIDE_SECTIONS_COURSIER = [
+    {
+      Icon: MdDeliveryDining, color:"#FFD700",
+      titre: "Trouver une mission disponible",
+      texte: "L'onglet « Missions disponibles » liste toutes les commandes publiées par les clients, en attente d'un coursier. Consultez le détail (service, tarif, adresse, horaires) puis cliquez sur « Je prends cette mission » pour la réserver.",
+    },
+    {
+      Icon: MdWork, color:"#3b82f6",
+      titre: "Suivre mes missions",
+      texte: "« Mes missions » regroupe toutes les missions que vous avez prises, avec leur progression (négociation, accepté, terminé). Discutez avec le client, validez l'accord de service, puis la mission passe automatiquement à « Terminé » une fois le client satisfait.",
+    },
+    {
+      Icon: MdChat, color:"#8b5cf6",
+      titre: "Messagerie avec les clients",
+      texte: "Dès qu'une mission est prise, une conversation s'ouvre dans « Messages ». Vous pouvez échanger les détails du service et retirer une conversation de votre liste si besoin — le retrait est définitif et lié à votre compte, même après déconnexion.",
+    },
+    {
+      Icon: MdStar, color:"#f59e0b",
+      titre: "Notes, trophées et statistiques",
+      texte: "Chaque mission terminée est notée par le client (1 à 5 étoiles). Vos notes s'accumulent en trophées, visibles dans « Mon profil », aux côtés de votre nombre total de missions effectuées et de votre note moyenne.",
+    },
+    {
+      Icon: MdAttachMoney, color:"#10b981",
+      titre: "Droit d'entrée et abonnement",
+      texte: "L'accès à la plateforme nécessite un droit d'entrée unique de 10 000 Ar, puis un abonnement mensuel de 10 000 Ar pour continuer à recevoir des offres. Sans renouvellement, votre compte est automatiquement désactivé.",
+    },
+    {
+      Icon: MdPerson, color:"#ef4444",
+      titre: "Mon profil",
+      texte: "Consultez et gérez vos informations personnelles (nom, téléphone, email, CIN) depuis l'onglet « Profil ». Vous y retrouvez aussi vos statistiques : nombre de missions, note moyenne, trophées.",
+    },
+  ];
+
   // ✅ CORRECTION PRINCIPALE : fetch profil corrigé
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -257,7 +394,11 @@ function DashboardCoursier() {
       .then(async res => {
         // ✅ Gestion 401 correcte — on ne continue pas avec res.json()
         if (res.status === 401) {
+          const CLES_A_GARDER = ["coursier_missions_masques", "coursier_messages_masques"];
+          const sauvegarde = {};
+          CLES_A_GARDER.forEach(cle => { const v = localStorage.getItem(cle); if (v) sauvegarde[cle] = v; });
           localStorage.clear();
+          Object.entries(sauvegarde).forEach(([cle, v]) => localStorage.setItem(cle, v));
           window.location.href = "/connexion";
           return null; // ✅ stoppe la chaîne
         }
@@ -358,6 +499,83 @@ useEffect(() => {
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
+  };
+
+  // ── Masquage LOCAL de "Mes missions" (coursier uniquement — la
+  // mission reste intacte en base pour que l'admin garde tout l'historique) ──
+  const [missionsMasques, setMissionsMasques] = useState(() => {
+    try {
+      const brut = localStorage.getItem("coursier_missions_masques");
+      return brut ? JSON.parse(brut) : [];
+    } catch { return []; }
+  });
+
+  const demanderRetraitMission = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Retirer de mes missions",
+      html: `Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/>
+        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
+        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
+        Elle restera toutefois visible et suivie normalement côté administration.`,
+      background: "#131330",
+      color: "#fff",
+      iconColor: "#ef4444",
+      showCancelButton: true,
+      confirmButtonText: "Retirer définitivement",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#333355",
+      reverseButtons: true,
+      customClass: { popup: "swal-iraky" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setMissionsMasques(prev => {
+          const next = [...prev, id];
+          try { localStorage.setItem("coursier_missions_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        showToast("Retirée définitivement de vos missions");
+      }
+    });
+  };
+
+  // ── Masquage LOCAL de "Messages" (coursier) ──────
+  const [messagesMasquesCoursier, setMessagesMasquesCoursier] = useState(() => {
+    try {
+      const brut = localStorage.getItem("coursier_messages_masques");
+      return brut ? JSON.parse(brut) : [];
+    } catch { return []; }
+  });
+
+  const demanderRetraitMessageCoursier = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Retirer cette conversation",
+      html: `Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/>
+        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
+        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
+        Elle restera toutefois visible et suivie normalement côté administration.`,
+      background: "#131330",
+      color: "#fff",
+      iconColor: "#ef4444",
+      showCancelButton: true,
+      confirmButtonText: "Retirer définitivement",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#333355",
+      reverseButtons: true,
+      customClass: { popup: "swal-iraky" },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setMessagesMasquesCoursier(prev => {
+          const next = [...prev, id];
+          try { localStorage.setItem("coursier_messages_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        showToast("Conversation retirée définitivement");
+      }
+    });
   };
 
 const prendreMission = async (pub) => {
@@ -902,9 +1120,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   </div>
                   Mes missions
                 </h4>
-                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>{missions.length} mission(s) assignée(s)</p>
+                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>{missions.filter(m=>!missionsMasques.includes(m.id)).length} mission(s) assignée(s)</p>
 
-                {missions.length === 0 && (
+                {missions.filter(m=>!missionsMasques.includes(m.id)).length === 0 && (
                   <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
                     <MdWork style={{ fontSize: 56, color: "#333", marginBottom: 12 }}/>
                     <p>Vous n'avez pas encore pris de mission.</p>
@@ -914,7 +1132,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   </div>
                 )}
 
-                {missions.map(mission => {
+                {missions.filter(m=>!missionsMasques.includes(m.id)).map(mission => {
                   const steps = ["en_attente","negociable","accepte","termine"];
                   const idx   = steps.indexOf(mission.statut);
                   return (
@@ -934,7 +1152,17 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             </span>
                           </div>
                         </div>
-                        <StatutBadge statut={mission.statut}/>
+                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                          <StatutBadge statut={mission.statut}/>
+                          <button
+                            onClick={()=>demanderRetraitMission(mission.id)}
+                            title="Retirer de mes missions (reste visible côté admin)"
+                            style={{ background:"#ef444415", border:"1px solid #ef444430",
+                              color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
+                              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <MdDelete style={{ fontSize:15 }}/>
+                          </button>
+                        </div>
                       </div>
 
                       <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
@@ -1009,13 +1237,13 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     Vos conversations avec les clients
                   </p>
 
-                  {missions.filter(m => m.statut !== "en_attente").length === 0 ? (
+                  {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
                     <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
                       <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
                       <p>Aucune conversation active.</p>
                     </div>
                   ) : (
-                    missions.filter(m => m.statut !== "en_attente").map(mission => (
+                    missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(mission => (
                       <div key={mission.id}
                         onClick={() => { ouvrirChat(mission); }}
                         style={{ ...card, marginBottom:14, cursor:"pointer",
@@ -1038,6 +1266,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           </div>
                           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                             <StatutBadge statut={mission.statut}/>
+                            <button
+                              onClick={e=>{ e.stopPropagation(); demanderRetraitMessageCoursier(mission.id); }}
+                              title="Retirer de mes messages (reste visible côté admin)"
+                              style={{ background:"#ef444415", border:"1px solid #ef444430",
+                                color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
+                                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                              <MdDelete style={{ fontSize:15 }}/>
+                            </button>
                             <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
                               color:"#3b82f6", borderRadius:10, padding:"7px 16px",
                               fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
@@ -1459,18 +1695,25 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                 </h4>
                 <p style={{ color: "#666", marginBottom: 28, fontSize: 14 }}>Comment pouvons-nous vous aider ?</p>
 
+                {aideVue === "menu" && (<>
                 <div className="aide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
                   {[
-                    { Icon: MdPhone, title: "Nous appeler",   desc: "+261 38 21 266 83",         color: "#10b981", bg: "#10b98115", action: "Appeler maintenant →" },
-                    { Icon: MdChat,  title: "Chat en direct", desc: "Réponse en moins de 5 min", color: "#3b82f6", bg: "#3b82f615", action: "Démarrer le chat →"   },
-                    { Icon: MdEmail, title: "Email support",  desc: "irakydelivery@gmail.com",   color: "#8b5cf6", bg: "#8b5cf615", action: "Envoyer un email →"    },
-                    { Icon: MdHelp,  title: "Guide coursier", desc: "Tutoriels pas à pas",       color: "#f59e0b", bg: "#f59e0b15", action: "Lire le guide →"       },
+                    { Icon: MdPhone,    title: "Nous appeler",   desc: "+261 38 21 266 83",         color: "#10b981", bg: "#10b98115", action: "Appeler maintenant →",
+                      onClick: () => { window.location.href = "tel:+261382126683"; } },
+                    { Icon: MdChat,     title: "Chat en direct", desc: "Réponse en moins de 5 min", color: "#3b82f6", bg: "#3b82f615", action: "Démarrer le chat →",
+                      onClick: () => setAideVue("chat") },
+                    { Icon: MdEmail,    title: "Email support",  desc: "irakydelivery@gmail.com",   color: "#8b5cf6", bg: "#8b5cf615", action: "Envoyer un email →",
+                      onClick: () => { window.location.href = `mailto:irakydelivery@gmail.com?subject=${encodeURIComponent("Support IRAKY Delivery - "+(profil.nom||""))}`; } },
+                    { Icon: MdMenuBook, title: "Guide coursier", desc: "Tutoriels pas à pas",       color: "#f59e0b", bg: "#f59e0b15", action: "Lire le guide →",
+                      onClick: () => { setGuideOuvert(0); setAideVue("guide"); } },
                   ].map((item, i) => (
-                    <div key={i} style={{ backgroundColor: "#131330", borderRadius: 16, padding: "28px 20px",
+                    <div key={i} onClick={item.onClick} className="aide-card-anim"
+                      style={{ backgroundColor: "#131330", borderRadius: 16, padding: "28px 20px",
                       border: `1px solid ${item.color}30`, cursor: "pointer",
-                      transition: "all 0.3s ease", position: "relative", overflow: "hidden" }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${item.color}30`; e.currentTarget.style.borderColor = `${item.color}66`; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${item.color}30`; }}>
+                      transition: "all 0.3s ease", position: "relative", overflow: "hidden",
+                      animationDelay: `${i*0.08}s` }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px) scale(1.015)"; e.currentTarget.style.boxShadow = `0 16px 40px ${item.color}30`; e.currentTarget.style.borderColor = `${item.color}66`; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0) scale(1)";    e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${item.color}30`; }}>
                       <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80,
                         borderRadius: "50%", backgroundColor: `${item.color}10` }}/>
                       <div style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: item.bg,
@@ -1486,6 +1729,229 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     </div>
                   ))}
                 </div>
+
+                {/* FAQ */}
+                <div style={{ ...card }}>
+                  <div style={{ color:"#FFD700", fontWeight:700, marginBottom:16, fontSize:15,
+                    display:"flex", alignItems:"center", gap:8 }}>
+                    <MdMenuBook style={{ fontSize:20 }}/> Questions fréquentes
+                  </div>
+                  {[
+                    ["Comment prendre une mission ?", "Allez dans « Missions disponibles », consultez le détail d'une offre puis cliquez sur « Je prends cette mission »."],
+                    ["Comment sont calculés mes gains ?", "Le tarif affiché sur chaque mission (selon le moyen : Piéton 5000 Ar, Vélo 6000 Ar, Moto 8000 Ar, Voiture 12000 Ar) vous revient intégralement."],
+                    ["Que se passe-t-il si je n'ai pas renouvelé mon abonnement ?", "Votre compte est automatiquement désactivé et vous ne pouvez plus recevoir de nouvelles offres tant que l'abonnement mensuel n'est pas réglé."],
+                    ["Comment ma note est-elle calculée ?", "Chaque mission terminée est notée de 1 à 5 étoiles par le client. Votre note moyenne et vos trophées apparaissent dans « Mon profil »."],
+                  ].map(([q, a], i) => (
+                    <details key={i} style={{ marginBottom:10, backgroundColor:"#0a0a1e",
+                      borderRadius:12, border:"1px solid #FFD70015", padding:"14px 18px" }}>
+                      <summary style={{ color:"#fff", fontWeight:600, cursor:"pointer", fontSize:14,
+                        listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                        {q}
+                        <span style={{ color:"#FFD700", fontSize:18 }}>+</span>
+                      </summary>
+                      <p style={{ color:"#888", fontSize:13, marginTop:10, lineHeight:1.6, marginBottom:0 }}>{a}</p>
+                    </details>
+                  ))}
+                </div>
+                </>)}
+
+                {/* ══════════════ CHAT SUPPORT — réel, connecté à la BDD ══════════════ */}
+                {aideVue === "chat" && (
+                  <div className="aide-fade-in" style={{
+                    backgroundColor:"#131330", borderRadius:18,
+                    border:"1px solid #3b82f630", overflow:"hidden",
+                    boxShadow:"0 16px 44px #3b82f620",
+                    display:"flex", flexDirection:"column" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12,
+                      padding:"16px 18px", borderBottom:"1px solid #3b82f625",
+                      background:"linear-gradient(135deg,#3b82f618,#8b5cf610)" }}>
+                      <button onClick={()=>setAideVue("menu")}
+                        style={{ background:"#ffffff10", border:"1px solid #ffffff20",
+                          borderRadius:10, width:34, height:34, cursor:"pointer",
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          color:"#fff", flexShrink:0 }}>
+                        <MdArrowBack style={{ fontSize:18 }}/>
+                      </button>
+                      <div style={{ width:40, height:40, borderRadius:"50%",
+                        background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        flexShrink:0, boxShadow:"0 0 0 3px #3b82f620" }}>
+                        <MdSupportAgent style={{ color:"#fff", fontSize:20 }}/>
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>Support IRAKY Delivery</div>
+                        <div style={{ color:"#3b82f6", fontSize:11, display:"flex", alignItems:"center", gap:5 }}>
+                          <span className="aide-dot-online"/> En ligne · répond sous 5 min
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ height:320, overflowY:"auto", padding:16,
+                      display:"flex", flexDirection:"column", gap:10 }}>
+                      {supportLoading && supportMessages.length === 0 && (
+                        <div style={{ margin:"auto", color:"#555", fontSize:13, display:"flex",
+                          flexDirection:"column", alignItems:"center", gap:10 }}>
+                          <div style={{ width:22, height:22, border:"3px solid #3b82f640",
+                            borderTop:"3px solid #3b82f6", borderRadius:"50%",
+                            animation:"spin 0.7s linear infinite" }}/>
+                          Chargement de la conversation...
+                        </div>
+                      )}
+                      {!supportLoading && supportMessages.length === 0 && (
+                        <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
+                          <MdSupportAgent style={{ fontSize:40, color:"#3b82f660", marginBottom:8 }}/>
+                          <p style={{ fontSize:13 }}>Bonjour {profil.prenom} 👋<br/>Posez-nous votre question, notre équipe vous répond ici.</p>
+                        </div>
+                      )}
+                      {supportMessages.map((m, i) => {
+                        const estMoi = m.sender_role === "client"
+                          || (profil.id && parseInt(m.sender_id) === parseInt(profil.id));
+                        const estBot = !estMoi && (m.bot || m.sender_id === null || m.sender_id === undefined);
+                        return (
+                          <div key={m.id || i} className="aide-msg-in"
+                            style={{ display:"flex", justifyContent: estMoi ? "flex-end" : "flex-start" }}>
+                            {!estMoi && (
+                              <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                                background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                                display:"flex", alignItems:"center", justifyContent:"center",
+                                marginRight:6, alignSelf:"flex-end" }}>
+                                <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                              </div>
+                            )}
+                            <div style={{
+                              backgroundColor: estMoi ? "#3b82f622" : "#1a1a35",
+                              border:`1px solid ${m.echec ? "#ef4444" : estMoi ? "#3b82f644" : "#ffffff15"}`,
+                              borderRadius: estMoi ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                              padding:"9px 14px", maxWidth:"75%", opacity: m.envoi ? 0.6 : 1 }}>
+                              {estBot && (
+                                <div style={{ color:"#3b82f6", fontSize:10, fontWeight:700,
+                                  marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>
+                                  🤖 Assistant automatique
+                                </div>
+                              )}
+                              <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                              <div style={{ color: m.echec ? "#ef6666" : "#666", fontSize:10, marginTop:3,
+                                textAlign:"right" }}>
+                                {m.echec ? "Échec de l'envoi" : (m.time || (m.created_at
+                                  ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
+                                  : "..."))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {supportTyping && (
+                        <div className="aide-msg-in" style={{ display:"flex", justifyContent:"flex-start" }}>
+                          <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
+                            background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            marginRight:6, alignSelf:"flex-end" }}>
+                            <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                          </div>
+                          <div style={{ backgroundColor:"#1a1a35", border:"1px solid #ffffff15",
+                            borderRadius:"16px 16px 16px 4px", padding:"12px 16px",
+                            display:"flex", gap:4, alignItems:"center" }}>
+                            <span className="aide-typing-dot"/>
+                            <span className="aide-typing-dot" style={{ animationDelay:"0.15s" }}/>
+                            <span className="aide-typing-dot" style={{ animationDelay:"0.3s" }}/>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={supportEndRef}/>
+                    </div>
+
+                    <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
+                      display:"flex", gap:10 }}>
+                      <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
+                        onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
+                        placeholder="Écrivez votre message au support..."
+                        style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #3b82f640",
+                          color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
+                          transition:"border-color 0.2s" }}
+                        onFocus={e=>e.target.style.borderColor="#3b82f6"}
+                        onBlur={e=>e.target.style.borderColor="#3b82f640"}
+                      />
+                      <button onClick={envoyerSupportMsg}
+                        disabled={!supportMsg.trim() || supportEnvoi}
+                        style={{
+                          background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                          color:"#fff", border:"none", borderRadius:12, padding:"10px 16px",
+                          cursor: supportMsg.trim() && !supportEnvoi ? "pointer" : "not-allowed",
+                          opacity: supportMsg.trim() ? 1 : 0.4,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          minWidth:44, transition:"transform 0.15s" }}
+                        onMouseEnter={e=>{ if(supportMsg.trim()) e.currentTarget.style.transform="scale(1.06)"; }}
+                        onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
+                        {supportEnvoi
+                          ? <div style={{ width:16, height:16, border:"2px solid #fff",
+                              borderTop:"2px solid transparent", borderRadius:"50%",
+                              animation:"spin 0.6s linear infinite" }}/>
+                          : <MdSend style={{ fontSize:18 }}/>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ══════════════ GUIDE INTERACTIF ══════════════ */}
+                {aideVue === "guide" && (
+                  <div className="aide-fade-in">
+                    <button onClick={()=>setAideVue("menu")}
+                      style={{ background:"#ffffff10", border:"1px solid #ffffff20",
+                        borderRadius:10, padding:"8px 16px", cursor:"pointer",
+                        color:"#fff", display:"flex", alignItems:"center", gap:8,
+                        fontSize:12, marginBottom:18 }}>
+                      <MdArrowBack style={{ fontSize:16 }}/> Retour
+                    </button>
+
+                    <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,#131330)",
+                      border:"1px solid #f59e0b30", display:"flex", alignItems:"center", gap:14 }}>
+                      <MdInfo style={{ color:"#f59e0b", fontSize:28, flexShrink:0 }}/>
+                      <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>
+                        Ce guide couvre toutes les fonctionnalités de votre espace coursier IRAKY Delivery.
+                        Cliquez sur une section pour dérouler les explications.
+                      </div>
+                    </div>
+
+                    {GUIDE_SECTIONS_COURSIER.map((s, i) => {
+                      const ouvert = guideOuvert === i;
+                      return (
+                        <div key={i} className="aide-card-anim" style={{
+                          animationDelay:`${i*0.06}s`,
+                          backgroundColor:"#131330", borderRadius:14,
+                          border:`1px solid ${ouvert ? s.color+"55" : "#ffffff15"}`,
+                          marginBottom:12, overflow:"hidden",
+                          transition:"border-color 0.25s" }}>
+                          <div onClick={()=>setGuideOuvert(ouvert ? -1 : i)}
+                            style={{ display:"flex", alignItems:"center", gap:14,
+                              padding:"16px 18px", cursor:"pointer" }}>
+                            <div style={{ width:42, height:42, borderRadius:12, flexShrink:0,
+                              backgroundColor:`${s.color}18`, border:`1px solid ${s.color}33`,
+                              display:"flex", alignItems:"center", justifyContent:"center" }}>
+                              <s.Icon style={{ color:s.color, fontSize:20 }}/>
+                            </div>
+                            <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
+                              {s.titre}
+                            </div>
+                            <MdExpandMore style={{ color: ouvert ? s.color : "#666", fontSize:22,
+                              transition:"transform 0.3s", transform: ouvert ? "rotate(180deg)" : "rotate(0)" }}/>
+                          </div>
+                          <div style={{
+                            maxHeight: ouvert ? 200 : 0,
+                            opacity: ouvert ? 1 : 0,
+                            transition:"max-height 0.35s ease, opacity 0.3s ease",
+                            overflow:"hidden" }}>
+                            <div style={{ padding:"0 18px 18px 74px", color:"#999",
+                              fontSize:13, lineHeight:1.7, display:"flex", gap:8 }}>
+                              <MdCheckCircle style={{ color:s.color, fontSize:15, flexShrink:0, marginTop:2 }}/>
+                              <span>{s.texte}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

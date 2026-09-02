@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import "../Theme.css";
+import "../App.css";
 
 function NosServices() {
   const [visible, setVisible] = useState(false);
@@ -19,82 +21,50 @@ function NosServices() {
     { icon: "fas fa-university", title: "Banque / Trésor", desc: "Fini les longues files à la banque ou au trésor." },
     { icon: "fas fa-shopping-cart", title: "Achats", desc: "Courses au SCORE, BazarBe, SCAMA et partout à Toliara." },
     { icon: "fas fa-graduation-cap", title: "Mentor universitaire", desc: "Aide les étudiants à trouver un mentor dans leur domaine." },
-    { icon: "fas fa-box", title: "Livraison de colis", 
-  desc: "Livrez vos colis et documents partout dans Toliara rapidement." },
+    { icon: "fas fa-box", title: "Livraison de colis", desc: "Livrez vos colis et documents partout dans Toliara rapidement." },
   ];
 
   return (
-    <section
-      id="services"
-      ref={ref}
-      style={{ backgroundColor: "#0a0a1e", padding: "100px 0" }}
-    >
+    <section id="services" ref={ref} style={{ backgroundColor: "var(--iraky-void)", padding: "110px 0" }}>
       <div className="container">
 
-        <div
-          className="text-center mb-5"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(30px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <h2 className="fw-bold" style={{ color: "#FFD700", fontSize: "40px" }}>
+        <div className="text-center mb-5 mx-auto" style={{
+          maxWidth: "560px",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(20px)",
+          transition: "all 0.7s ease",
+        }}>
+          <span className="iraky-eyebrow justify-content-center mb-3">Ce qu'on fait pour vous</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
             Nos Services
           </h2>
-          <p style={{ color: "#aaaaaa", fontSize: "17px" }}>
-            Tout ce que nous pouvons faire à votre place
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
+            Tout ce que nous pouvons faire à votre place.
           </p>
         </div>
 
         <div className="row g-4 justify-content-center">
           {services.map((service, index) => (
-            <div
-              key={index}
-              className="col-md-6 col-lg-4"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(40px)",
-                transition: `all 0.7s ease ${index * 0.15}s`,
-              }}
-            >
-              <div
-                className="card h-100 p-4 border-0"
-                style={{
-                  backgroundColor: "#1a1a35",
-                  borderRadius: "16px",
-                  borderLeft: "4px solid #FFD700",
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  cursor: "default",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow = "0 15px 35px #FFD70022";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
+            <div key={index} className="col-md-6 col-lg-4" style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(28px)",
+              transition: `all 0.6s ease ${index * 0.08}s`,
+            }}>
+              <div className="iraky-card h-100 p-4" style={{ cursor: "default" }}>
                 <div className="d-flex align-items-center gap-3 mb-3">
-                  <div
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "12px",
-                      backgroundColor: "#FFD70022",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <i className={service.icon} style={{ color: "#FFD700", fontSize: "20px" }}></i>
+                  <div style={{
+                    width: "48px", height: "48px", borderRadius: "13px",
+                    backgroundColor: "var(--iraky-gold-soft)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "transform 0.3s ease",
+                  }}>
+                    <i className={service.icon} style={{ color: "var(--iraky-gold)", fontSize: "19px" }}></i>
                   </div>
-                  <h5 className="fw-bold mb-0" style={{ color: "#ffffff" }}>
+                  <h5 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "16px", margin: 0 }}>
                     {service.title}
                   </h5>
                 </div>
-                <p style={{ color: "#aaaaaa", fontSize: "14px", marginBottom: "0" }}>
+                <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: 0 }}>
                   {service.desc}
                 </p>
               </div>
@@ -102,24 +72,23 @@ function NosServices() {
           ))}
         </div>
 
-        {/* Prix */}
-        <div
-          className="text-center mt-5"
-          style={{
-            opacity: visible ? 1 : 0,
-            transition: "all 0.7s ease 0.8s",
-          }}
-        >
-          <div
-            className="d-inline-block px-5 py-3"
-            style={{
-              backgroundColor: "#FFD700",
-              borderRadius: "50px",
-              boxShadow: "0 0 40px #FFD70055",
-            }}
-          >
-            <span style={{ color: "#000", fontWeight: "bold", fontSize: "22px" }}>
-              🚀 À seulement 5 000 Ar par course !
+        {/* Prix — pilule signature */}
+        <div className="text-center mt-5" style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(14px)",
+          transition: "all 0.6s ease 0.5s",
+        }}>
+          <div className="d-inline-flex align-items-center gap-3" style={{
+            backgroundColor: "var(--iraky-surface)",
+            border: "1px solid rgba(255,215,0,0.25)",
+            borderRadius: "999px",
+            padding: "14px 30px",
+            boxShadow: "0 16px 40px rgba(255,215,0,0.08)",
+          }}>
+            <span style={{ width: "9px", height: "9px", borderRadius: "50%", background: "var(--iraky-route)",
+              animation: "iraky-pulse-dot 1.8s infinite", flexShrink: 0 }} />
+            <span style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 700, fontSize: "17px" }}>
+              À seulement <span style={{ color: "var(--iraky-gold)" }}>5 000 Ar</span> par course
             </span>
           </div>
         </div>
