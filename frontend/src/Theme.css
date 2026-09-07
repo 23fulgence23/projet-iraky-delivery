@@ -1,0 +1,150 @@
+/* ═══════════════════════════════════════════════════════════
+   IRAKY DELIVERY — Design System
+   Importé par chaque section du site vitrine.
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  /* Fond */
+  --iraky-void: #07070f;
+  --iraky-deep: #0d0d22;
+  --iraky-surface: #14142c;
+  --iraky-surface-2: #191938;
+
+  /* Or — couleur de marque */
+  --iraky-gold: #FFD700;
+  --iraky-gold-deep: #E8B800;
+  --iraky-gold-soft: rgba(255, 215, 0, 0.10);
+  --iraky-gold-line: rgba(255, 215, 0, 0.16);
+
+  /* Vert "route" — accent secondaire (disponibilité, gratuité, succès) */
+  --iraky-route: #34D399;
+  --iraky-route-soft: rgba(52, 211, 153, 0.12);
+
+  /* Texte */
+  --iraky-ink: #F5F3EC;
+  --iraky-muted: #9797B0;
+  --iraky-muted-dim: #6C6C87;
+
+  /* Navbar & cartes — séparés pour pouvoir basculer proprement en mode clair */
+  --iraky-nav-bg: rgba(7, 7, 15, 0.55);
+  --iraky-nav-bg-scrolled: rgba(7, 7, 15, 0.92);
+  --iraky-nav-border: rgba(255, 215, 0, 0.04);
+  --iraky-nav-border-scrolled: rgba(255, 215, 0, 0.16);
+  --iraky-card-border: rgba(255, 255, 255, 0.05);
+  --iraky-card-border-hover: var(--iraky-gold-line);
+  --iraky-card-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  --iraky-input-bg: var(--iraky-void);
+
+  /* Typo */
+  --f-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --f-body: 'Inter', 'Segoe UI', sans-serif;
+  --f-mono: 'Space Mono', 'Courier New', monospace;
+}
+
+/* Transition douce de toutes les couleurs lors du changement de thème */
+body, .iraky-card, .iraky-btn-ghost, input, textarea {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* ── Utilitaires typographiques ─────────────────────── */
+.iraky-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--iraky-gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.iraky-eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--iraky-gold);
+  display: inline-block;
+}
+
+.iraky-h2 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  color: var(--iraky-ink);
+  letter-spacing: -0.5px;
+}
+
+.iraky-body { font-family: var(--f-body); color: var(--iraky-muted); }
+
+/* ── Boutons ─────────────────────────────────────────── */
+.iraky-btn-gold {
+  font-family: var(--f-body);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--iraky-gold), var(--iraky-gold-deep));
+  color: #0a0a1e;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 28px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.18);
+}
+.iraky-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(255, 215, 0, 0.28); }
+.iraky-btn-gold:active { transform: translateY(0); }
+
+.iraky-btn-ghost {
+  font-family: var(--f-body);
+  font-weight: 700;
+  background: transparent;
+  color: var(--iraky-gold);
+  border: 1.5px solid var(--iraky-gold-line);
+  border-radius: 999px;
+  padding: 13px 28px;
+  transition: all 0.2s ease;
+}
+.iraky-btn-ghost:hover { border-color: var(--iraky-gold); background: var(--iraky-gold-soft); transform: translateY(-2px); }
+
+/* ── Cartes ──────────────────────────────────────────── */
+.iraky-card {
+  background: linear-gradient(160deg, var(--iraky-surface), var(--iraky-surface-2));
+  border: 1px solid var(--iraky-card-border);
+  border-radius: 18px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.iraky-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--iraky-card-border-hover);
+  box-shadow: var(--iraky-card-shadow);
+}
+
+/* ── Reveal au scroll (minimisé) ─────────────────────── */
+.iraky-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.iraky-reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ── Motif "route en pointillés" (élément signature) ──── */
+@keyframes iraky-dash-flow { to { stroke-dashoffset: -32; } }
+.iraky-route-path {
+  stroke-dasharray: 2 10;
+  stroke-linecap: round;
+  animation: iraky-dash-flow 2.4s linear infinite;
+}
+
+@keyframes iraky-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes iraky-pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+}
+
+/* ── Reduced motion : on respecte le choix du visiteur ──── */
+@media (prefers-reduced-motion: reduce) {
+  .iraky-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .iraky-route-path { animation: none !important; }
+  * { scroll-behavior: auto !important; }
+}

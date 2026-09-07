@@ -11,7 +11,7 @@ import {
   MdForum,
 } from "react-icons/md";
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://projet-iraky-delivery.onrender.com";
 
 // ══════════════════════════════════════════════
 //  COULEURS STATUT — style original inchangé

@@ -10,7 +10,7 @@ function OubliMotDePasse() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await fetch("http://localhost:8000/api/forgot-password", {
+      await fetch("https://projet-iraky-delivery.onrender.com/api/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

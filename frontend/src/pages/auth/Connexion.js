@@ -33,7 +33,7 @@ function Connexion() {
     const iv = setInterval(async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/verifier-statut-coursier/${coursierEnAttenteId}`
+          `https://projet-iraky-delivery.onrender.com/api/verifier-statut-coursier/${coursierEnAttenteId}`
         );
 
         if (res.status === 404) {
@@ -65,7 +65,7 @@ function Connexion() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
+      const response = await fetch("https://projet-iraky-delivery.onrender.com/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

@@ -492,7 +492,7 @@ const [notifs, setNotifs] = useState([]);
   const chargerSupportMessages = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8000/api/support/messages", {
+      const res = await fetch("https://projet-iraky-delivery.onrender.com/api/support/messages", {
         headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
       });
       const data = await res.json();
@@ -531,7 +531,7 @@ const [notifs, setNotifs] = useState([]);
     setSupportEnvoi(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8000/api/support/messages", {
+      const res = await fetch("https://projet-iraky-delivery.onrender.com/api/support/messages", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -649,7 +649,7 @@ const [profil, setProfil] = useState({
 useEffect(() => {
   const token = localStorage.getItem("token");
   if (!token) return;
-  fetch("http://localhost:8000/api/me", {
+  fetch("https://projet-iraky-delivery.onrender.com/api/me", {
     headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
   })
     .then(res => { if (res.status === 401) {
@@ -684,7 +684,7 @@ const ouvrirChat = async (cmd) => {
   setChatMessages([]);
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch(`http://localhost:8000/api/commandes/${cmd.id}/messages`, {
+    const res = await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${cmd.id}/messages`, {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     });
     const data = await res.json();
@@ -718,7 +718,7 @@ const envoyerChatMsg = async () => {
   try {
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:8000/api/commandes/${chatCommande.id}/messages`,
+      `https://projet-iraky-delivery.onrender.com/api/commandes/${chatCommande.id}/messages`,
       {
         method: "POST",
         headers: {
@@ -755,12 +755,12 @@ useEffect(() => {
 
   const fetchAll = () => {
     // Notifs
-    fetch("http://localhost:8000/api/notifications", {
+    fetch("https://projet-iraky-delivery.onrender.com/api/notifications", {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => setNotifs(Array.isArray(data) ? data : [])).catch(()=>{});
 
     // Commandes
-    fetch("http://localhost:8000/api/commandes/mes-commandes", {
+    fetch("https://projet-iraky-delivery.onrender.com/api/commandes/mes-commandes", {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
       if (!Array.isArray(data)) return;
@@ -779,7 +779,7 @@ useEffect(() => {
 // ── Charger les moyens de transport (tarifs) depuis la BDD ─────
 useEffect(() => {
   const palette = ["#10b981","#3b82f6","#f59e0b","#ef4444","#8b5cf6","#06b6d4"];
-  fetch("http://localhost:8000/api/moyens-transport")
+  fetch("https://projet-iraky-delivery.onrender.com/api/moyens-transport")
     .then(r => r.json())
     .then(data => {
       if (!Array.isArray(data)) return;
@@ -801,7 +801,7 @@ useEffect(() => {
   const token = localStorage.getItem("token");
 
   const fetchMessages = () => {
-    fetch(`http://localhost:8000/api/commandes/${chatCommande.id}/messages`, {
+    fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${chatCommande.id}/messages`, {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
       if (Array.isArray(data)) setChatMessages(filtrerMessagesEffaces(chatCommande.id, data));
@@ -827,7 +827,7 @@ useEffect(() => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/api/commandes", {
+      const response = await fetch("https://projet-iraky-delivery.onrender.com/api/commandes", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -867,7 +867,7 @@ useEffect(() => {
 const supprimer = async (id) => {
   try {
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:8000/api/commandes/${id}`, {
+    await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` },
     });
@@ -882,7 +882,7 @@ const supprimer = async (id) => {
 const noterCoursier = async (id, note) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`http://localhost:8000/api/commandes/${id}/terminer`, {
+    const response = await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${id}/terminer`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -1056,7 +1056,7 @@ const noterCoursier = async (id, note) => {
                         try {
                           const token = localStorage.getItem("token");
                           const res = await fetch(
-                            `http://localhost:8000/api/commandes/${cmd.id}/messages`,
+                            `https://projet-iraky-delivery.onrender.com/api/commandes/${cmd.id}/messages`,
                             { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" } }
                           );
                           const data = await res.json();
@@ -1068,7 +1068,7 @@ const noterCoursier = async (id, note) => {
 
                       // Marquer comme lu
                       const token = localStorage.getItem("token");
-                      await fetch(`http://localhost:8000/api/notifications/${n.id}/lu`, {
+                      await fetch(`https://projet-iraky-delivery.onrender.com/api/notifications/${n.id}/lu`, {
                         method: "POST",
                         headers: { "Authorization": `Bearer ${token}` },
                       });
@@ -1085,7 +1085,7 @@ const noterCoursier = async (id, note) => {
               <button
                 onClick={async () => {
                   const token = localStorage.getItem("token");
-                  await fetch(`http://localhost:8000/api/notifications/${n.id}`, {
+                  await fetch(`https://projet-iraky-delivery.onrender.com/api/notifications/${n.id}`, {
                     method:"DELETE",
                     headers:{ "Authorization":`Bearer ${token}` },
                   });
@@ -1109,7 +1109,7 @@ const noterCoursier = async (id, note) => {
         <span
           onClick={async () => {
             const token = localStorage.getItem("token");
-            await fetch("http://localhost:8000/api/notifications/tous-lus", {
+            await fetch("https://projet-iraky-delivery.onrender.com/api/notifications/tous-lus", {
               method:"POST",
               headers:{ "Authorization":`Bearer ${token}` },
             });
@@ -1793,7 +1793,7 @@ const noterCoursier = async (id, note) => {
               onClick={async () => {
                 const token = localStorage.getItem("token");
                 const res = await fetch(
-                  `http://localhost:8000/api/commandes/${chatCommande.id}/accepter-client`,
+                  `https://projet-iraky-delivery.onrender.com/api/commandes/${chatCommande.id}/accepter-client`,
                   { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/json" } }
                 );
                 const data = await res.json();
@@ -1815,7 +1815,7 @@ const noterCoursier = async (id, note) => {
               onClick={async () => {
                 const token = localStorage.getItem("token");
                 const res = await fetch(
-                  `http://localhost:8000/api/commandes/${chatCommande.id}/refuser`,
+                  `https://projet-iraky-delivery.onrender.com/api/commandes/${chatCommande.id}/refuser`,
                   { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/json" } }
                 );
                 if (res.ok) {
@@ -1850,7 +1850,7 @@ const noterCoursier = async (id, note) => {
                 onClick={async () => {
                   const token = localStorage.getItem("token");
                   await Promise.all([...selectedMsgs].map(msgId =>
-                    fetch(`http://localhost:8000/api/commandes/${chatCommande.id}/messages/${msgId}`, {
+                    fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${chatCommande.id}/messages/${msgId}`, {
                       method: "DELETE",
                       headers: { "Authorization": `Bearer ${token}` },
                     })
@@ -2117,7 +2117,7 @@ const noterCoursier = async (id, note) => {
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
-          `http://localhost:8000/api/commandes/${cmd.id}/terminer`,
+          `https://projet-iraky-delivery.onrender.com/api/commandes/${cmd.id}/terminer`,
           {
             method: "POST",
             headers: {
@@ -2136,7 +2136,7 @@ const noterCoursier = async (id, note) => {
             showToast("🏁 Mission terminée ! Le coursier a reçu 1 ⭐", "success");
 
           // ✅ Refetch immédiat pour éviter toute désync avec le polling
-          const resFresh = await fetch("http://localhost:8000/api/commandes/mes-commandes", {
+          const resFresh = await fetch("https://projet-iraky-delivery.onrender.com/api/commandes/mes-commandes", {
             headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
           });
           const fresh = await resFresh.json();

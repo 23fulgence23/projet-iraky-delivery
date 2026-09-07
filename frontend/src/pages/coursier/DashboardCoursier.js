@@ -68,7 +68,7 @@ const STATUT_CONFIG = {
   termine:    { label: "Terminé",        color: "#8b5cf6", bg: "#8b5cf618", icon: <MdStar/> },
 };
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://projet-iraky-delivery.onrender.com";
 
 // ══════════════════════════════════════════════
 //  ÉTOILES
@@ -581,7 +581,7 @@ useEffect(() => {
 const prendreMission = async (pub) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`http://localhost:8000/api/commandes/${pub.id}/prendre`, {
+    const response = await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${pub.id}/prendre`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     });

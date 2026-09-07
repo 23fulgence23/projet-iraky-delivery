@@ -121,7 +121,7 @@ function Inscription() {
         formData.append("mvola_transaction", form.mvola_transaction);
       }
 
-      const response = await fetch("http://localhost:8000/api/register", {
+      const response = await fetch("https://projet-iraky-delivery.onrender.com/api/register", {
         method: "POST",
         body: formData,
       });
@@ -165,7 +165,7 @@ useEffect(() => {
 
   const iv = setInterval(async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/verifier-statut-coursier/${userIdCree}`);
+      const res = await fetch(`https://projet-iraky-delivery.onrender.com/api/verifier-statut-coursier/${userIdCree}`);
 
       if (res.status === 404) {
         setEtapeValidation(0);
