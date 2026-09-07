@@ -1,6 +1,7 @@
 FROM richarvey/nginx-php-fpm:latest
 
 COPY backend/ .
+COPY nginx-site.conf /etc/nginx/sites-available/default.conf
 
 RUN composer install --no-dev --optimize-autoloader --working-dir=/var/www/html
 
