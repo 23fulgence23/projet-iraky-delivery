@@ -26,4 +26,6 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan migrate --force
 
-CMD ["/start.sh"]
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+CMD ["/docker-entrypoint.sh"]
