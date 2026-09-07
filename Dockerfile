@@ -8,11 +8,21 @@ ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
 ENV REAL_IP_HEADER 1
-
 ENV APP_ENV production
 ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
-
 ENV COMPOSER_ALLOW_SUPERUSER 1
+
+ENV DB_CONNECTION=pgsql
+ENV DB_HOST=dpg-dac25a8u01pc73fhmiu0-a
+ENV DB_PORT=5432
+ENV DB_DATABASE=iraky_delivery
+ENV DB_USERNAME=iraky_delivery_user
+ENV DB_PASSWORD=z7cfOINMWwy5Rz2Io4QWALm35sbLch5j
+ENV APP_KEY=base64:HVoSUTZiJjAXEMZWGqBv/vGr7Q8Yw+xkR95cxNI1ECI=
+
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan migrate --force
 
 CMD ["/start.sh"]
