@@ -385,8 +385,8 @@ function DashboardAdmin() {
   };
 
   // ── Support Chat : messages d'une conversation précise ──
-  const fetchSupportMessages = async (clientId) => {
-    setSupportLoading(true);
+  const fetchSupportMessages = async (clientId, silencieux = false) => {
+    if (!silencieux) setSupportLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/api/admin/support/conversations/${clientId}`, { headers: getHeaders() });
       if (res.ok) {
@@ -394,7 +394,7 @@ function DashboardAdmin() {
         if (Array.isArray(d)) setSupportMessages(d);
       }
     } catch (e) { console.error(e); }
-    setSupportLoading(false);
+    if (!silencieux) setSupportLoading(false);
   };
 
   const ouvrirConversation = (clientId) => {
@@ -454,7 +454,7 @@ function DashboardAdmin() {
     fetchSupportConvs();
     const iv = setInterval(() => {
       fetchSupportConvs();
-      if (supportSelected) fetchSupportMessages(supportSelected);
+      if (supportSelected) fetchSupportMessages(supportSelected, true);
     }, 3000);
     return () => clearInterval(iv);
   }, [onglet, supportSelected]);
