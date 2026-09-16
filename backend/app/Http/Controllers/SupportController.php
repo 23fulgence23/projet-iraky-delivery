@@ -118,7 +118,7 @@ TXT;
             ])->timeout(15)->post(
                 'https://api.groq.com/openai/v1/chat/completions',
                 [
-                    'model'      => 'llama-3.3-70b-versatile', // ✅ meilleure qualité, gratuit
+                    'model'      => 'openai/gpt-oss-120b', // modele recommande par Groq (llama-3.3-70b-versatile decommissionne)
                     'max_tokens' => 400,
                     'messages'   => [
                         ['role' => 'system', 'content' => $this->baseConnaissance($prenom)],
