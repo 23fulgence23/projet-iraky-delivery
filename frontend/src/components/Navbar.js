@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../logo.png";
-import InstallButton from "./InstallButton";
+import FloatingInstallButton from "./FloatingInstallButton";
 import "../Theme.css";
 import "../App.css";
 
@@ -53,6 +53,7 @@ function Navbar() {
   ];
 
   return (
+    <>
     <nav
       className="navbar navbar-dark fixed-top"
       style={{
@@ -113,7 +114,7 @@ function Navbar() {
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ width: "20px", height: "2px", backgroundColor: "#FFD700", borderRadius: 2 }} />
                 <div style={{ width: "20px", height: "2px", backgroundColor: "#FFD700", borderRadius: 2 }} />
-                <div style={{ width: "14px", height: "2px", backgroundColor: "#FFD700", borderRadius: 2 }} />
+                <div style={{ width: "20px", height: "2px", backgroundColor: "#FFD700", borderRadius: 2 }} />
               </div>
             )}
           </button>
@@ -155,7 +156,6 @@ function Navbar() {
             }}>
             <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} style={{ fontSize: "14px" }}></i>
           </button>
-          <InstallButton style={{ padding: "9px 16px", fontSize: "13px" }} />
           <button onClick={() => navigate("/connexion")} className="iraky-btn-ghost"
             style={{ padding: "9px 20px", fontSize: "14px" }}>
             Se connecter
@@ -197,7 +197,6 @@ function Navbar() {
             ))}
 
             <div className="px-3 mb-2">
-              <InstallButton style={{ width: "100%", justifyContent: "center" }} />
             </div>
             <div className="d-flex gap-2 px-3 mt-3">
               <button
@@ -216,6 +215,8 @@ function Navbar() {
 
       </div>
     </nav>
+    <FloatingInstallButton />
+    </>
   );
 }
 
