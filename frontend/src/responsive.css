@@ -6,20 +6,22 @@
 /* ── NAVBAR ── */
 @media (max-width: 991px) {
   .navbar .container {
-    flex-wrap: wrap !important;
-    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
     padding: 10px 15px !important;
   }
 
-  /* Menu liens — caché sur mobile, affiché en colonne */
-  .navbar .d-flex.align-items-center.gap-4 {
-    display: none !important;
+  /* Groupe logo : reste colle a gauche, ne se centre jamais */
+  .navbar .container > span {
+    flex-shrink: 1;
+    min-width: 0;
   }
 
-  /* Boutons connexion/inscription */
-  .navbar .d-flex.gap-2 {
-    width: 100% !important;
-    justify-content: center !important;
+  /* Groupe icones mobile (theme + hamburger) : colle a droite, cote a cote */
+  .navbar .d-lg-none.d-flex {
+    flex-shrink: 0;
+    justify-content: flex-end !important;
+    width: auto !important;
   }
 }
 
