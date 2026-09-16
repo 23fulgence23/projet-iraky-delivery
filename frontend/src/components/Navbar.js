@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../logo.png";
+import InstallButton from "./InstallButton";
 import "../Theme.css";
 import "../App.css";
 
@@ -154,6 +155,7 @@ function Navbar() {
             }}>
             <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} style={{ fontSize: "14px" }}></i>
           </button>
+          <InstallButton style={{ padding: "9px 16px", fontSize: "13px" }} />
           <button onClick={() => navigate("/connexion")} className="iraky-btn-ghost"
             style={{ padding: "9px 20px", fontSize: "14px" }}>
             Se connecter
@@ -194,6 +196,9 @@ function Navbar() {
               </div>
             ))}
 
+            <div className="px-3 mb-2">
+              <InstallButton style={{ width: "100%", justifyContent: "center" }} />
+            </div>
             <div className="d-flex gap-2 px-3 mt-3">
               <button
                 onClick={() => { navigate("/connexion"); setMenuOpen(false); }}
