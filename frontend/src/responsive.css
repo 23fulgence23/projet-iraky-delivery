@@ -189,3 +189,99 @@ body {
     padding: 14px 6px !important;
   }
 }
+
+/* ── ADMIN — grilles a 3 colonnes ── */
+@media (max-width: 768px) {
+  div[style*="repeat(3"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 480px) {
+  div[style*="repeat(3"],
+  div[style*="1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── ADMIN — Support Chat : sidebar fixe 320px + hauteur fixe 600px ne rentrent pas sur mobile ── */
+@media (max-width: 768px) {
+  .support-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  .support-grid > div:first-child {
+    max-height: 260px;
+  }
+  .support-grid > div:last-child {
+    min-height: 420px;
+  }
+}
+
+/* ── ADMIN — tableaux transformes en cartes sur mobile ── */
+@media (max-width: 768px) {
+  table.responsive-table thead { display: none; }
+  table.responsive-table, table.responsive-table tbody,
+  table.responsive-table tr, table.responsive-table td {
+    display: block;
+    width: 100%;
+  }
+  table.responsive-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #ffffff12;
+    border-radius: 12px;
+    padding: 4px 0;
+    background: #131330;
+  }
+  table.responsive-table td {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #ffffff08 !important;
+    text-align: right;
+    gap: 12px;
+  }
+  table.responsive-table td:last-child { border-bottom: none !important; }
+  table.responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    text-align: left;
+  }
+}
+
+/* ── Cellule "Nom" (avatar + prenom/nom) : garde son alignement flex normal ── */
+@media (max-width: 768px) {
+  table.responsive-table td.td-nom {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+  table.responsive-table td.td-nom::before {
+    margin-bottom: 2px;
+  }
+  table.responsive-table td.td-nom > div {
+    width: 100%;
+  }
+
+  /* Cellule "Actions" (derniere colonne, sans data-label) : boutons alignes a droite, pas de label */
+  table.responsive-table td:not([data-label]) {
+    justify-content: flex-end !important;
+  }
+  table.responsive-table td:not([data-label])::before {
+    content: "";
+  }
+}
+
+/* ── Grilles auto-fill/minmax : trop larges pour 1 seule colonne confortable sur mobile ── */
+@media (max-width: 480px) {
+  div[style*="minmax(220px"],
+  div[style*="minmax(200px"],
+  div[style*="minmax(160px"] {
+    grid-template-columns: 1fr !important;
+  }
+}

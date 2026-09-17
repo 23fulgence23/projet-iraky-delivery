@@ -802,7 +802,7 @@ function DashboardAdmin() {
         </button>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <img src={logo} alt="IRAKY" style={{ width:50,height:50,borderRadius:"50%" }}/>
-          <div>
+          <div className="d-none d-lg-block">
             <div style={{ color:"#FFD700", fontWeight:800, fontSize:17 }}>IRAKY Admin</div>
             <div style={{ color:"#555", fontSize:11 }}>Panneau de contrôle</div>
           </div>
@@ -1187,7 +1187,7 @@ function DashboardAdmin() {
                     </button>
                   </div>
                   <div style={{ overflowX:"auto" }}>
-                    <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                    <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                       <thead>
                         <tr style={{ borderBottom:"1px solid #FFD70018" }}>
                           {["Service","Client","Coursier","Tarif","Statut","Date"].map(h=>(
@@ -1201,12 +1201,12 @@ function DashboardAdmin() {
                           <tr key={cmd.id} style={{ borderBottom:"1px solid #ffffff06" }}
                             onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                             onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                            <td style={{ padding:"10px 12px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                            <td style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.client}</td>
-                            <td style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.coursier||"—"}</td>
-                            <td style={{ padding:"10px 12px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
-                            <td style={{ padding:"10px 12px" }}><StatutBadge statut={cmd.statut}/></td>
-                            <td style={{ padding:"10px 12px",color:"#555",fontSize:12 }}>{cmd.date}</td>
+                            <td data-label="Service" style={{ padding:"10px 12px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
+                            <td data-label="Client" style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.client}</td>
+                            <td data-label="Coursier" style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.coursier||"—"}</td>
+                            <td data-label="Tarif" style={{ padding:"10px 12px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                            <td data-label="Statut" style={{ padding:"10px 12px" }}><StatutBadge statut={cmd.statut}/></td>
+                            <td data-label="Date" style={{ padding:"10px 12px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           </tr>
                         ))}
                         {commandes.length===0 && (
@@ -1262,7 +1262,7 @@ function DashboardAdmin() {
                   const clientsPageData = clientsFiltres.slice((pageClient-1)*CLIENT_PAR_PAGE, pageClient*CLIENT_PAR_PAGE);
                   return (
                 <div style={{ overflowX:"auto" }}>
-                  <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                  <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
                         {["Nom","Email","Téléphone","Commandes","Statut","Inscrit le","Actions"].map(h=>(
@@ -1276,7 +1276,7 @@ function DashboardAdmin() {
                         <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                          <td style={{ padding:"12px 14px" }}>
+                          <td data-label="Nom" className="td-nom" style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                               <div style={{ width:34,height:34,borderRadius:"50%",
                                 background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
@@ -1290,11 +1290,11 @@ function DashboardAdmin() {
                               </div>
                             </div>
                           </td>
-                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{c.email}</td>
-                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.commandes}</td>
-                          <td style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
-                          <td style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{c.created_at}</td>
+                          <td data-label="Email" style={{ padding:"12px 14px",color:"#aaa" }}>{c.email}</td>
+                          <td data-label="Téléphone" style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
+                          <td data-label="Commandes" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.commandes}</td>
+                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
+                          <td data-label="Inscrit le" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{c.created_at}</td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               <button onClick={()=>setDetailUser({...c,type:"client"})}
@@ -1415,7 +1415,7 @@ function DashboardAdmin() {
 
                 {/* Tableau */}
                 <div style={{ overflowX:"auto" }}>
-                  <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                  <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
                         {["Nom","Téléphone","Missions","Note","Statut","Actions"].map(h=>(
@@ -1429,7 +1429,7 @@ function DashboardAdmin() {
                         <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                          <td style={{ padding:"12px 14px" }}>
+                          <td data-label="Nom" className="td-nom" style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                               <div style={{ width:34,height:34,borderRadius:"50%",
                                 background:"linear-gradient(135deg,#FFD700,#ff8c00)",
@@ -1443,16 +1443,16 @@ function DashboardAdmin() {
                               </div>
                             </div>
                           </td>
-                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
-                          <td style={{ padding:"12px 14px" }}>
+                          <td data-label="Téléphone" style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
+                          <td data-label="Missions" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label="Note" style={{ padding:"12px 14px" }}>
                             {c.note > 0 ? (
                               <span style={{ display:"flex",alignItems:"center",gap:4,color:"#FFD700",fontWeight:700 }}>
                                 <MdStar style={{ fontSize:14 }}/> {c.note}/5
                               </span>
                             ) : <span style={{ color:"#555" }}>—</span>}
                           </td>
-                          <td style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
+                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               <button onClick={()=>setDetailUser({...c,type:"coursier"})}
@@ -1579,7 +1579,7 @@ function DashboardAdmin() {
 
                 {/* Tableau avec pagination */}
                 <div style={{ overflowX:"auto" }}>
-                  <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                  <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
                         {["#","Service","Client","Coursier","Tarif","Statut","Date","Actions"].map(h=>(
@@ -1593,13 +1593,13 @@ function DashboardAdmin() {
                         <tr key={cmd.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                          <td style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>#{cmd.id}</td>
-                          <td style={{ padding:"12px 14px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.client}</td>
-                          <td style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.coursier||"Non assigné"}</td>
-                          <td style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
-                          <td style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
-                          <td style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
+                          <td data-label="#" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>#{cmd.id}</td>
+                          <td data-label="Service" style={{ padding:"12px 14px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
+                          <td data-label="Client" style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.client}</td>
+                          <td data-label="Coursier" style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.coursier||"Non assigné"}</td>
+                          <td data-label="Tarif" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
+                          <td data-label="Date" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               {/* Modifier */}
