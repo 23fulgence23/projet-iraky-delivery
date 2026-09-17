@@ -159,3 +159,33 @@ img {
 body {
   overflow-x: hidden;
 }
+/* ── DASHBOARDS — grilles a colonnes fixes (stats, choix de service/moyen) ── */
+@media (max-width: 768px) {
+  div[style*="repeat(4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  div[style*="repeat(4"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Formulaires / details en 2 colonnes -> 1 colonne sur tres petit ecran */
+@media (max-width: 480px) {
+  div[style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Icones des cartes service/moyen : 70px trop grand pour 4 colonnes etroites ── */
+@media (max-width: 480px) {
+  div[style*="repeat(4"] div[style*="70px"] {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  div[style*="repeat(4"] > div {
+    padding: 14px 6px !important;
+  }
+}
