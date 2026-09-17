@@ -6,7 +6,7 @@
 /* ── NAVBAR ── */
 @media (max-width: 991px) {
   .navbar .container {
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     justify-content: space-between !important;
     padding: 10px 15px !important;
   }
