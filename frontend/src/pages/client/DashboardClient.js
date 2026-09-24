@@ -1753,7 +1753,7 @@ const noterCoursier = async (id, note) => {
 
     {/* Fenêtre chat fixe en bas — même style coursier */}
     {chatCommande && (
-      <div style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
+      <div className="chat-panel" style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
         backgroundColor:"#131330", border:"1px solid #FFD70030",
         borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
 

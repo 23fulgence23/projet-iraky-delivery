@@ -280,8 +280,23 @@ body {
 /* ── Grilles auto-fill/minmax : trop larges pour 1 seule colonne confortable sur mobile ── */
 @media (max-width: 480px) {
   div[style*="minmax(220px"],
+  div[style*="minmax(260px"],
   div[style*="minmax(200px"],
   div[style*="minmax(160px"] {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Panneau de conversation (Messages) : plein ecran sur mobile au lieu de flottant a droite ── */
+@media (max-width: 768px) {
+  .chat-panel {
+    right: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
   }
 }
