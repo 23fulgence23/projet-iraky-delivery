@@ -837,9 +837,9 @@ function DashboardAdmin() {
         <>
           <div onClick={()=>setNotifOpen(false)} style={{ position:"fixed",inset:0,zIndex:149 }}/>
           <div style={{
-            position:"fixed",top:74,right:20,zIndex:150,
+            position:"fixed",top:74,right:20,zIndex:150,maxWidth:"calc(100vw - 40px)",
             backgroundColor:"#0f1128",border:"1px solid #FFD70025",
-            borderRadius:16,width:380,maxHeight:500,
+            borderRadius:16,width:380,maxHeight:"min(500px, calc(100vh - 100px))",
             boxShadow:"0 16px 48px rgba(0,0,0,0.7)",
             display:"flex",flexDirection:"column",overflow:"hidden",
           }}>
