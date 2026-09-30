@@ -10,7 +10,7 @@ import {
   MdLocalShipping, MdCampaign, MdThumbUp, MdClose,
   MdDirectionsBike, MdStar, MdStarBorder, MdWork,
   MdPhone, MdEmail, MdBadge, MdVerified,MdDoneAll,
-  MdDelete, MdArrowBack, MdSupportAgent, MdInfo, MdMenuBook, MdExpandMore,
+  MdDelete, MdArrowBack, MdSupportAgent, MdInfo, MdMenuBook, MdKeyboardArrowUp, MdKeyboardArrowDown,
 } from "react-icons/md";
 
 // ══════════════════════════════════════════════
@@ -1934,8 +1934,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
                               {s.titre}
                             </div>
-                            <MdExpandMore style={{ color: ouvert ? s.color : "#666", fontSize:22,
-                              transition:"transform 0.3s", transform: ouvert ? "rotate(180deg)" : "rotate(0)" }}/>
+                            {ouvert ? <MdKeyboardArrowUp style={{ color:s.color, fontSize:24 }}/> : <MdKeyboardArrowDown style={{ color:"#666", fontSize:24 }}/>}
                           </div>
                           <div style={{
                             maxHeight: ouvert ? 200 : 0,
