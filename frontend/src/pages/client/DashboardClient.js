@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
+import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
@@ -251,15 +252,7 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
       {/* profil mini */}
       <div style={{ padding:"0 20px 20px", borderBottom:"1px solid #FFD70018", marginBottom:8 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{
-            width:42, height:42, borderRadius:"50%",
-            background:"linear-gradient(135deg, #FFD700, #ff8c00)",
-            display:"flex", alignItems:"center", justifyContent:"center",
-            fontWeight:800, color:"#000", fontSize:16,
-            boxShadow:"0 0 12px #FFD70044",
-          }}>
-            {profil.prenom?.[0]}{profil.nom?.[0]}
-          </div>
+          <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={42} fontSize={16} style={{ boxShadow:"0 0 12px #FFD70044" }} />
           <div>
             <div style={{ color:"#fff", fontWeight:700, fontSize:13 }}>
               {profil.prenom} {profil.nom}
@@ -672,7 +665,7 @@ useEffect(() => {
         adresse:   data.adresse   || "",
         role:      data.role      || "client",
       };
-      setProfil(p);
+      setProfil({ ...p, photo_profil: data.photo_profil || null });
       // ✅ Met à jour le localStorage aussi
       Object.entries(p).forEach(([k,v]) => localStorage.setItem(k, v));
     })
@@ -973,9 +966,9 @@ const noterCoursier = async (id, note) => {
             background:"linear-gradient(135deg,#FFD700,#ff8c00)",
             display:"flex", alignItems:"center", justifyContent:"center",
             color:"#000", fontWeight:800, fontSize:15,
-            boxShadow:"0 0 12px #FFD70044", cursor:"pointer",
+            boxShadow:"0 0 12px #FFD70044", cursor:"pointer", overflow:"hidden",
           }} onClick={()=>setOnglet("profil")}>
-            {profil.prenom[0]}{profil.nom[0]}
+            {profil.photo_profil ? <img src={profil.photo_profil} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/> : <>{profil.prenom[0]}{profil.nom[0]}</>}
           </div>
 
           <span style={{ color:"#ccc", fontSize:14 }} className="d-none d-md-inline">
@@ -2185,18 +2178,9 @@ const noterCoursier = async (id, note) => {
                     </h4>
                 <div style={card}>
                   <div style={{ textAlign:"center", marginBottom:28 }}>
-                    <div style={{
-                      width:90, height:90, borderRadius:"50%",
-                      background:"linear-gradient(135deg,#FFD700,#ff8c00)",
-                      margin:"0 auto 14px",
-                      display:"flex", alignItems:"center", justifyContent:"center",
-                      fontSize:36, fontWeight:800, color:"#000",
-                      boxShadow:"0 0 30px #FFD70044",
-                    }}>
-                      {profil.prenom[0]}{profil.nom[0]}
-                    </div>
+                    <AvatarProfilEditable photo={profil.photo_profil} initiales={`${profil.prenom?.[0] || ""}${profil.nom?.[0] || ""}`} apiUrl="https://projet-iraky-delivery.onrender.com" onSaved={(url)=>setProfil(p=>({ ...p, photo_profil:url }))} />
                     <div style={{ color:"#fff", fontWeight:800, fontSize:20 }}>
-                      {profil.prenom?.[0]}{profil.nom?.[0]}
+                      {profil.prenom} {profil.nom}
                     </div>
                     <div style={{ marginTop:6 }}>
                       <span style={{ backgroundColor:"#FFD70018", color:"#FFD700",

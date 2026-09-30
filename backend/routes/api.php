@@ -19,6 +19,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get ('/me',     [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/profil/photo', [AuthController::class, 'updatePhotoProfil']);
 
     // ── ADMIN — toutes les routes admin sont ICI dans le groupe ──
     Route::prefix('admin')->group(function () {

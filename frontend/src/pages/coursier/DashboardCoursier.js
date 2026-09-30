@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef  } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
+import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
 import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
@@ -168,15 +169,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "0 20px 20px", borderBottom: "1px solid #FFD70018", marginBottom: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 46, height: 46, borderRadius: "50%",
-            background: "linear-gradient(135deg,#FFD700,#ff8c00)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 800, color: "#000", fontSize: 17,
-            boxShadow: "0 0 14px #FFD70044",
-          }}>
-            {profil.prenom?.[0]}{profil.nom?.[0]}
-          </div>
+          <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={46} fontSize={17} style={{ boxShadow: "0 0 14px #FFD70044" }} />
           <div>
             <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{profil.prenom} {profil.nom}</div>
             <div style={{ color: "#FFD700", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
@@ -421,6 +414,7 @@ function DashboardCoursier() {
           // ✅ photo_recto et photo_verso uniquement — plus photo_identite
           photo_recto:  data.photo_recto  || null,
           photo_verso:  data.photo_verso  || null,
+          photo_profil: data.photo_profil || null,
           note:         data.note         || 0,
           nb_missions:  data.nb_missions  || 0,
           nb_terminees: data.nb_terminees || 0,
@@ -809,14 +803,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
               }}>{nbNonLus}</span>
             )}
           </div>
-          <div style={{
-            width: 38, height: 38, borderRadius: "50%",
-            background: "linear-gradient(135deg,#FFD700,#ff8c00)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#000", fontWeight: 800, fontSize: 15, cursor: "pointer",
-            boxShadow: "0 0 12px #FFD70044",
-          }} onClick={() => setOnglet("profil")}>
-            {profil.prenom?.[0]}{profil.nom?.[0]}
+          <div onClick={() => setOnglet("profil")} style={{ cursor: "pointer" }}>
+            <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={38} fontSize={15} style={{ boxShadow: "0 0 12px #FFD70044" }} />
           </div>
           <span style={{ color: "#ccc", fontSize: 14 }} className="d-none d-md-inline">{profil.prenom}</span>
         </div>
@@ -1561,15 +1549,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                   {/* Avatar */}
                   <div style={{ textAlign: "center", marginBottom: 28 }}>
-                    <div style={{
-                      width: 90, height: 90, borderRadius: "50%",
-                      background: "linear-gradient(135deg,#FFD700,#ff8c00)",
-                      margin: "0 auto 14px", display: "flex", alignItems: "center",
-                      justifyContent: "center", fontSize: 36, fontWeight: 800, color: "#000",
-                      boxShadow: "0 0 30px #FFD70044",
-                    }}>
-                      {profil.prenom?.[0]}{profil.nom?.[0]}
-                    </div>
+                    <AvatarProfilEditable photo={profil.photo_profil} initiales={`${profil.prenom?.[0] || ""}${profil.nom?.[0] || ""}`} apiUrl={BASE_URL} onSaved={(url)=>setProfil(p=>({ ...p, photo_profil:url }))} />
                     <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>{profil.prenom} {profil.nom}</div>
                     <div style={{ marginTop: 8, display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
                       <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,

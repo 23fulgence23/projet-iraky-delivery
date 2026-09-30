@@ -225,4 +225,21 @@ public function login(Request $request)
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
         return $earthRadius * $c;
     }
+
+    // Photo de profil (image reduite cote navigateur, stockee en data URL)
+    public function updatePhotoProfil(Request $request)
+    {
+        $request->validate([
+            'photo_profil' => ['required', 'string', 'max:400000',
+                'regex:/^data:image\/(jpeg|png|webp);base64,/'],
+        ]);
+
+        $user = auth('api')->user();
+        $user->forceFill(['photo_profil' => $request->photo_profil])->save();
+
+        return response()->json([
+            'message'      => 'Photo de profil mise a jour.',
+            'photo_profil' => $user->photo_profil,
+        ]);
+    }
 }
