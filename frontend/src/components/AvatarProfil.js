@@ -92,7 +92,7 @@ export function AvatarProfilEditable({ photo, initiales, apiUrl, onSaved }) {
           fontSize: 36, fontWeight: 800, color: "#000", boxShadow: "0 0 30px #FFD70044",
           opacity: loading ? 0.5 : 1 }}>
           {photo
-            ? <img src={photo} alt="Photo de profil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ? <img src={photo} alt="Profil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             : initiales}
         </div>
         <button type="button" onClick={() => inputRef.current && inputRef.current.click()}

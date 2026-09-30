@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
+import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
@@ -638,6 +639,8 @@ const [profil, setProfil] = useState({
   adresse:   localStorage.getItem("adresse")   || "",
   role:      localStorage.getItem("role")      || "client",
 });
+
+const [apercuCoursierId, setApercuCoursierId] = useState(null);
 
 // ✅ Synchronise avec l'API au chargement
 useEffect(() => {
@@ -1593,7 +1596,7 @@ const noterCoursier = async (id, note) => {
                           </div>
                           {cmd.coursier && (
                             <div style={{ color:"#aaa", fontSize:13, marginTop:8 }}>
-                              👤 Coursier : <strong style={{ color:"#FFD700" }}>{cmd.coursier}</strong>
+                              👤 Coursier : <LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"#FFD700", fontWeight:700 }} />
                             </div>
                           )}
                           <div style={{ color:"#666", fontSize:12, marginTop:6,
@@ -1693,7 +1696,7 @@ const noterCoursier = async (id, note) => {
                 {cmd.coursier?.[0]}
               </div>
               <div>
-                <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}>{cmd.coursier}</div>
+                <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
                 <div style={{ color:"#888", fontSize:12 }}>{cmd.service} · {cmd.date}</div>
               </div>
             </div>
@@ -2059,7 +2062,7 @@ const noterCoursier = async (id, note) => {
                         {cmd.coursier[0]}
                       </div>
                       <div>
-                        <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.coursier}</div>
+                        <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
                         {/* ✅ Étoile du coursier directement visible */}
                         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                           <Etoiles value={cmd.coursier_note || 0}/>
@@ -2617,6 +2620,7 @@ const noterCoursier = async (id, note) => {
           </div>
         </main>
       </div>
+      {apercuCoursierId && <ApercuCoursierModal coursierId={apercuCoursierId} apiUrl="https://projet-iraky-delivery.onrender.com" onClose={() => setApercuCoursierId(null)} />}
       {/* MODAL DÉTAIL */}
       {detailCmd && (
         <Modal onClose={()=>setDetailCmd(null)} size="lg">

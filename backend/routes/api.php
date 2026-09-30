@@ -94,6 +94,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post  ('/commandes/{id}/refuser',           [CommandeController::class, 'refuser']);
     Route::post  ('/commandes/{id}/terminer',          [CommandeController::class, 'terminer']);
     Route::delete('/commandes/{id}',                   [CommandeController::class, 'destroy']);
+    Route::get   ('/coursiers/{id}/apercu',            [CommandeController::class, 'apercuCoursier']);
 
     // ── Messages ─────────────────────────────────
     Route::get   ('/commandes/{id}/messages',                       [MessageController::class, 'index']);

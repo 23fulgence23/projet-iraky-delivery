@@ -57,7 +57,7 @@ class CommandeController extends Controller
         {
             $user = JWTAuth::user();
             $commandes = Commande::where('client_id', $user->id)
-                ->with('coursier') // charge déjà la relation
+                ->with('coursier:id,prenom,nom,note,trophees,photo_profil') // charge déjà la relation
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(fn($c) => [
@@ -355,5 +355,31 @@ public function terminer(Request $request, $id)
 
         $commande->delete();
         return response()->json(['message' => 'Commande supprimée']);
+    }
+
+    // ── Apercu public d'un coursier (photo, nom, note, missions terminees) ──
+    // Accessible au client qui a une commande avec ce coursier, et aux admins.
+    public function apercuCoursier($id)
+    {
+        $user = JWTAuth::user();
+
+        $autorise = $user->role === 'admin'
+            || Commande::where('coursier_id', $id)->where('client_id', $user->id)->exists();
+
+        if (!$autorise) {
+            return response()->json(['message' => 'Acces refuse.'], 403);
+        }
+
+        $coursier = User::findOrFail($id);
+
+        return response()->json([
+            'id'           => $coursier->id,
+            'prenom'       => $coursier->prenom,
+            'nom'          => $coursier->nom,
+            'photo_profil' => $coursier->photo_profil,
+            'note'         => $coursier->note ?? 0,
+            'nb_terminees' => Commande::where('coursier_id', $coursier->id)
+                                ->where('statut', 'termine')->count(),
+        ]);
     }
 }
