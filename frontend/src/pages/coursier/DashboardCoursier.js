@@ -735,7 +735,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
         <img
           src={`${BASE_URL}/storage/${chemin}`}
           alt={label}
-          style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }}
+          style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}
           onError={e => {
             // ✅ Si l'image ne charge pas, affiche un message d'erreur
             e.target.style.display = "none";
@@ -744,7 +744,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
         />
       ) : null}
       <div style={{
-        height: 180,
+        aspectRatio: "85.6 / 54",
         display: chemin ? "none" : "flex",
         alignItems: "center", justifyContent: "center",
         flexDirection: "column", gap: 8, color: "#555",

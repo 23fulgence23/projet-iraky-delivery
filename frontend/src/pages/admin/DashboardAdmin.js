@@ -2351,10 +2351,10 @@ function DashboardAdmin() {
                     </div>
                     {p.chemin?(
                       <img src={`${BASE_URL}/storage/${p.chemin}`} alt={p.label}
-                        style={{ width:"100%",height:160,objectFit:"cover",display:"block" }}
+                        style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                     ):(
-                      <div style={{ height:160,display:"flex",alignItems:"center",
+                      <div style={{ aspectRatio: "85.6 / 54", display: "flex",alignItems:"center",
                         justifyContent:"center",flexDirection:"column",gap:8,color:"#444" }}>
                         <MdBadge style={{ fontSize:36 }}/>
                         <span style={{ fontSize:12 }}>Non fourni</span>
@@ -2606,9 +2606,9 @@ function DashboardAdmin() {
                   color: "#aaa", fontSize: 12 }}>{p.label}</div>
                 {p.chemin ? (
                   <img src={`${BASE_URL}/storage/${p.chemin}`} alt={p.label}
-                    style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}/>
+                    style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}/>
                 ) : (
-                  <div style={{ height: 160, display: "flex", alignItems: "center",
+                  <div style={{ aspectRatio: "85.6 / 54", display: "flex", alignItems: "center",
                     justifyContent: "center", color: "#444", fontSize: 13 }}>Non fourni</div>
                 )}
               </div>

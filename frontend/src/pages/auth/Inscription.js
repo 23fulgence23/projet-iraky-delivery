@@ -4,6 +4,24 @@ import { MdVisibility, MdVisibilityOff, MdCheckCircle, MdClose,
          MdDeliveryDining, MdAttachMoney, MdReceipt } from "react-icons/md";
 import logo from "../../logo.png";
 
+// Aperçu de la photo CIN choisie (même ratio qu'une carte, image entière visible)
+function ApercuCIN({ fichier }) {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    if (!fichier) { setUrl(null); return; }
+    const u = URL.createObjectURL(fichier);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [fichier]);
+  if (!url) return null;
+  return (
+    <img src={url} alt="Aperçu CIN"
+      style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain",
+        backgroundColor: "#000", borderRadius: 10, border: "1px solid #ffffff20",
+        marginTop: 8, display: "block" }} />
+  );
+}
+
 function Inscription() {
   const navigate = useNavigate();
   const [role, setRole] = useState("client");
@@ -509,6 +527,7 @@ useEffect(() => {
                 <input type="file" name="photo_recto" className="form-control mt-1"
                   accept="image/*" onChange={handleChange} style={inp("photo_recto")} />
                 {errors.photo_recto && <small style={{ color: "#ef4444", fontSize: 11 }}>{errors.photo_recto}</small>}
+                <ApercuCIN fichier={form.photo_recto} />
               </div>
 
               <div className="col-md-6">
@@ -518,6 +537,7 @@ useEffect(() => {
                 <input type="file" name="photo_verso" className="form-control mt-1"
                   accept="image/*" onChange={handleChange} style={inp("photo_verso")} />
                 {errors.photo_verso && <small style={{ color: "#ef4444", fontSize: 11 }}>{errors.photo_verso}</small>}
+                <ApercuCIN fichier={form.photo_verso} />
               </div>
 
               {/* Bloc paiement MVola */}
