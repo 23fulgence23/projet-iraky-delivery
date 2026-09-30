@@ -113,7 +113,7 @@ public function commandesMensuelles()
                 'tarif'    => $c->tarif,
                 'statut'   => $c->statut,
                 'date'     => $c->created_at->format('Y-m-d'),
-                'heure'    => $c->heure_publication,
+                'heure'    => optional($c->heure_publication)->format('H:i'),
             ]);
         return response()->json($commandes);
     }
@@ -627,7 +627,7 @@ public function rejeterCoursier(Request $request, $id)
                     'client'         => $c->client   ? $c->client->prenom.' '.$c->client->nom   : '—',
                     'coursier'       => $c->coursier ? $c->coursier->prenom.' '.$c->coursier->nom : null,
                     'date'           => $c->created_at->format('Y-m-d'),
-                    'heure'          => $c->heure_publication,
+                    'heure'          => optional($c->heure_publication)->format('H:i'),
                 ])
         );
     }
@@ -642,9 +642,9 @@ public function rejeterCoursier(Request $request, $id)
             'tarif'             => 'required|numeric|min:0',
             'detail'            => 'nullable|string|max:500',
             'adresse_pickup'    => 'nullable|string|max:255',
-            'heure_publication' => 'nullable|string',
-            'heure_debut'       => 'nullable|string',
-            'heure_livraison'   => 'nullable|string',
+            'heure_publication' => 'nullable|date',
+            'heure_debut'       => 'nullable|date',
+            'heure_livraison'   => 'nullable|date',
             'statut'            => 'nullable|in:en_attente,negociable,accepte,refuse,termine',
         ]);
 
@@ -656,9 +656,9 @@ public function rejeterCoursier(Request $request, $id)
             'tarif'             => $request->tarif,
             'detail'            => $request->detail ?? '',
             'adresse_pickup'    => $request->adresse_pickup ?? '',
-            'heure_publication' => $request->heure_publication ?? now()->format('H:i'),
-            'heure_debut'       => $request->heure_debut ?? now()->format('H:i'),
-            'heure_livraison'   => $request->heure_livraison ?? now()->addHour()->format('H:i'),
+            'heure_publication' => $request->heure_publication ?? now(),
+            'heure_debut'       => $request->heure_debut ?? now(),
+            'heure_livraison'   => $request->heure_livraison ?? now()->addHour(),
             'statut'            => $request->statut ?? 'en_attente',
             'accord_client'     => false,
             'accord_coursier'   => false,

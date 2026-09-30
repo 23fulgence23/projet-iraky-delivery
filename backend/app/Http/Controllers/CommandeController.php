@@ -18,9 +18,8 @@ class CommandeController extends Controller
             'moyen'             => 'required|string',
             'tarif'             => 'required|numeric',
             'detail'            => 'required|string',
-            'heure_publication' => 'required',
-            'heure_debut'       => 'required',
-            'heure_livraison'   => 'required',
+            'heure_debut'       => 'required|date',
+            'heure_livraison'   => 'required|date',
         ]);
 
         $commande = Commande::create([
@@ -30,7 +29,7 @@ class CommandeController extends Controller
             'tarif'             => $request->tarif,
             'detail'            => $request->detail,
             'adresse_pickup'    => $request->adresse_pickup,
-            'heure_publication' => $request->heure_publication,
+            'heure_publication' => now(),
             'heure_debut'       => $request->heure_debut,
             'heure_livraison'   => $request->heure_livraison,
             'statut'            => 'en_attente',

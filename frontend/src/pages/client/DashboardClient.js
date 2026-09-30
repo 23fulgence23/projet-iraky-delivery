@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { formatDateHeure } from "../../utils/formatDateHeure";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
@@ -821,7 +822,7 @@ useEffect(() => {
   };
 
   const publier = async () => {
-    if (!form.service || !form.moyen || !form.detail || !form.heure_publication || !form.heure_debut || !form.heure_livraison) {
+    if (!form.service || !form.moyen || !form.detail || !form.heure_debut || !form.heure_livraison) {
       showToast("Veuillez remplir tous les champs obligatoires", "error"); return;
     }
     setLoading(true);
@@ -839,7 +840,6 @@ useEffect(() => {
           tarif:             tarifSel,
           detail:            form.detail,
           adresse_pickup:    form.adresse_pickup,
-          heure_publication: form.heure_publication,
           heure_debut:       form.heure_debut,
           heure_livraison:   form.heure_livraison,
         }),
@@ -1443,25 +1443,6 @@ const noterCoursier = async (id, note) => {
       />
     </div>
 
-    {/* Heure publication */}
-    <div>
-      <label style={{ color:"#aaa", fontSize:12, display:"flex",
-        alignItems:"center", gap:6, marginBottom:6 }}>
-        <MdCampaign style={{ color:"#8b5cf6", fontSize:15 }}/>
-        Heure de publication
-        <span style={{ color:"#ef4444" }}>*</span>
-      </label>
-      <input type="time" value={form.heure_publication}
-        onChange={e=>setForm(f=>({...f,heure_publication:e.target.value}))}
-        style={inp}
-        onFocus={e=>e.target.style.borderColor="#FFD700"}
-        onBlur={e=>e.target.style.borderColor="#FFD70030"}
-      />
-      <small style={{ color:"#555", fontSize:11, marginTop:4, display:"block" }}>
-        Heure à laquelle vous publiez l'annonce
-      </small>
-    </div>
-
     {/* Heure début */}
     <div>
       <label style={{ color:"#aaa", fontSize:12, display:"flex",
@@ -1470,7 +1451,7 @@ const noterCoursier = async (id, note) => {
         Heure de début souhaitée
         <span style={{ color:"#ef4444" }}>*</span>
       </label>
-      <input type="time" value={form.heure_debut}
+      <input type="datetime-local" value={form.heure_debut}
         onChange={e=>setForm(f=>({...f,heure_debut:e.target.value}))}
         style={inp}
         onFocus={e=>e.target.style.borderColor="#FFD700"}
@@ -1489,7 +1470,7 @@ const noterCoursier = async (id, note) => {
         Heure de livraison souhaitée
         <span style={{ color:"#ef4444" }}>*</span>
       </label>
-      <input type="time" value={form.heure_livraison}
+      <input type="datetime-local" value={form.heure_livraison}
         onChange={e=>setForm(f=>({...f,heure_livraison:e.target.value}))}
         style={inp}
         onFocus={e=>e.target.style.borderColor="#FFD700"}
@@ -1517,9 +1498,8 @@ const noterCoursier = async (id, note) => {
         { Icon:MdMiscellaneousServices, label:"Service",    val:SERVICES.find(s=>s.id===form.service)?.label||"—", color:"#FFD700" },
         { Icon:MdDirectionsBike,        label:"Moyen",      val:moyens.find(m=>m.id===form.moyen)?.label||"—",     color:"#3b82f6" },
         { Icon:MdAttachMoney,           label:"Tarif",      val:`${tarifSel.toLocaleString()} Ar`,                  color:"#10b981" },
-        { Icon:MdCampaign,              label:"Publie à",   val:form.heure_publication||"—",                        color:"#8b5cf6" },
-        { Icon:MdAccessTime,            label:"Début",      val:form.heure_debut||"—",                              color:"#f59e0b" },
-        { Icon:MdLocalShipping,         label:"Livraison",  val:form.heure_livraison||"—",                          color:"#ec4899" },
+        { Icon:MdAccessTime,            label:"Début",      val:formatDateHeure(form.heure_debut),                              color:"#f59e0b" },
+        { Icon:MdLocalShipping,         label:"Livraison",  val:formatDateHeure(form.heure_livraison),                          color:"#ec4899" },
       ].map(({Icon, label, val, color})=>(
         <div key={label} style={{ backgroundColor:"#0a0a1e40", borderRadius:10,
           padding:"10px 14px", display:"flex", alignItems:"center", gap:10 }}>
@@ -1614,9 +1594,9 @@ const noterCoursier = async (id, note) => {
                             </span>
                             <span style={{ color:"#888", fontSize:12 }}>📅 {cmd.date}</span>
                             {cmd.heure_publication && (
-                              <span style={{ color:"#888", fontSize:12 }}>📢 Publié à {cmd.heure_publication}</span>
+                              <span style={{ color:"#888", fontSize:12 }}>📢 Publié à {formatDateHeure(cmd.heure_publication)}</span>
                             )}
-                            <span style={{ color:"#888", fontSize:12 }}>🕐 {cmd.heure_debut} → {cmd.heure_livraison}</span>
+                            <span style={{ color:"#888", fontSize:12 }}>🕐 {formatDateHeure(cmd.heure_debut)} → {formatDateHeure(cmd.heure_livraison)}</span>
                           </div>
                           {cmd.coursier && (
                             <div style={{ color:"#aaa", fontSize:13, marginTop:8 }}>
@@ -2019,7 +1999,7 @@ const noterCoursier = async (id, note) => {
               <div>
                 <div style={{ color:"#fff", fontWeight:700, fontSize:16 }}>{cmd.service}</div>
                 <div style={{ color:"#888", fontSize:13, marginTop:4 }}>
-                  {cmd.moyen} · 📢 {cmd.heure_publication} · 🕐 {cmd.heure_debut} → {cmd.heure_livraison}
+                  {cmd.moyen} · 📢 {formatDateHeure(cmd.heure_publication)} · 🕐 {formatDateHeure(cmd.heure_debut)} → {formatDateHeure(cmd.heure_livraison)}
                 </div>
               </div>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -2680,7 +2660,7 @@ const noterCoursier = async (id, note) => {
               ["Tarif",              `${detailCmd.tarif?.toLocaleString()} Ar`],
               ["Statut",             STATUT_CONFIG[detailCmd.statut]?.label],
               ["Date",               detailCmd.date],
-              ["Heure publication",  detailCmd.heure_publication||"—"],
+              ["Heure publication",  formatDateHeure(detailCmd.heure_publication)],
               ["Heure de début",     detailCmd.heure_debut],
               ["Heure de livraison", detailCmd.heure_livraison],
               ["Coursier",           detailCmd.coursier||"Non assigné"],

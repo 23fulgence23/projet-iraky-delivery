@@ -16,6 +16,9 @@ class Commande extends Model
         'accord_client'  => 'boolean',
         'accord_coursier'=> 'boolean',
         'note'            => 'integer',
+        'heure_publication' => 'datetime',
+        'heure_debut'       => 'datetime',
+        'heure_livraison'   => 'datetime',
     ];
 
     public function client()

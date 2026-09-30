@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef  } from "react";
+import { formatDateHeure } from "../../utils/formatDateHeure";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
 import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
@@ -1034,7 +1035,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       padding: "12px 0", borderBottom: "1px solid #ffffff08", flexWrap: "wrap", gap: 8 }}>
                       <div>
                         <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{pub.service}</div>
-                        <div style={{ color: "#666", fontSize: 12 }}>{pub.moyen} · {pub.client} · {pub.heure_debut}</div>
+                        <div style={{ color: "#666", fontSize: 12 }}>{pub.moyen} · {pub.client} · {formatDateHeure(pub.heure_debut)}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ color: "#FFD700", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
@@ -1083,7 +1084,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdPerson style={{ color: pub.color }}/> {pub.client}</span>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdDirectionsBike style={{ color: pub.color }}/> {pub.moyen}</span>
-                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdAccessTime style={{ color: pub.color }}/> {pub.heure_debut} → {pub.heure_livraison}</span>
+                          <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdAccessTime style={{ color: pub.color }}/> {formatDateHeure(pub.heure_debut)} → {formatDateHeure(pub.heure_livraison)}</span>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdLocationOn style={{ color: pub.color }}/> {pub.adresse_pickup}</span>
                         </div>
                         <div style={{ color: "#aaa", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{pub.detail}</div>
@@ -1148,7 +1149,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               <MdAttachMoney style={{ color: "#10b981" }}/> {mission.tarif.toLocaleString()} Ar
                             </span>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                              <MdAccessTime style={{ color: "#f59e0b" }}/> {mission.heure_debut} → {mission.heure_livraison}
+                              <MdAccessTime style={{ color: "#f59e0b" }}/> {formatDateHeure(mission.heure_debut)} → {formatDateHeure(mission.heure_livraison)}
                             </span>
                           </div>
                         </div>
@@ -1972,8 +1973,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
               ["Moyen",           detailModal.moyen],
               ["Tarif",           `${detailModal.tarif?.toLocaleString()} Ar`],
               ["Date",            detailModal.date],
-              ["Heure début",     detailModal.heure_debut],
-              ["Heure livraison", detailModal.heure_livraison],
+              ["Heure début",     formatDateHeure(detailModal.heure_debut)],
+              ["Heure livraison", formatDateHeure(detailModal.heure_livraison)],
               ["Adresse pickup",  detailModal.adresse_pickup],
               ["Statut",          STATUT_CONFIG[detailModal.statut]?.label],
             ].map(([k, v]) => (
