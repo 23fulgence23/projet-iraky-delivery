@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import Demarche from "./Demarche";
 import Partenariats from "./Partenariats";
 import "../Theme.css";
 import "../App.css";
 
 function APropos() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const ref = useRef();
 
@@ -18,10 +20,10 @@ function APropos() {
   }, []);
 
   const cards = [
-    { icon: "fas fa-briefcase", title: "Emploi local", desc: "Des opportunités concrètes pour les jeunes coursiers de Toliara." },
-    { icon: "fas fa-clock", title: "Gain de temps", desc: "Plus besoin de faire la queue. Notre coursier s'en charge à votre place." },
-    { icon: "fas fa-coins", title: "Prix abordable", desc: "Un service complet dès 5 000 Ar la course, accessible à tous." },
-    { icon: "fas fa-shield-alt", title: "Service fiable", desc: "Des coursiers vérifiés, identifiés et suivis en temps réel." },
+    { icon: "fas fa-briefcase", title: t("Emploi local"), desc: t("Des opportunités concrètes pour les jeunes coursiers de Toliara.") },
+    { icon: "fas fa-clock", title: t("Gain de temps"), desc: t("Plus besoin de faire la queue. Notre coursier s'en charge à votre place.") },
+    { icon: "fas fa-coins", title: t("Prix abordable"), desc: t("Un service complet dès 5 000 Ar la course, accessible à tous.") },
+    { icon: "fas fa-shield-alt", title: t("Service fiable"), desc: t("Des coursiers vérifiés, identifiés et suivis en temps réel.") },
   ];
 
   return (
@@ -38,13 +40,10 @@ function APropos() {
               transition: "all 0.7s ease",
             }}
           >
-            <span className="iraky-eyebrow justify-content-center mb-3">Qui sommes-nous</span>
-            <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
-              À propos de nous
-            </h2>
+            <span className="iraky-eyebrow justify-content-center mb-3">{t("Qui sommes-nous")}</span>
+            <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>{t("À propos de nous")}</h2>
             <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
-              IRAKY Delivery met en relation les habitants de Toliara avec des
-              coursiers locaux de confiance, pour toutes les démarches du quotidien.
+              {t("IRAKY Delivery met en relation les habitants de Toliara avec des coursiers locaux de confiance, pour toutes les démarches du quotidien.")}
             </p>
           </div>
 

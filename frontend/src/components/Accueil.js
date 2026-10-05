@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import coursier1 from "../images/coursier1.png";
 import coursier2 from "../images/coursier2.jpg";
 import coursier3 from "../images/coursier3.jpg";
@@ -6,6 +7,7 @@ import coursier4 from "../images/coursier4.jpg";
 import "../Theme.css";
 import "../App.css";
 function Accueil() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -28,9 +30,9 @@ function Accueil() {
   };
 
   const stats = [
-    { value: "5 000 Ar", label: "dès la 1ère course" },
-    { value: "15–30 min", label: "délai moyen" },
-    { value: "100 %", label: "coursiers locaux" },
+    { value: "5 000 Ar", label: t("dès la 1ère course") },
+    { value: "15–30 min", label: t("délai moyen") },
+    { value: "100 %", label: t("coursiers locaux") },
   ];
 
   return (
@@ -59,7 +61,7 @@ function Accueil() {
               transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
             }}
           >
-            <span className="iraky-eyebrow mb-4 d-inline-flex">Service de coursier · Toliara</span>
+            <span className="iraky-eyebrow mb-4 d-inline-flex">{t("Service de coursier · Toliara")}</span>
 
             <h1
               style={{
@@ -73,9 +75,9 @@ function Accueil() {
                 marginBottom: "20px",
               }}
             >
-              On fait la queue
+              {t("On fait la queue")}
               <br />
-              <span style={{ color: "var(--iraky-gold)" }}>à votre place.</span>
+              <span style={{ color: "var(--iraky-gold)" }}>{t("à votre place.")}</span>
             </h1>
 
             <p
@@ -88,18 +90,13 @@ function Accueil() {
                 marginBottom: "32px",
               }}
             >
-              Facture, banque, courses, colis, documents — un coursier vérifié
-              de Toliara s'en charge pour vous, à partir de{" "}
+              {t("Facture, banque, courses, colis, documents — un coursier vérifié de Toliara s'en charge pour vous, à partir de")}{" "}
               <strong style={{ color: "var(--iraky-gold)" }}>5 000 Ar</strong>.
             </p>
 
             <div className="d-flex gap-3 flex-wrap mb-5">
-              <button className="iraky-btn-gold" onClick={() => scrollTo("services")}>
-                Voir nos services
-              </button>
-              <button className="iraky-btn-ghost" onClick={() => scrollTo("apropos")}>
-                En savoir plus
-              </button>
+              <button className="iraky-btn-gold" onClick={() => scrollTo("services")}>{t("Voir nos services")}</button>
+              <button className="iraky-btn-ghost" onClick={() => scrollTo("apropos")}>{t("En savoir plus")}</button>
             </div>
 
             {/* Stats */}
@@ -152,7 +149,7 @@ function Accueil() {
                   <img
                     key={index}
                     src={img}
-                    alt={`Coursier IRAKY Delivery ${index + 1}`}
+                    alt={`${t("Coursier IRAKY Delivery")} ${index + 1}`}
                     style={{
                       position: "absolute",
                       top: 0,
@@ -195,12 +192,8 @@ function Accueil() {
                   background: "var(--iraky-route)", animation: "iraky-pulse-dot 1.8s infinite",
                 }} />
                 <div>
-                  <div style={{ fontFamily: "var(--f-mono)", fontSize: "11px", color: "var(--iraky-route)", fontWeight: 700 }}>
-                    COURSIER EN ROUTE
-                  </div>
-                  <div style={{ fontFamily: "var(--f-body)", fontSize: "11px", color: "var(--iraky-muted)" }}>
-                    Arrivée estimée : 18 min
-                  </div>
+                  <div style={{ fontFamily: "var(--f-mono)", fontSize: "11px", color: "var(--iraky-route)", fontWeight: 700 }}>{t("COURSIER EN ROUTE")}</div>
+                  <div style={{ fontFamily: "var(--f-body)", fontSize: "11px", color: "var(--iraky-muted)" }}>{t("Arrivée estimée : 18 min")}</div>
                 </div>
               </div>
 

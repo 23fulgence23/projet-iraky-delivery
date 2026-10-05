@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../Theme.css";
 import "../App.css";
 
 function NosServices() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const ref = useRef();
 
@@ -16,12 +18,12 @@ function NosServices() {
   }, []);
 
   const services = [
-    { icon: "fas fa-bolt", title: "Facture JIRAMA", desc: "Réglez votre facture JIRAMA sans vous déplacer." },
-    { icon: "fas fa-id-card", title: "Légalisation CIN", desc: "Légalisez votre CIN ou tout document administratif." },
-    { icon: "fas fa-university", title: "Banque / Trésor", desc: "Fini les longues files à la banque ou au trésor." },
-    { icon: "fas fa-shopping-cart", title: "Achats", desc: "Courses au SCORE, BazarBe, SCAMA et partout à Toliara." },
-    { icon: "fas fa-graduation-cap", title: "Mentor universitaire", desc: "Aide les étudiants à trouver un mentor dans leur domaine." },
-    { icon: "fas fa-box", title: "Livraison de colis", desc: "Livrez vos colis et documents partout dans Toliara rapidement." },
+    { icon: "fas fa-bolt", title: t("Facture JIRAMA"), desc: t("Réglez votre facture JIRAMA sans vous déplacer.") },
+    { icon: "fas fa-id-card", title: t("Légalisation CIN"), desc: t("Légalisez votre CIN ou tout document administratif.") },
+    { icon: "fas fa-university", title: t("Banque / Trésor"), desc: t("Fini les longues files à la banque ou au trésor.") },
+    { icon: "fas fa-shopping-cart", title: t("Achats"), desc: t("Courses au SCORE, BazarBe, SCAMA et partout à Toliara.") },
+    { icon: "fas fa-graduation-cap", title: t("Mentor universitaire"), desc: t("Aide les étudiants à trouver un mentor dans leur domaine.") },
+    { icon: "fas fa-box", title: t("Livraison de colis"), desc: t("Livrez vos colis et documents partout dans Toliara rapidement.") },
   ];
 
   return (
@@ -34,13 +36,9 @@ function NosServices() {
           transform: visible ? "translateY(0)" : "translateY(20px)",
           transition: "all 0.7s ease",
         }}>
-          <span className="iraky-eyebrow justify-content-center mb-3">Ce qu'on fait pour vous</span>
-          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
-            Nos Services
-          </h2>
-          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
-            Tout ce que nous pouvons faire à votre place.
-          </p>
+          <span className="iraky-eyebrow justify-content-center mb-3">{t("Ce qu'on fait pour vous")}</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>{t("Nos Services")}</h2>
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>{t("Tout ce que nous pouvons faire à votre place.")}</p>
         </div>
 
         <div className="row g-4 justify-content-center">
@@ -88,7 +86,7 @@ function NosServices() {
             <span style={{ width: "9px", height: "9px", borderRadius: "50%", background: "var(--iraky-route)",
               animation: "iraky-pulse-dot 1.8s infinite", flexShrink: 0 }} />
             <span style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 700, fontSize: "17px" }}>
-              À seulement <span style={{ color: "var(--iraky-gold)" }}>5 000 Ar</span> par course
+              {t("À seulement")}{" "}<span style={{ color: "var(--iraky-gold)" }}>5 000 Ar</span>{" "}{t("par course")}
             </span>
           </div>
         </div>
