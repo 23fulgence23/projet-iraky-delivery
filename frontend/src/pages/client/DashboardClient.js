@@ -136,6 +136,7 @@ const MOCK_NOTIFS = [
 // ══════════════════════════════════════════════
 function Etoiles({ value, onChange }) {
   const [hov, setHov] = useState(0);
+  const valeur = onChange ? value : Math.round(Number(value) || 0);
   return (
     <div style={{ display:"flex", gap:6 }}>
       {[1,2,3,4,5].map(i => (
@@ -144,10 +145,10 @@ function Etoiles({ value, onChange }) {
           onMouseEnter={() => onChange && setHov(i)}
           onMouseLeave={() => onChange && setHov(0)}
           style={{ fontSize:24, cursor:onChange?"pointer":"default",
-            color: i<=(hov||value) ? "#FFD700":"#ffffff18",
+            color: i<=(hov||valeur) ? "#FFD700":"#ffffff18",
             transition:"color 0.15s, transform 0.15s",
             display:"inline-block",
-            transform: i<=(hov||value) ? "scale(1.2)":"scale(1)" }}>★</span>
+            transform: i<=(hov||valeur) ? "scale(1.2)":"scale(1)" }}>★</span>
       ))}
     </div>
   );

@@ -75,7 +75,8 @@ const BASE_URL = "https://projet-iraky-delivery.onrender.com";
 // ══════════════════════════════════════════════
 //  ÉTOILES
 // ══════════════════════════════════════════════
-function Etoiles({ value }) {
+function Etoiles({ value: valeurBrute }) {
+  const value = Math.round(Number(valeurBrute) || 0);
   return (
     <div style={{ display: "flex", gap: 3 }}>
       {[1,2,3,4,5].map(i => (
@@ -468,6 +469,33 @@ useEffect(() => {
 
   fetchAll();
   const interval = setInterval(fetchAll, 5000);
+  return () => clearInterval(interval);
+}, []);
+
+// ── Rafraîchit les stats du profil (note, trophées...) toutes les 15 s ──
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  const rafraichir = () => {
+    fetch(BASE_URL + "/api/me", {
+      headers: { "Authorization": "Bearer " + token, "Accept": "application/json" },
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (!d) return;
+        setProfil(p => ({
+          ...p,
+          note: d.note || 0,
+          nb_missions: d.nb_missions || 0,
+          nb_terminees: d.nb_terminees || 0,
+          trophees: d.trophees || 0,
+          etoiles_actuelles: d.etoiles_actuelles || 0,
+          photo_profil: d.photo_profil || null,
+        }));
+      })
+      .catch(() => {});
+  };
+  const interval = setInterval(rafraichir, 15000);
   return () => clearInterval(interval);
 }, []);
 
