@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import logo from "../../logo.png";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 function Connexion() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.success;
@@ -95,6 +98,7 @@ function Connexion() {
     <div style={{ minHeight: "100vh", backgroundColor: "#0a0a1e",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "80px 16px 40px 16px" }}>
+      <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
       <div style={{ backgroundColor: "#1a1a35", borderRadius: "20px",
         padding: "clamp(20px, 5vw, 40px)",
         width: "100%", maxWidth: "450px",
@@ -104,10 +108,8 @@ function Connexion() {
         <div className="text-center mb-4">
           <img src={logo} alt="IRAKY"
             style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>Se connecter</h4>
-          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>
-            Accédez à votre espace IRAKY Delivery
-          </p>
+          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>{t("Se connecter")}</h4>
+          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Accédez à votre espace IRAKY Delivery")}</p>
         </div>
 
         {/* ✅ Bandeau attente vérification — polling en cours */}
@@ -124,11 +126,9 @@ function Connexion() {
             </div>
             <div>
               <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 13, margin: 0 }}>
-                ⏳ Bonjour {prenomCoursier} ! Votre dossier est en cours de vérification...
+                {t("⏳ Bonjour {{prenom}} ! Votre dossier est en cours de vérification...", { prenom: prenomCoursier })}
               </p>
-              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>
-                L'administrateur examine votre inscription. Cette page se met à jour automatiquement.
-              </p>
+              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>{t("L'administrateur examine votre inscription. Cette page se met à jour automatiquement.")}</p>
             </div>
           </div>
         )}
@@ -141,11 +141,9 @@ function Connexion() {
             <span style={{ fontSize: 28 }}>🎉</span>
             <div>
               <p style={{ color: "#10b981", fontWeight: 800, fontSize: 14, margin: 0 }}>
-                Félicitations {prenomCoursier} ! Votre compte est validé et activé.
+                {t("Félicitations {{prenom}} ! Votre compte est validé et activé.", { prenom: prenomCoursier })}
               </p>
-              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>
-                Vous pouvez vous connecter maintenant avec votre email et mot de passe.
-              </p>
+              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>{t("Vous pouvez vous connecter maintenant avec votre email et mot de passe.")}</p>
             </div>
           </div>
         )}
@@ -155,17 +153,13 @@ function Connexion() {
           <div className="mb-3 p-3"
             style={{ backgroundColor: "#ef444418", border: "1px solid #ef444444",
               borderRadius: 12 }}>
-            <p style={{ color: "#ef4444", fontWeight: 800, fontSize: 14, margin: "0 0 8px" }}>
-              ❌ Votre dossier d'inscription a été rejeté.
-            </p>
+            <p style={{ color: "#ef4444", fontWeight: 800, fontSize: 14, margin: "0 0 8px" }}>{t("❌ Votre dossier d'inscription a été rejeté.")}</p>
 
             {/* Message de l'admin */}
             {msgRejetConnexion && (
               <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
                 padding: "10px 12px", marginBottom: 10 }}>
-                <p style={{ color: "#aaa", fontSize: 11, margin: "0 0 4px" }}>
-                  Message de l'administrateur :
-                </p>
+                <p style={{ color: "#aaa", fontSize: 11, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
                 <p style={{ color: "#fff", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
                   {msgRejetConnexion
                     .replace("❌ Votre dossier a été rejeté. Raison : ", "")
@@ -174,17 +168,12 @@ function Connexion() {
               </div>
             )}
 
-            <p style={{ color: "#888", fontSize: 12, margin: "0 0 12px" }}>
-              📧 Un email détaillé a été envoyé à votre adresse email.
-              Corrigez les erreurs et réinscrivez-vous.
-            </p>
+            <p style={{ color: "#888", fontSize: 12, margin: "0 0 12px" }}>{t("📧 Un email détaillé a été envoyé à votre adresse email. Corrigez les erreurs et réinscrivez-vous.")}</p>
             <button
               onClick={() => navigate("/inscription")}
               style={{ backgroundColor: "#ef4444", color: "#fff", border: "none",
                 borderRadius: 8, padding: "10px 16px", cursor: "pointer",
-                fontWeight: 700, fontSize: 13, width: "100%" }}>
-              🔄 Se réinscrire avec les corrections
-            </button>
+                fontWeight: 700, fontSize: 13, width: "100%" }}>{t("🔄 Se réinscrire avec les corrections")}</button>
           </div>
         )}
 
@@ -196,8 +185,7 @@ function Connexion() {
               gap: 10, justifyContent: "center" }}>
             <span style={{ fontSize: 22 }}>🎉</span>
             <span style={{ color: "#FFD700", fontSize: 14, fontWeight: 700 }}>
-              Bravo {prenomCoursier} ! Votre compte coursier est validé et activé.
-              Vous pouvez vous connecter dès maintenant.
+              {t("Bravo {{prenom}} ! Votre compte coursier est validé et activé. Vous pouvez vous connecter dès maintenant.", { prenom: prenomCoursier })}
             </span>
           </div>
         )}
@@ -207,7 +195,7 @@ function Connexion() {
           <div className="mb-3 p-2 text-center"
             style={{ backgroundColor: "#28a74522", color: "#28a745",
               borderRadius: "8px", fontSize: "14px" }}>
-            ✅ {successMessage}
+            ✅ {t(successMessage)}
           </div>
         )}
 
@@ -215,14 +203,12 @@ function Connexion() {
         {error && (
           <div className="mb-3 p-2 text-center"
             style={{ backgroundColor: "#dc354522", color: "#dc3545",
-              borderRadius: "8px", fontSize: "14px" }}>
-            {error}
-          </div>
+              borderRadius: "8px", fontSize: "14px" }}>{t(error)}</div>
         )}
 
         {/* Email */}
         <div className="mb-3">
-          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>Email</label>
+          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Email")}</label>
           <input type="email" name="email" className="form-control mt-1"
             placeholder="votre@email.com" value={form.email} onChange={handleChange}
             style={{ backgroundColor: "#0a0a1e", border: "1px solid #FFD70033",
@@ -231,7 +217,7 @@ function Connexion() {
 
         {/* Mot de passe */}
         <div className="mb-3">
-          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>Mot de passe</label>
+          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Mot de passe")}</label>
           <div style={{ position: "relative" }}>
             <input
               type={showPassword ? "text" : "password"}
@@ -270,9 +256,7 @@ function Connexion() {
 
         {/* Mot de passe oublié */}
         <div className="text-end mb-3">
-          <Link to="/oubli-mot-de-passe" style={{ color: "#FFD700", fontSize: "13px" }}>
-            Mot de passe oublié ?
-          </Link>
+          <Link to="/oubli-mot-de-passe" style={{ color: "#FFD700", fontSize: "13px" }}>{t("Mot de passe oublié ?")}</Link>
         </div>
 
         {/* Bouton connexion */}
@@ -280,22 +264,18 @@ function Connexion() {
           className="btn fw-bold w-100 py-2"
           style={{ backgroundColor: "#FFD700", color: "#000",
             borderRadius: "10px", fontSize: "16px" }}>
-          {loading ? "Connexion..." : "Se connecter"}
+          {loading ? t("Connexion...") : t("Se connecter")}
         </button>
 
         {/* Lien inscription */}
         <p className="text-center mt-3" style={{ color: "#aaaaaa", fontSize: "14px" }}>
-          Pas encore de compte ?{" "}
-          <Link to="/inscription" style={{ color: "#FFD700" }}>
-            S'inscrire gratuitement
-          </Link>
+          {t("Pas encore de compte ?")}{" "}
+          <Link to="/inscription" style={{ color: "#FFD700" }}>{t("S'inscrire gratuitement")}</Link>
         </p>
 
         {/* Retour portail */}
         <p className="text-center mt-2">
-          <Link to="/" style={{ color: "#aaaaaa", fontSize: "13px" }}>
-            ← Retour au portail
-          </Link>
+          <Link to="/" style={{ color: "#aaaaaa", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
         </p>
       </div>
 

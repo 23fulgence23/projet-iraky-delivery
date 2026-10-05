@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../logo.png";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 function OubliMotDePasse() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,7 @@ function OubliMotDePasse() {
         justifyContent: "center",
       }}
     >
+      <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
       <div
         style={{
           backgroundColor: "#1a1a35",
@@ -46,12 +50,8 @@ function OubliMotDePasse() {
           <img src={logo} alt="IRAKY"
             style={{ width: "80px", height: "80px", borderRadius: "50%" }}
           />
-          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>
-            Mot de passe oublié
-          </h4>
-          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>
-            Entrez votre email pour recevoir un lien de réinitialisation
-          </p>
+          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>{t("Mot de passe oublié")}</h4>
+          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Entrez votre email pour recevoir un lien de réinitialisation")}</p>
         </div>
 
         {sent ? (
@@ -63,13 +63,11 @@ function OubliMotDePasse() {
               borderRadius: "10px",
             }}
           >
-            <i className="fas fa-check-circle me-2"></i>
-            Un email de réinitialisation a été envoyé !
-          </div>
+            <i className="fas fa-check-circle me-2"></i>{t("Un email de réinitialisation a été envoyé !")}</div>
         ) : (
           <>
             <div className="mb-3">
-              <label style={{ color: "#aaaaaa", fontSize: "14px" }}>Email</label>
+              <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Email")}</label>
               <input
                 type="email"
                 className="form-control mt-1"
@@ -85,15 +83,13 @@ function OubliMotDePasse() {
               className="btn fw-bold w-100 py-2"
               style={{ backgroundColor: "#FFD700", color: "#000", borderRadius: "10px", fontSize: "16px" }}
             >
-              {loading ? "Envoi..." : "Envoyer le lien"}
+              {loading ? t("Envoi...") : t("Envoyer le lien")}
             </button>
           </>
         )}
 
         <p className="text-center mt-3">
-          <Link to="/connexion" style={{ color: "#FFD700", fontSize: "14px" }}>
-            ← Retour à la connexion
-          </Link>
+          <Link to="/connexion" style={{ color: "#FFD700", fontSize: "14px" }}>{t("← Retour à la connexion")}</Link>
         </p>
       </div>
     </div>

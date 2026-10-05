@@ -45,7 +45,7 @@ function Contact() {
 
   const infos = [
     { icon: "fas fa-phone", label: t("Téléphone"), value: "+261 38 21 266 83" },
-    { icon: "fas fa-envelope", label: "Email", value: "irakydelivery@gmail.com" },
+    { icon: "fas fa-envelope", label: t("Email"), value: "irakydelivery@gmail.com" },
     { icon: "fas fa-map-marker-alt", label: t("Adresse"), value: "Enceinte Score BazarBe, Toliara" },
   ];
 
