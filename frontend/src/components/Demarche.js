@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../Theme.css";
 import "../App.css";
 
 function Demarche() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("client");
   const ref = useRef();
@@ -17,21 +19,21 @@ function Demarche() {
   }, []);
 
   const demarcheCoursier = [
-    { step: "01", icon: "fas fa-user-plus", title: "Inscription",
-      desc: "Créez votre compte coursier et rejoignez la plateforme IRAKY Delivery.", badge: null },
-    { step: "02", icon: "fas fa-hand-holding-usd", title: "Droit d'entrée",
-      desc: "Payez le droit d'entrée unique pour activer votre compte coursier.",
+    { step: "01", icon: "fas fa-user-plus", title: t("Inscription"),
+      desc: t("Créez votre compte coursier et rejoignez la plateforme IRAKY Delivery."), badge: null },
+    { step: "02", icon: "fas fa-hand-holding-usd", title: t("Droit d'entrée"),
+      desc: t("Payez le droit d'entrée unique pour activer votre compte coursier."),
       badge: "10 000 Ar", badgeColor: "var(--iraky-gold)" },
-    { step: "03", icon: "fas fa-calendar-check", title: "Abonnement mensuel",
-      desc: "Payez votre premier abonnement pour accéder aux offres clients.",
-      badge: "10 000 Ar/mois", badgeColor: "var(--iraky-gold)" },
-    { step: "04", icon: "fas fa-list-alt", title: "Voir les offres",
-      desc: "Consultez toutes les demandes des clients disponibles près de vous.", badge: null },
-    { step: "05", icon: "fas fa-motorcycle", title: "Accepter une mission",
-      desc: "Choisissez librement les courses que vous souhaitez effectuer.", badge: null },
-    { step: "06", icon: "fas fa-exclamation-triangle", title: "Renouveler l'abonnement",
-      desc: "Chaque mois, sinon votre compte est désactivé automatiquement.",
-      badge: "Obligatoire", badgeColor: "#EF4444" },
+    { step: "03", icon: "fas fa-calendar-check", title: t("Abonnement mensuel"),
+      desc: t("Payez votre premier abonnement pour accéder aux offres clients."),
+      badge: t("10 000 Ar/mois"), badgeColor: "var(--iraky-gold)" },
+    { step: "04", icon: "fas fa-list-alt", title: t("Voir les offres"),
+      desc: t("Consultez toutes les demandes des clients disponibles près de vous."), badge: null },
+    { step: "05", icon: "fas fa-motorcycle", title: t("Accepter une mission"),
+      desc: t("Choisissez librement les courses que vous souhaitez effectuer."), badge: null },
+    { step: "06", icon: "fas fa-exclamation-triangle", title: t("Renouveler l'abonnement"),
+      desc: t("Chaque mois, sinon votre compte est désactivé automatiquement."),
+      badge: t("Obligatoire"), badgeColor: "#EF4444" },
   ];
 
   return (
@@ -44,13 +46,9 @@ function Demarche() {
           transform: visible ? "translateY(0)" : "translateY(20px)",
           transition: "all 0.7s ease",
         }}>
-          <span className="iraky-eyebrow justify-content-center mb-3">Le parcours</span>
-          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
-            Comment ça marche ?
-          </h2>
-          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
-            Choisissez votre profil et découvrez les étapes.
-          </p>
+          <span className="iraky-eyebrow justify-content-center mb-3">{t("Le parcours")}</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>{t("Comment ça marche ?")}</h2>
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>{t("Choisissez votre profil et découvrez les étapes.")}</p>
         </div>
 
         {/* Toggle segmenté */}
@@ -59,8 +57,8 @@ function Demarche() {
             display: "inline-flex", backgroundColor: "var(--iraky-surface)",
             borderRadius: "999px", padding: "5px", border: "1px solid rgba(255,255,255,0.06)",
           }}>
-            {[{ id: "client", label: "Je suis Client", icon: "fas fa-user" },
-              { id: "coursier", label: "Je suis Coursier", icon: "fas fa-motorcycle" }].map(tab => (
+            {[{ id: "client", label: t("Je suis Client"), icon: "fas fa-user" },
+              { id: "coursier", label: t("Je suis Coursier"), icon: "fas fa-motorcycle" }].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -93,7 +91,7 @@ function Demarche() {
             <div className="col-lg-6 text-center position-relative">
               <img
                 src={require("../images/client.jpg")}
-                alt="Client IRAKY Delivery"
+                alt={t("Client IRAKY Delivery")}
                 style={{
                   width: "100%", maxWidth: "440px", borderRadius: "22px",
                   boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
@@ -107,26 +105,18 @@ function Demarche() {
                 display: "inline-block", backgroundColor: "var(--iraky-route-soft)",
                 color: "var(--iraky-route)", fontFamily: "var(--f-mono)", fontSize: "12px",
                 padding: "6px 14px", borderRadius: "999px", marginBottom: "16px",
-              }}>
-                ✓ INSCRIPTION 100% GRATUITE
-              </span>
-              <h3 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "26px" }}>
-                Comment commander un coursier ?
-              </h3>
+              }}>{t("✓ INSCRIPTION 100% GRATUITE")}</span>
+              <h3 style={{ fontFamily: "var(--f-display)", fontWeight: 700, color: "var(--iraky-ink)", fontSize: "26px" }}>{t("Comment commander un coursier ?")}</h3>
               <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "15.5px", lineHeight: "1.85" }}>
-                Inscrivez-vous gratuitement, connectez-vous à votre espace
-                personnel, puis remplissez une demande en indiquant le service
-                souhaité, votre adresse et une description. Un coursier
-                disponible l'accepte rapidement, et vous êtes notifié dès la
-                mission terminée — le tout dès{" "}
+                {t("Inscrivez-vous gratuitement, connectez-vous à votre espace personnel, puis remplissez une demande en indiquant le service souhaité, votre adresse et une description. Un coursier disponible l'accepte rapidement, et vous êtes notifié dès la mission terminée — le tout dès")}{" "}
                 <strong style={{ color: "var(--iraky-gold)" }}>5 000 Ar</strong>.
               </p>
               <div className="d-flex gap-3 mt-4 flex-wrap">
                 <button className="iraky-btn-gold">
-                  <i className="fas fa-user-plus me-2"></i>S'inscrire gratuitement
+                  <i className="fas fa-user-plus me-2"></i>{t("S'inscrire gratuitement")}
                 </button>
                 <button className="iraky-btn-ghost">
-                  <i className="fas fa-sign-in-alt me-2"></i>Se connecter
+                  <i className="fas fa-sign-in-alt me-2"></i>{t("Se connecter")}
                 </button>
               </div>
             </div>

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../Theme.css";
 import "../App.css";
 
 function Partenariats() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const ref = useRef();
 
@@ -16,11 +18,11 @@ function Partenariats() {
   }, []);
 
   const partenaires = [
-    { icon: "fas fa-store", nom: "SCORE", desc: "Supermarché" },
-    { icon: "fas fa-shopping-bag", nom: "BazarBe", desc: "Marché partenaire" },
-    { icon: "fas fa-building", nom: "SCAMA", desc: "Commerce partenaire" },
-    { icon: "fas fa-bolt", nom: "JIRAMA", desc: "Eau et électricité" },
-    { icon: "fas fa-university", nom: "BFV", desc: "Banque partenaire" },
+    { icon: "fas fa-store", nom: "SCORE", desc: t("Supermarché") },
+    { icon: "fas fa-shopping-bag", nom: "BazarBe", desc: t("Marché partenaire") },
+    { icon: "fas fa-building", nom: "SCAMA", desc: t("Commerce partenaire") },
+    { icon: "fas fa-bolt", nom: "JIRAMA", desc: t("Eau et électricité") },
+    { icon: "fas fa-university", nom: "BFV", desc: t("Banque partenaire") },
     { icon: "fas fa-mobile-alt", nom: "Mvola", desc: "Mobile Money" },
   ];
 
@@ -34,13 +36,9 @@ function Partenariats() {
           transform: visible ? "translateY(0)" : "translateY(20px)",
           transition: "all 0.7s ease",
         }}>
-          <span className="iraky-eyebrow justify-content-center mb-3">Écosystème local</span>
-          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
-            Nos Partenaires
-          </h2>
-          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
-            Ils nous font confiance à Toliara.
-          </p>
+          <span className="iraky-eyebrow justify-content-center mb-3">{t("Écosystème local")}</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>{t("Nos Partenaires")}</h2>
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>{t("Ils nous font confiance à Toliara.")}</p>
         </div>
 
         <div className="row g-4 justify-content-center">

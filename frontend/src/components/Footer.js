@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import logo from "../logo.png";
 import "../Theme.css";
 import "../App.css";
 
 function Footer() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const scrollTo = (id) => {
@@ -11,16 +13,16 @@ function Footer() {
   };
 
   const liens = [
-    { id: "accueil", label: "Accueil" },
-    { id: "apropos", label: "À propos" },
-    { id: "services", label: "Nos services" },
-    { id: "demarche", label: "Comment ça marche" },
-    { id: "contact", label: "Contact" },
+    { id: "accueil", label: t("Accueil") },
+    { id: "apropos", label: t("À propos") },
+    { id: "services", label: t("Nos services") },
+    { id: "demarche", label: t("Comment ça marche") },
+    { id: "contact", label: t("Contact") },
   ];
 
   const services = [
-    "Facture JIRAMA", "Légalisation CIN", "Banque / Trésor",
-    "Achats", "Mentor universitaire", "Livraison de colis",
+    t("Facture JIRAMA"), t("Légalisation CIN"), t("Banque / Trésor"),
+    t("Achats"), t("Mentor universitaire"), t("Livraison de colis"),
   ];
 
   return (
@@ -38,29 +40,25 @@ function Footer() {
           <div className="col-md-6">
             <div className="iraky-card p-4 h-100 d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <div className="iraky-eyebrow mb-2">Vous êtes client</div>
-                <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 600, fontSize: "15px", margin: 0 }}>
-                  Faites gérer vos courses en quelques clics.
-                </p>
+                <div className="iraky-eyebrow mb-2">{t("Vous êtes client")}</div>
+                <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 600, fontSize: "15px", margin: 0 }}>{t("Faites gérer vos courses en quelques clics.")}</p>
               </div>
               <button className="iraky-btn-gold" style={{ fontSize: "13px", padding: "10px 20px", whiteSpace: "nowrap" }}
                 onClick={() => navigate("/inscription")}>
-                S'inscrire <i className="fas fa-arrow-right ms-1"></i>
+                {t("S'inscrire")} <i className="fas fa-arrow-right ms-1"></i>
               </button>
             </div>
           </div>
           <div className="col-md-6">
             <div className="iraky-card p-4 h-100 d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <div className="iraky-eyebrow mb-2" style={{ color: "var(--iraky-route)" }}>Vous êtes coursier</div>
-                <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 600, fontSize: "15px", margin: 0 }}>
-                  Rejoignez la flotte et générez un revenu.
-                </p>
+                <div className="iraky-eyebrow mb-2" style={{ color: "var(--iraky-route)" }}>{t("Vous êtes coursier")}</div>
+                <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontWeight: 600, fontSize: "15px", margin: 0 }}>{t("Rejoignez la flotte et générez un revenu.")}</p>
               </div>
               <button className="iraky-btn-ghost" style={{ fontSize: "13px", padding: "10px 20px", whiteSpace: "nowrap",
                 borderColor: "rgba(52,211,153,0.35)", color: "var(--iraky-route)" }}
                 onClick={() => navigate("/inscription")}>
-                Devenir coursier <i className="fas fa-motorcycle ms-1"></i>
+                {t("Devenir coursier")} <i className="fas fa-motorcycle ms-1"></i>
               </button>
             </div>
           </div>
@@ -78,10 +76,7 @@ function Footer() {
                 IRAKY <span style={{ color: "var(--iraky-gold)" }}>Delivery</span>
               </span>
             </div>
-            <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", lineHeight: 1.7, maxWidth: "280px" }}>
-              La plateforme de coursiers qui connecte les habitants de Toliara
-              à des livreurs locaux vérifiés, pour toutes les démarches du quotidien.
-            </p>
+            <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", lineHeight: 1.7, maxWidth: "280px" }}>{t("La plateforme de coursiers qui connecte les habitants de Toliara à des livreurs locaux vérifiés, pour toutes les démarches du quotidien.")}</p>
             <div className="d-flex gap-2 mt-3">
               {["facebook-f", "whatsapp", "instagram"].map((net) => (
                 <a key={net} href="#" onClick={(e) => e.preventDefault()} style={{
@@ -101,7 +96,7 @@ function Footer() {
 
           <div className="col-lg-2 col-md-6">
             <div style={{ fontFamily: "var(--f-mono)", fontSize: "11.5px", letterSpacing: "1.5px",
-              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>NAVIGATION</div>
+              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>{t("NAVIGATION")}</div>
             {liens.map(l => (
               <div key={l.id} onClick={() => scrollTo(l.id)} style={{
                 fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px",
@@ -117,7 +112,7 @@ function Footer() {
 
           <div className="col-lg-3 col-md-6">
             <div style={{ fontFamily: "var(--f-mono)", fontSize: "11.5px", letterSpacing: "1.5px",
-              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>SERVICES</div>
+              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>{t("SERVICES")}</div>
             {services.map(s => (
               <div key={s} style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px", marginBottom: "12px" }}>
                 {s}
@@ -127,7 +122,7 @@ function Footer() {
 
           <div className="col-lg-3 col-md-6">
             <div style={{ fontFamily: "var(--f-mono)", fontSize: "11.5px", letterSpacing: "1.5px",
-              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>CONTACT</div>
+              color: "var(--iraky-muted-dim)", marginBottom: "16px" }}>{t("CONTACT")}</div>
             <div className="d-flex align-items-start gap-2 mb-3">
               <i className="fas fa-phone mt-1" style={{ color: "var(--iraky-gold)", fontSize: "12px" }}></i>
               <span style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13.5px" }}>+261 38 21 266 83</span>
@@ -151,9 +146,7 @@ function Footer() {
           <small style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted-dim)", fontSize: "12.5px" }}>
             © 2026 IRAKY Delivery — Toliara, Madagascar
           </small>
-          <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>
-            FAIT AVEC 🛵 À TOLIARA
-          </small>
+          <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("FAIT AVEC 🛵 À TOLIARA")}</small>
         </div>
       </div>
     </footer>

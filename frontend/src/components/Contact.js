@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../Theme.css";
 import "../App.css";
 
 function Contact() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [form, setForm] = useState({ nom: "", email: "", sujet: "", message: "" });
   const [envoye, setEnvoye] = useState(false);
@@ -42,9 +44,9 @@ function Contact() {
   };
 
   const infos = [
-    { icon: "fas fa-phone", label: "Téléphone", value: "+261 38 21 266 83" },
+    { icon: "fas fa-phone", label: t("Téléphone"), value: "+261 38 21 266 83" },
     { icon: "fas fa-envelope", label: "Email", value: "irakydelivery@gmail.com" },
-    { icon: "fas fa-map-marker-alt", label: "Adresse", value: "Enceinte Score BazarBe, Toliara" },
+    { icon: "fas fa-map-marker-alt", label: t("Adresse"), value: "Enceinte Score BazarBe, Toliara" },
   ];
 
   return (
@@ -57,13 +59,9 @@ function Contact() {
           transform: visible ? "translateY(0)" : "translateY(20px)",
           transition: "all 0.7s ease",
         }}>
-          <span className="iraky-eyebrow justify-content-center mb-3">Une question ?</span>
-          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>
-            Contactez-nous
-          </h2>
-          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>
-            Nous sommes disponibles pour vous aider.
-          </p>
+          <span className="iraky-eyebrow justify-content-center mb-3">{t("Une question ?")}</span>
+          <h2 className="iraky-h2" style={{ fontSize: "clamp(28px,4vw,40px)", marginTop: "14px" }}>{t("Contactez-nous")}</h2>
+          <p style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "16px", marginTop: "10px" }}>{t("Nous sommes disponibles pour vous aider.")}</p>
         </div>
 
         <div className="row g-5 align-items-start">
@@ -100,7 +98,7 @@ function Contact() {
             }}>
               <i className="fas fa-clock" style={{ color: "var(--iraky-route)" }}></i>
               <span style={{ fontFamily: "var(--f-body)", color: "var(--iraky-ink)", fontSize: "13px" }}>
-                Réponse habituelle sous <strong>5 minutes</strong> via le chat du site.
+                {t("Réponse habituelle sous")} <strong>{t("5 minutes")}</strong> {t("via le chat du site.")}
               </span>
             </div>
           </div>
@@ -114,33 +112,33 @@ function Contact() {
             <form onSubmit={envoyer} className="iraky-card p-4">
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>Nom</label>
-                  <input type="text" className="form-control mt-1" placeholder="Votre nom" required
+                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>{t("Nom")}</label>
+                  <input type="text" className="form-control mt-1" placeholder={t("Votre nom")} required
                     value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })}
                     onFocus={onFocus} onBlur={onBlur} style={inputStyle} />
                 </div>
                 <div className="col-md-6">
-                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>Email</label>
-                  <input type="email" className="form-control mt-1" placeholder="Votre email" required
+                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>{t("Email")}</label>
+                  <input type="email" className="form-control mt-1" placeholder={t("Votre email")} required
                     value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
                     onFocus={onFocus} onBlur={onBlur} style={inputStyle} />
                 </div>
                 <div className="col-12">
-                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>Sujet</label>
-                  <input type="text" className="form-control mt-1" placeholder="Sujet de votre message"
+                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>{t("Sujet")}</label>
+                  <input type="text" className="form-control mt-1" placeholder={t("Sujet de votre message")}
                     value={form.sujet} onChange={e => setForm({ ...form, sujet: e.target.value })}
                     onFocus={onFocus} onBlur={onBlur} style={inputStyle} />
                 </div>
                 <div className="col-12">
-                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>Message</label>
-                  <textarea className="form-control mt-1" rows="4" placeholder="Votre message..." required
+                  <label style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted)", fontSize: "13px" }}>{t("Message")}</label>
+                  <textarea className="form-control mt-1" rows="4" placeholder={t("Votre message...")} required
                     value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
                     onFocus={onFocus} onBlur={onBlur} style={{ ...inputStyle, resize: "none" }} />
                 </div>
                 <div className="col-12">
                   <button type="submit" className="iraky-btn-gold w-100 py-2" style={{ fontSize: "15px" }}>
                     <i className="fas fa-paper-plane me-2"></i>
-                    {envoye ? "Ouverture de votre messagerie..." : "Envoyer le message"}
+                    {envoye ? t("Ouverture de votre messagerie...") : t("Envoyer le message")}
                   </button>
                 </div>
               </div>
