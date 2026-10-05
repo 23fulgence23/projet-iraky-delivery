@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MdClose, MdStar, MdStarBorder } from "react-icons/md";
+import { MdClose, MdStar, MdStarBorder, MdEmail, MdLocationOn } from "react-icons/md";
 import { AvatarRond } from "./AvatarProfil";
 
 // Nom de coursier cliquable (ouvre l'aperçu). Sans id : simple texte.
@@ -10,7 +10,7 @@ export function LienCoursier({ nom, id, onOpen, style = {} }) {
     <span role="button" tabIndex={0} title="Voir le profil du coursier"
       onClick={ouvrir}
       onKeyDown={(e) => { if (e.key === "Enter") ouvrir(e); }}
-      style={{ cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3, ...style }}>
+      style={{ cursor: "pointer", ...style }}>
       {nom}
     </span>
   );
@@ -82,6 +82,19 @@ export default function ApercuCoursierModal({ coursierId, apiUrl, onClose }) {
             <div style={{ marginTop: 10, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
               <Etoiles5 note={data.note} />
               <span style={{ color: "#888", fontSize: 12 }}>({Math.round(Number(data.note) || 0)}/5)</span>
+            </div>
+            <div style={{ marginTop: 16, display: "grid", gap: 8, textAlign: "left" }}>
+              {[{ Icon: MdEmail, label: "Email", val: data.email },
+                { Icon: MdLocationOn, label: "Adresse", val: data.adresse }].map(({ Icon, label, val }) => val ? (
+                <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                  borderRadius: 10, backgroundColor: "#0a0a1e", border: "1px solid #FFD70018" }}>
+                  <Icon style={{ color: "#FFD700", fontSize: 18, flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: "#777", fontSize: 11 }}>{label}</div>
+                    <div style={{ color: "#fff", fontSize: 13, wordBreak: "break-word" }}>{val}</div>
+                  </div>
+                </div>
+              ) : null)}
             </div>
             <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12,
               backgroundColor: "#0a0a1e", border: "1px solid #FFD70018" }}>

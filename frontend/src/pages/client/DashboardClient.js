@@ -2397,7 +2397,7 @@ const noterCoursier = async (id, note) => {
                               justifyContent:"space-between", alignItems:"center",
                             }}>
                               {q}
-                              <span style={{ color:"#FFD700", fontSize:18 }}>+</span>
+                              <MdKeyboardArrowDown className="faq-chevron" style={{ color:"#FFD700", fontSize:24, flexShrink:0 }}/>
                             </summary>
                             <p style={{
                               color:"#888", fontSize:13, marginTop:10,

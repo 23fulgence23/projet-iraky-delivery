@@ -377,6 +377,8 @@ public function terminer(Request $request, $id)
             'prenom'       => $coursier->prenom,
             'nom'          => $coursier->nom,
             'photo_profil' => $coursier->photo_profil,
+            'email'        => $coursier->email,
+            'adresse'      => $coursier->adresse,
             'note'         => $coursier->note ?? 0,
             'nb_terminees' => Commande::where('coursier_id', $coursier->id)
                                 ->where('statut', 'termine')->count(),

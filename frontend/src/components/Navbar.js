@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../logo.png";
 import FloatingInstallButton from "./FloatingInstallButton";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "../Theme.css";
 import "../App.css";
 
 function Navbar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState("accueil");
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -87,7 +90,7 @@ function Navbar() {
 
         {/* Hamburger + bascule thème mobile */}
         <div className="d-lg-none d-flex align-items-center gap-2">
-          <button onClick={toggleTheme} aria-label="Changer de thème"
+          <button onClick={toggleTheme} aria-label={t("Changer de thème")}
             style={{
               width: "36px", height: "36px", borderRadius: "50%",
               border: "1.5px solid rgba(255,215,0,0.35)", backgroundColor: "transparent",
@@ -99,7 +102,7 @@ function Navbar() {
           <button
             className="btn"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menu"
+            aria-label={t("Menu")}
             style={{
               backgroundColor: "transparent",
               border: "1.5px solid rgba(255,215,0,0.35)",
@@ -140,14 +143,15 @@ function Navbar() {
               onMouseEnter={(e) => { if (activeSection !== item.id) e.currentTarget.style.color = "var(--iraky-ink)"; }}
               onMouseLeave={(e) => { if (activeSection !== item.id) e.currentTarget.style.color = "var(--iraky-muted)"; }}
             >
-              {item.label}
+              {t(item.label)}
             </span>
           ))}
         </div>
 
         {/* Boutons desktop */}
         <div className="d-none d-lg-flex gap-2 align-items-center">
-          <button onClick={toggleTheme} aria-label="Changer de thème" title="Mode clair / sombre"
+          <LanguageSwitcher />
+          <button onClick={toggleTheme} aria-label={t("Changer de thème")} title={t("Mode clair / sombre")}
             style={{
               width: "38px", height: "38px", borderRadius: "50%",
               border: "1.5px solid var(--iraky-gold-line)", backgroundColor: "transparent",
@@ -157,13 +161,9 @@ function Navbar() {
             <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} style={{ fontSize: "14px" }}></i>
           </button>
           <button onClick={() => navigate("/connexion")} className="iraky-btn-ghost"
-            style={{ padding: "9px 20px", fontSize: "14px" }}>
-            Se connecter
-          </button>
+            style={{ padding: "9px 20px", fontSize: "14px" }}>{t("Se connecter")}</button>
           <button onClick={() => navigate("/inscription")} className="iraky-btn-gold"
-            style={{ padding: "9px 20px", fontSize: "14px" }}>
-            S'inscrire
-          </button>
+            style={{ padding: "9px 20px", fontSize: "14px" }}>{t("S'inscrire")}</button>
         </div>
 
         {/* Menu mobile déroulant */}
@@ -192,23 +192,18 @@ function Navbar() {
                   transition: "all 0.2s ease",
                 }}
               >
-                {item.label}
+                {t(item.label)}
               </div>
             ))}
 
-            <div className="px-3 mb-2">
-            </div>
+            <div className="px-3 mb-2"><LanguageSwitcher /></div>
             <div className="d-flex gap-2 px-3 mt-3">
               <button
                 onClick={() => { navigate("/connexion"); setMenuOpen(false); }}
-                className="iraky-btn-ghost flex-fill" style={{ fontSize: "14px" }}>
-                Se connecter
-              </button>
+                className="iraky-btn-ghost flex-fill" style={{ fontSize: "14px" }}>{t("Se connecter")}</button>
               <button
                 onClick={() => { navigate("/inscription"); setMenuOpen(false); }}
-                className="iraky-btn-gold flex-fill" style={{ fontSize: "14px" }}>
-                S'inscrire
-              </button>
+                className="iraky-btn-gold flex-fill" style={{ fontSize: "14px" }}>{t("S'inscrire")}</button>
             </div>
           </div>
         )}

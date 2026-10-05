@@ -1728,7 +1728,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <summary style={{ color:"#fff", fontWeight:600, cursor:"pointer", fontSize:14,
                         listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                         {q}
-                        <span style={{ color:"#FFD700", fontSize:18 }}>+</span>
+                        <MdKeyboardArrowDown className="faq-chevron" style={{ color:"#FFD700", fontSize:24, flexShrink:0 }}/>
                       </summary>
                       <p style={{ color:"#888", fontSize:13, marginTop:10, lineHeight:1.6, marginBottom:0 }}>{a}</p>
                     </details>
