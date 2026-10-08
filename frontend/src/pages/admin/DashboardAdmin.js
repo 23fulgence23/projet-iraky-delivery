@@ -10,6 +10,7 @@ import {
   MdHistory, MdEmojiEvents, MdMilitaryTech, MdWorkHistory, MdFilterList,
   MdForum,
 } from "react-icons/md";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 const BASE_URL = "https://projet-iraky-delivery.onrender.com";
 
@@ -808,6 +809,7 @@ function DashboardAdmin() {
           </div>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+          <LanguageSwitcher />
           {/* Cloche notifs — polling 2s */}
           <div style={{ position:"relative", cursor:"pointer" }}
             onClick={()=>setNotifOpen(!notifOpen)}>
