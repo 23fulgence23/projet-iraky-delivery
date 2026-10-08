@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef  } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
 import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
@@ -831,6 +832,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
               }}>{nbNonLus}</span>
             )}
           </div>
+          <LanguageSwitcher style={{ marginRight: 4 }} />
           <div onClick={() => setOnglet("profil")} style={{ cursor: "pointer" }}>
             <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={38} fontSize={15} style={{ boxShadow: "0 0 12px #FFD70044" }} />
           </div>

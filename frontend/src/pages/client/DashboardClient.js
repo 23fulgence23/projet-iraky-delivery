@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
@@ -964,6 +965,7 @@ const noterCoursier = async (id, note) => {
               }}>{nbNonLus}</span>
             )}
 </div>
+          <LanguageSwitcher style={{ marginRight: 4 }} />
           {/* avatar */}
           <div style={{
             width:38, height:38, borderRadius:"50%",

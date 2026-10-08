@@ -31,4 +31,16 @@ i18n.on("languageChanged", (l) => {
 });
 document.documentElement.lang = initiale;
 
+// Conserve la langue et le thème quand une déconnexion vide le localStorage
+try {
+  const viderOriginal = Storage.prototype.clear;
+  Storage.prototype.clear = function () {
+    const garde = this === window.localStorage
+      ? ["langue", "iraky-theme"].map((k) => [k, this.getItem(k)]).filter(([, v]) => v !== null)
+      : [];
+    viderOriginal.call(this);
+    garde.forEach(([k, v]) => this.setItem(k, v));
+  };
+} catch {}
+
 export default i18n;
