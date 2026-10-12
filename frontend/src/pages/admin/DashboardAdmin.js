@@ -11,6 +11,10 @@ import {
   MdForum,
 } from "react-icons/md";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+const tr = (cle, opts) => (typeof cle === "string" ? i18n.t(cle, opts) : cle);
+const localeDate = () => (String(i18n.language).startsWith("en") ? "en-GB" : "fr-FR");
 
 const BASE_URL = "https://projet-iraky-delivery.onrender.com";
 
@@ -35,7 +39,7 @@ function StatutBadge({ statut }) {
   return (
     <span style={{ backgroundColor:s.bg, color:s.color, borderRadius:20,
       padding:"3px 12px", fontSize:11, fontWeight:700, border:`1px solid ${s.color}44` }}>
-      {s.label}
+      {tr(s.label)}
     </span>
   );
 }
@@ -89,7 +93,7 @@ function BarChart({ data, color="#FFD700", height=80 }) {
               boxShadow:`0 0 8px ${color}66`,
             }}/>
           </div>
-          <span style={{ color:"#666", fontSize:9, fontWeight:600 }}>{d.label}</span>
+          <span style={{ color:"#666", fontSize:9, fontWeight:600 }}>{tr(d.label)}</span>
         </div>
       ))}
     </div>
@@ -122,7 +126,7 @@ function DonutChart({ segments, size=120 }) {
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle"
         fill="#FFD700" fontSize="14" fontWeight="800">{total}</text>
       <text x={cx} y={cy+14} textAnchor="middle" dominantBaseline="middle"
-        fill="#666" fontSize="8">TOTAL</text>
+        fill="#666" fontSize="8">{tr("TOTAL")}</text>
     </svg>
   );
 }
@@ -152,8 +156,8 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
             <MdAdminPanelSettings style={{ color:"#000", fontSize:26 }}/>
           </div>
           <div>
-            <div style={{ color:"#fff", fontWeight:800, fontSize:14 }}>Administrateur</div>
-            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>IRAKY Delivery</div>
+            <div style={{ color:"#fff", fontWeight:800, fontSize:14 }}>{tr("Administrateur")}</div>
+            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>{tr("IRAKY Delivery")}</div>
           </div>
         </div>
       </div>
@@ -171,7 +175,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
             onMouseEnter={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="#ffffff08"; e.currentTarget.style.color="#fff"; }}}
             onMouseLeave={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="transparent"; e.currentTarget.style.color="#8888aa"; }}}>
             <span style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <item.Icon style={{ fontSize:18 }}/> {item.label}
+              <item.Icon style={{ fontSize:18 }}/> {tr(item.label)}
             </span>
             {item.badge > 0 && (
               <span style={{ background:"#ef4444", color:"#fff", borderRadius:12,
@@ -189,8 +193,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
             justifyContent:"center", gap:8 }}
           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#ef444425"}
           onMouseLeave={e=>e.currentTarget.style.backgroundColor="#ef444410"}>
-          <MdLogout style={{ fontSize:18 }}/> Se déconnecter
-        </button>
+          <MdLogout style={{ fontSize:18 }}/>{" "}{tr("Se déconnecter")}</button>
       </div>
     </div>
   );
@@ -200,6 +203,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
 //  COMPOSANT PRINCIPAL
 // ══════════════════════════════════════════════
 function DashboardAdmin() {
+  useTranslation();
   const [onglet, setOnglet]           = useState("accueil");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen]     = useState(false);
@@ -416,11 +420,11 @@ function DashboardAdmin() {
         setSupportReply("");
         fetchSupportMessages(supportSelected);
         fetchSupportConvs();
-        showToast("Réponse envoyée");
+        showToast(tr("Réponse envoyée"));
       } else {
-        showToast("Erreur lors de l'envoi", "error");
+        showToast(tr("Erreur lors de l'envoi"), "error");
       }
-    } catch (e) { console.error(e); showToast("Erreur lors de l'envoi", "error"); }
+    } catch (e) { console.error(e); showToast(tr("Erreur lors de l'envoi"), "error"); }
     setSupportEnvoi(false);
   };
 
@@ -432,7 +436,7 @@ function DashboardAdmin() {
         ? `${BASE_URL}/api/admin/support/export-pdf?client_id=${clientId}`
         : `${BASE_URL}/api/admin/support/export-pdf`;
       const res = await fetch(url, { headers: getHeaders() });
-      if (!res.ok) { showToast("Erreur lors de l'export PDF", "error"); setSupportPdfLoading(false); return; }
+      if (!res.ok) { showToast(tr("Erreur lors de l'export PDF"), "error"); setSupportPdfLoading(false); return; }
       const blob = await res.blob();
       const lien = document.createElement("a");
       const objectUrl = window.URL.createObjectURL(blob);
@@ -444,8 +448,8 @@ function DashboardAdmin() {
       lien.click();
       lien.remove();
       window.URL.revokeObjectURL(objectUrl);
-      showToast("PDF téléchargé");
-    } catch (e) { console.error(e); showToast("Erreur lors de l'export PDF", "error"); }
+      showToast(tr("PDF téléchargé"));
+    } catch (e) { console.error(e); showToast(tr("Erreur lors de l'export PDF"), "error"); }
     setSupportPdfLoading(false);
   };
 
@@ -471,7 +475,7 @@ function DashboardAdmin() {
       const data = await res.json();
       setClients(prev=>prev.map(c=>c.id===id?{...c,statut:data.statut}:c));
       setCoursiers(prev=>prev.map(c=>c.id===id?{...c,statut:data.statut}:c));
-      showToast(`Statut de ${nom} mis à jour`);
+      showToast(tr("Statut de {{nom}} mis à jour", { nom: nom }));
       // Refresh stats
       fetch(`${BASE_URL}/api/admin/stats`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
@@ -487,11 +491,11 @@ function DashboardAdmin() {
       setClients(prev=>prev.filter(c=>c.id!==id));
       setCoursiers(prev=>prev.filter(c=>c.id!==id));
       setConfirmDelete(null);
-      showToast(`${nom} supprimé`);
+      showToast(tr("{{nom}} supprimé", { nom: nom }));
       fetch(`${BASE_URL}/api/admin/stats`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
     } else {
-      showToast("Erreur lors de la suppression", "error");
+      showToast(tr("Erreur lors de la suppression"), "error");
     }
   };
 
@@ -547,16 +551,16 @@ function DashboardAdmin() {
         // Laravel renvoie souvent { message, errors: { champ: [messages] } }
         // en cas d'erreur 422 — on affiche le premier message précis s'il existe.
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-        setAdminErreur(premierMsg || data.message || "Une erreur est survenue.");
+        setAdminErreur(premierMsg || data.message || tr("Une erreur est survenue."));
         return;
       }
 
       setAdminModal(null);
-      showToast(adminModal==="ajouter" ? "Admin créé avec succès" : "Admin modifié avec succès");
+      showToast(adminModal==="ajouter" ? tr("Admin créé avec succès") : tr("Admin modifié avec succès"));
       fetch(`${BASE_URL}/api/admin/admins`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setAdmins(d)).catch(()=>{});
     } catch (err) {
-      setAdminErreur("Erreur réseau, veuillez réessayer.");
+      setAdminErreur(tr("Erreur réseau, veuillez réessayer."));
     } finally {
       setAdminEnvoi(false);
     }
@@ -571,9 +575,9 @@ function DashboardAdmin() {
     if (res.ok) {
       setAdmins(prev=>prev.filter(a=>a.id!==id));
       setConfirmDeleteAdmin(null);
-      showToast(`${nom} supprimé`);
+      showToast(tr("{{nom}} supprimé", { nom: nom }));
     } else {
-      showToast(data.message || "Suppression impossible", "error");
+      showToast(data.message || tr("Suppression impossible"), "error");
       setConfirmDeleteAdmin(null);
     }
   };
@@ -609,16 +613,16 @@ function DashboardAdmin() {
       const data = await res.json();
       if (!res.ok) {
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-        setMoyenErreur(premierMsg || data.message || "Une erreur est survenue.");
+        setMoyenErreur(premierMsg || data.message || tr("Une erreur est survenue."));
         return;
       }
 
       setMoyenModal(null);
-      showToast(moyenModal==="ajouter" ? "Moyen de transport créé avec succès" : "Moyen de transport modifié avec succès");
+      showToast(moyenModal==="ajouter" ? tr("Moyen de transport créé avec succès") : tr("Moyen de transport modifié avec succès"));
       fetch(`${BASE_URL}/api/admin/moyens-transport`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setMoyens(d)).catch(()=>{});
     } catch (err) {
-      setMoyenErreur("Erreur réseau, veuillez réessayer.");
+      setMoyenErreur(tr("Erreur réseau, veuillez réessayer."));
     } finally {
       setMoyenEnvoi(false);
     }
@@ -633,9 +637,9 @@ function DashboardAdmin() {
     if (res.ok) {
       setMoyens(prev=>prev.filter(m=>m.id!==id));
       setConfirmDeleteMoyen(null);
-      showToast(`${nom} supprimé`);
+      showToast(tr("{{nom}} supprimé", { nom: nom }));
     } else {
-      showToast(data.message || "Suppression impossible", "error");
+      showToast(data.message || tr("Suppression impossible"), "error");
       setConfirmDeleteMoyen(null);
     }
   };
@@ -643,7 +647,7 @@ function DashboardAdmin() {
   // ── Handlers CRUD Commandes ────────────────────
   const sauvegarderCommande = async () => {
     if (!cmdForm.client_id || !cmdForm.service || !cmdForm.moyen || !cmdForm.tarif) {
-      setCmdErreur("Client, service, moyen et tarif sont obligatoires."); return;
+      setCmdErreur(tr("Client, service, moyen et tarif sont obligatoires.")); return;
     }
     setCmdEnvoi(true); setCmdErreur("");
     const url = cmdModal === "modifier"
@@ -675,11 +679,11 @@ function DashboardAdmin() {
             : c));
         }
         setCmdModal(null);
-        showToast(cmdModal==="ajouter" ? "Commande créée !" : "Commande modifiée !");
+        showToast(cmdModal==="ajouter" ? tr("Commande créée !") : tr("Commande modifiée !"));
       } else {
-        setCmdErreur(data.message || "Erreur lors de l'opération");
+        setCmdErreur(data.message || tr("Erreur lors de l'opération"));
       }
-    } catch { setCmdErreur("Erreur réseau"); }
+    } catch { setCmdErreur(tr("Erreur réseau")); }
     setCmdEnvoi(false);
   };
 
@@ -687,7 +691,7 @@ function DashboardAdmin() {
   const sauvegarderClient = async () => {
     if (!clientForm.nom || !clientForm.prenom || !clientForm.email ||
         (clientModal==="ajouter" && !clientForm.password)) {
-      setClientErreur("Nom, prénom, email" + (clientModal==="ajouter" ? " et mot de passe" : "") + " sont obligatoires.");
+      setClientErreur(tr(clientModal==="ajouter" ? "Nom, prénom, email et mot de passe sont obligatoires." : "Nom, prénom, email sont obligatoires."));
       return;
     }
     setClientEnvoi(true); setClientErreur("");
@@ -708,12 +712,12 @@ function DashboardAdmin() {
           setClients(prev=>prev.map(c=>c.id===clientForm.id ? { ...c, ...clientForm } : c));
         }
         setClientModal(null);
-        showToast(clientModal==="ajouter" ? "Client créé !" : "Client modifié !");
+        showToast(clientModal==="ajouter" ? tr("Client créé !") : tr("Client modifié !"));
       } else {
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-        setClientErreur(premierMsg || data.message || "Erreur lors de l'opération");
+        setClientErreur(premierMsg || data.message || tr("Erreur lors de l'opération"));
       }
-    } catch { setClientErreur("Erreur réseau"); }
+    } catch { setClientErreur(tr("Erreur réseau")); }
     setClientEnvoi(false);
   };
 
@@ -721,7 +725,7 @@ function DashboardAdmin() {
   const sauvegarderCoursier = async () => {
     if (!coursierForm.nom || !coursierForm.prenom || !coursierForm.email ||
         (coursierModal==="ajouter" && !coursierForm.password)) {
-      setCoursierErreur("Nom, prénom, email" + (coursierModal==="ajouter" ? " et mot de passe" : "") + " sont obligatoires.");
+      setCoursierErreur(tr(coursierModal==="ajouter" ? "Nom, prénom, email et mot de passe sont obligatoires." : "Nom, prénom, email sont obligatoires."));
       return;
     }
     setCoursierEnvoi(true); setCoursierErreur("");
@@ -742,12 +746,12 @@ function DashboardAdmin() {
           setCoursiers(prev=>prev.map(c=>c.id===coursierForm.id ? { ...c, ...coursierForm } : c));
         }
         setCoursierModal(null);
-        showToast(coursierModal==="ajouter" ? "Coursier créé !" : "Coursier modifié !");
+        showToast(coursierModal==="ajouter" ? tr("Coursier créé !") : tr("Coursier modifié !"));
       } else {
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-        setCoursierErreur(premierMsg || data.message || "Erreur lors de l'opération");
+        setCoursierErreur(premierMsg || data.message || tr("Erreur lors de l'opération"));
       }
-    } catch { setCoursierErreur("Erreur réseau"); }
+    } catch { setCoursierErreur(tr("Erreur réseau")); }
     setCoursierEnvoi(false);
   };
 
@@ -758,9 +762,9 @@ function DashboardAdmin() {
     if (res.ok) {
       setCommandes(prev=>prev.filter(c=>c.id!==id));
       setConfirmDeleteCmd(null);
-      showToast("Commande supprimée");
+      showToast(tr("Commande supprimée"));
     } else {
-      showToast("Suppression impossible","error");
+      showToast(tr("Suppression impossible"),"error");
       setConfirmDeleteCmd(null);
     }
   };
@@ -802,10 +806,10 @@ function DashboardAdmin() {
           {[0,1,2].map(i=><div key={i} style={{ width:20,height:2,backgroundColor:"#FFD700",margin:i<2?"0 0 4px 0":"0" }}/>)}
         </button>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <img src={logo} alt="IRAKY" style={{ width:50,height:50,borderRadius:"50%" }}/>
+          <img src={logo} alt={tr("IRAKY")} style={{ width:50,height:50,borderRadius:"50%" }}/>
           <div className="d-none d-lg-block">
-            <div style={{ color:"#FFD700", fontWeight:800, fontSize:17 }}>IRAKY Admin</div>
-            <div style={{ color:"#555", fontSize:11 }}>Panneau de contrôle</div>
+            <div style={{ color:"#FFD700", fontWeight:800, fontSize:17 }}>{tr("IRAKY Admin")}</div>
+            <div style={{ color:"#555", fontSize:11 }}>{tr("Panneau de contrôle")}</div>
           </div>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
@@ -829,7 +833,7 @@ function DashboardAdmin() {
             backgroundColor:"#FFD70015", border:"1px solid #FFD70033",
             borderRadius:12, padding:"6px 14px" }}>
             <MdAdminPanelSettings style={{ color:"#FFD700", fontSize:20 }}/>
-            <span style={{ color:"#FFD700", fontWeight:700, fontSize:13 }}>Admin</span>
+            <span style={{ color:"#FFD700", fontWeight:700, fontSize:13 }}>{tr("Admin")}</span>
           </div>
         </div>
       </nav>
@@ -855,12 +859,11 @@ function DashboardAdmin() {
               <button onClick={marquerTousLus}
                 style={{ background:"transparent",border:"none",color:"#FFD700",
                   cursor:"pointer",fontSize:11,display:"flex",alignItems:"center",gap:4 }}>
-                <MdDoneAll style={{ fontSize:14 }}/> Tout lire
-              </button>
+                <MdDoneAll style={{ fontSize:14 }}/>{" "}{tr("Tout lire")}</button>
             </div>
             <div style={{ overflowY:"auto",flex:1 }}>
               {notifs.length===0 && (
-                <div style={{ padding:24,textAlign:"center",color:"#555",fontSize:13 }}>Aucune notification</div>
+                <div style={{ padding:24,textAlign:"center",color:"#555",fontSize:13 }}>{tr("Aucune notification")}</div>
               )}
               {notifs.map(n=>(
                 <div key={n.id} style={{
@@ -891,7 +894,7 @@ function DashboardAdmin() {
       setCoursiersEnAttente(data);
 
       if (!Array.isArray(data) || data.length === 0) {
-        showToast("Ce coursier a déjà été traité (validé ou rejeté).", "error");
+        showToast(tr("Ce coursier a déjà été traité (validé ou rejeté)."), "error");
         return;
       }
 
@@ -904,11 +907,11 @@ function DashboardAdmin() {
         setCoursierVerif(cible);
       } else {
         // Le coursier ciblé n'est plus en attente — propose le plus récent à la place
-        showToast("Ce dossier a déjà été traité — voici le dossier le plus récent en attente.", "error");
+        showToast(tr("Ce dossier a déjà été traité — voici le dossier le plus récent en attente."), "error");
         setCoursierVerif(data[0]);
       }
     }}
-    title="Voir le dossier"
+    title={tr("Voir le dossier")}
     style={{ background:"#f59e0b18", border:"1px solid #f59e0b33",
       color:"#f59e0b", borderRadius:6, padding:"4px 7px", cursor:"pointer",
       display:"flex", alignItems:"center" }}>
@@ -916,7 +919,7 @@ function DashboardAdmin() {
   </button>
 ) : n.commande_id ? (
     <button onClick={()=>{ setNotifOpen(false); setOnglet("commandes"); }}
-      title="Voir commande"
+      title={tr("Voir commande")}
       style={{ background:"#3b82f618", border:"1px solid #3b82f633",
         color:"#3b82f6", borderRadius:6, padding:"4px 7px", cursor:"pointer",
         display:"flex", alignItems:"center" }}>
@@ -927,7 +930,7 @@ function DashboardAdmin() {
   {/* ✅ Supprimer — toujours présent */}
   <button
     onClick={() => setConfirmNotifDel(n.id)}
-    title="Supprimer"
+    title={tr("Supprimer")}
     style={{ background:"#ef444415", border:"1px solid #ef444430",
       color:"#ef6666", borderRadius:6, padding:"4px 7px", cursor:"pointer",
       display:"flex", alignItems:"center" }}>
@@ -974,19 +977,16 @@ function DashboardAdmin() {
               <div style={{ textAlign:"center",padding:80,color:"#555" }}>
                 <div style={{ width:40,height:40,border:"3px solid #FFD70033",
                   borderTop:"3px solid #FFD700",borderRadius:"50%",
-                  animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>
-                Chargement des données...
-              </div>
+                  animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>{tr("Chargement des données...")}</div>
             )}
 
             {/* ═══ TABLEAU DE BORD — données BDD ═══ */}
             {onglet==="accueil" && !loading && (
               <div>
                 <div style={{ marginBottom:28 }}>
-                  <h3 style={{ color:"#fff",fontWeight:800,margin:0,fontSize:24 }}>
-                    Tableau de bord <span style={{ color:"#FFD700" }}>Admin</span>
+                  <h3 style={{ color:"#fff",fontWeight:800,margin:0,fontSize:24 }}>{tr("Tableau de bord")}{" "}<span style={{ color:"#FFD700" }}>{tr("Admin")}</span>
                   </h3>
-                  <p style={{ color:"#555",marginTop:4,fontSize:14 }}>Vue d'ensemble de la plateforme IRAKY Delivery</p>
+                  <p style={{ color:"#555",marginTop:4,fontSize:14 }}>{tr("Vue d'ensemble de la plateforme IRAKY Delivery")}</p>
                 </div>
 
                 {/* ────────────────────────────────────────────
@@ -1039,7 +1039,7 @@ function DashboardAdmin() {
                       </div>
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
-                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{s.label}</div>
+                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
                       </div>
                     </div>
@@ -1093,7 +1093,7 @@ function DashboardAdmin() {
                       </div>
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
-                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{s.label}</div>
+                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
                       </div>
                     </div>
@@ -1111,9 +1111,9 @@ function DashboardAdmin() {
                           border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
                           <MdBarChart style={{ color:"#FFD700",fontSize:18 }}/>
                         </div>
-                        <span style={{ color:"#FFD700",fontWeight:700,fontSize:14 }}>Commandes mensuelles 2026</span>
+                        <span style={{ color:"#FFD700",fontWeight:700,fontSize:14 }}>{tr("Commandes mensuelles 2026")}</span>
                       </div>
-                      <span style={{ color:"#555",fontSize:12 }}>12 derniers mois</span>
+                      <span style={{ color:"#555",fontSize:12 }}>{tr("12 derniers mois")}</span>
                     </div>
                     <BarChart data={chartMensuel.length?chartMensuel:[{label:"—",val:0}]} color="#FFD700" height={120}/>
                   </div>
@@ -1130,7 +1130,7 @@ function DashboardAdmin() {
                         border:"1px solid #8b5cf633",display:"flex",alignItems:"center",justifyContent:"center" }}>
                         <MdPieChart style={{ color:"#8b5cf6",fontSize:18 }}/>
                       </div>
-                      <span style={{ color:"#8b5cf6",fontWeight:700,fontSize:14 }}>Utilisateurs</span>
+                      <span style={{ color:"#8b5cf6",fontWeight:700,fontSize:14 }}>{tr("Utilisateurs")}</span>
                     </div>
                     <div style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:12 }}>
                       <DonutChart segments={[
@@ -1149,7 +1149,7 @@ function DashboardAdmin() {
                           <div key={s.label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:6 }}>
                               <div style={{ width:8,height:8,borderRadius:"50%",backgroundColor:s.color }}/>
-                              <span style={{ color:"#888",fontSize:11 }}>{s.label}</span>
+                              <span style={{ color:"#888",fontSize:11 }}>{tr(s.label)}</span>
                             </div>
                             <span style={{ color:"#fff",fontWeight:700,fontSize:12 }}>{s.val}</span>
                           </div>
@@ -1166,7 +1166,7 @@ function DashboardAdmin() {
                       border:"1px solid #10b98133",display:"flex",alignItems:"center",justifyContent:"center" }}>
                       <MdShowChart style={{ color:"#10b981",fontSize:18 }}/>
                     </div>
-                    <span style={{ color:"#10b981",fontWeight:700,fontSize:14 }}>Services les plus demandés</span>
+                    <span style={{ color:"#10b981",fontWeight:700,fontSize:14 }}>{tr("Services les plus demandés")}</span>
                   </div>
                   <BarChart data={chartServices.length?chartServices:[{label:"—",val:0}]} color="#10b981" height={100}/>
                   <div style={{ display:"flex",justifyContent:"space-around",marginTop:8,flexWrap:"wrap",gap:6 }}>
@@ -1180,19 +1180,16 @@ function DashboardAdmin() {
                 <div style={card}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18 }}>
                     <h5 style={{ color:"#FFD700",margin:0,fontWeight:700,display:"flex",alignItems:"center",gap:8 }}>
-                      <MdListAlt style={{ fontSize:20 }}/> Dernières commandes
-                    </h5>
+                      <MdListAlt style={{ fontSize:20 }}/>{" "}{tr("Dernières commandes")}</h5>
                     <button onClick={()=>setOnglet("commandes")}
                       style={{ background:"transparent",border:"1px solid #FFD70030",color:"#FFD700",
-                        borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:12 }}>
-                      Voir tout
-                    </button>
+                        borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:12 }}>{tr("Voir tout")}</button>
                   </div>
                   <div style={{ overflowX:"auto" }}>
                     <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                       <thead>
                         <tr style={{ borderBottom:"1px solid #FFD70018" }}>
-                          {["Service","Client","Coursier","Tarif","Statut","Date"].map(h=>(
+                          {[tr("Service"),tr("Client"),tr("Coursier"),tr("Tarif"),tr("Statut"),tr("Date")].map(h=>(
                             <th key={h} style={{ color:"#555",fontWeight:600,padding:"8px 12px",
                               textAlign:"left",fontSize:11,letterSpacing:1 }}>{h.toUpperCase()}</th>
                           ))}
@@ -1203,16 +1200,16 @@ function DashboardAdmin() {
                           <tr key={cmd.id} style={{ borderBottom:"1px solid #ffffff06" }}
                             onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                             onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                            <td data-label="Service" style={{ padding:"10px 12px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                            <td data-label="Client" style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.client}</td>
-                            <td data-label="Coursier" style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.coursier||"—"}</td>
-                            <td data-label="Tarif" style={{ padding:"10px 12px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
-                            <td data-label="Statut" style={{ padding:"10px 12px" }}><StatutBadge statut={cmd.statut}/></td>
-                            <td data-label="Date" style={{ padding:"10px 12px",color:"#555",fontSize:12 }}>{cmd.date}</td>
+                            <td data-label={tr("Service")} style={{ padding:"10px 12px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
+                            <td data-label={tr("Client")} style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.client}</td>
+                            <td data-label={tr("Coursier")} style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.coursier||"—"}</td>
+                            <td data-label={tr("Tarif")} style={{ padding:"10px 12px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                            <td data-label={tr("Statut")} style={{ padding:"10px 12px" }}><StatutBadge statut={cmd.statut}/></td>
+                            <td data-label={tr("Date")} style={{ padding:"10px 12px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           </tr>
                         ))}
                         {commandes.length===0 && (
-                          <tr><td colSpan={6} style={{ padding:24,textAlign:"center",color:"#555" }}>Aucune commande</td></tr>
+                          <tr><td colSpan={6} style={{ padding:24,textAlign:"center",color:"#555" }}>{tr("Aucune commande")}</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -1236,8 +1233,7 @@ function DashboardAdmin() {
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
                       border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
                       display:"flex",alignItems:"center",gap:6 }}>
-                    <MdAdd style={{ fontSize:18 }}/> Ajouter
-                  </button>
+                    <MdAdd style={{ fontSize:18 }}/>{" "}{tr("Ajouter")}</button>
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{clients.length} client(s) enregistré(s)</p>
 
@@ -1245,14 +1241,14 @@ function DashboardAdmin() {
                   <div style={{ flex:1,position:"relative",minWidth:200 }}>
                     <MdSearch style={{ position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"#555",fontSize:18 }}/>
                     <input value={search} onChange={e=>setSearch(e.target.value)}
-                      placeholder="Rechercher un client..."
+                      placeholder={tr("Rechercher un client...")}
                       style={{ ...inp,paddingLeft:40 }}/>
                   </div>
                   <select value={filtreStatut} onChange={e=>setFiltreStatut(e.target.value)}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                    <option value="tous">Tous</option>
-                    <option value="actif">Actifs</option>
-                    <option value="inactif">Inactifs</option>
+                    <option value="tous">{tr("Tous")}</option>
+                    <option value="actif">{tr("Actifs")}</option>
+                    <option value="inactif">{tr("Inactifs")}</option>
                   </select>
                 </div>
 
@@ -1267,7 +1263,7 @@ function DashboardAdmin() {
                   <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
-                        {["Nom","Email","Téléphone","Commandes","Statut","Inscrit le","Actions"].map(h=>(
+                        {[tr("Nom"),tr("Email"),tr("Téléphone"),tr("Commandes"),tr("Statut"),tr("Inscrit le"),tr("Actions")].map(h=>(
                           <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
                             textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
                         ))}
@@ -1278,7 +1274,7 @@ function DashboardAdmin() {
                         <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                          <td data-label="Nom" className="td-nom" style={{ padding:"12px 14px" }}>
+                          <td data-label={tr("Nom")} className="td-nom" style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                               <div style={{ width:34,height:34,borderRadius:"50%",
                                 background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
@@ -1292,15 +1288,15 @@ function DashboardAdmin() {
                               </div>
                             </div>
                           </td>
-                          <td data-label="Email" style={{ padding:"12px 14px",color:"#aaa" }}>{c.email}</td>
-                          <td data-label="Téléphone" style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td data-label="Commandes" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.commandes}</td>
-                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
-                          <td data-label="Inscrit le" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{c.created_at}</td>
+                          <td data-label={tr("Email")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.email}</td>
+                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
+                          <td data-label={tr("Commandes")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.commandes}</td>
+                          <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
+                          <td data-label={tr("Inscrit le")} style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{c.created_at}</td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               <button onClick={()=>setDetailUser({...c,type:"client"})}
-                                title="Voir"
+                                title={tr("Voir")}
                                 style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
                                   color:"#3b82f6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdVisibility style={{ fontSize:15 }}/>
@@ -1311,13 +1307,13 @@ function DashboardAdmin() {
                                 setClientForm({ id:c.id, nom:c.nom||"", prenom:c.prenom||"", email:c.email||"",
                                   telephone:c.telephone||"", adresse:c.adresse||"", password:"" });
                                 setClientErreur("");
-                              }} title="Modifier"
+                              }} title={tr("Modifier")}
                                 style={{ backgroundColor:"#8b5cf618",border:"1px solid #8b5cf633",
                                   color:"#8b5cf6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdEdit style={{ fontSize:15 }}/>
                               </button>
                               <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                                title={c.statut==="actif"?"Désactiver":"Activer"}
+                                title={c.statut==="actif"? tr("Désactiver") : tr("Activer")}
                                 style={{ backgroundColor:c.statut==="actif"?"#ef444418":"#10b98118",
                                   border:`1px solid ${c.statut==="actif"?"#ef444433":"#10b98133"}`,
                                   color:c.statut==="actif"?"#ef4444":"#10b981",
@@ -1325,7 +1321,7 @@ function DashboardAdmin() {
                                 {c.statut==="actif"?<MdBlock style={{ fontSize:15 }}/>:<MdCheckCircle style={{ fontSize:15 }}/>}
                               </button>
                               <button onClick={()=>setConfirmDelete({id:c.id,nom:`${c.prenom} ${c.nom}`})}
-                                title="Supprimer"
+                                title={tr("Supprimer")}
                                 style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
                                   color:"#ef4444",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdDelete style={{ fontSize:15 }}/>
@@ -1337,7 +1333,7 @@ function DashboardAdmin() {
                     </tbody>
                   </table>
                   {clientsFiltres.length===0 && (
-                    <div style={{ textAlign:"center",padding:32,color:"#555" }}>Aucun client trouvé</div>
+                    <div style={{ textAlign:"center",padding:32,color:"#555" }}>{tr("Aucun client trouvé")}</div>
                   )}
 
                   {/* Pagination — 5 par page, même style que Commandes */}
@@ -1394,8 +1390,7 @@ function DashboardAdmin() {
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
                       border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
                       display:"flex",alignItems:"center",gap:6 }}>
-                    <MdAdd style={{ fontSize:18 }}/> Ajouter
-                  </button>
+                    <MdAdd style={{ fontSize:18 }}/>{" "}{tr("Ajouter")}</button>
                 </h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{coursiers.length} coursier(s) enregistré(s)</p>
 
@@ -1404,14 +1399,14 @@ function DashboardAdmin() {
                   <div style={{ flex:1,position:"relative",minWidth:200 }}>
                     <MdSearch style={{ position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"#555",fontSize:18 }}/>
                     <input value={search} onChange={e=>setSearch(e.target.value)}
-                      placeholder="Rechercher un coursier..."
+                      placeholder={tr("Rechercher un coursier...")}
                       style={{ ...inp,paddingLeft:40 }}/>
                   </div>
                   <select value={filtreStatut} onChange={e=>setFiltreStatut(e.target.value)}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                    <option value="tous">Tous</option>
-                    <option value="actif">Actifs</option>
-                    <option value="inactif">Inactifs</option>
+                    <option value="tous">{tr("Tous")}</option>
+                    <option value="actif">{tr("Actifs")}</option>
+                    <option value="inactif">{tr("Inactifs")}</option>
                   </select>
                 </div>
 
@@ -1420,7 +1415,7 @@ function DashboardAdmin() {
                   <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
-                        {["Nom","Téléphone","Missions","Note","Statut","Actions"].map(h=>(
+                        {[tr("Nom"),tr("Téléphone"),tr("Missions"),tr("Note"),tr("Statut"),tr("Actions")].map(h=>(
                           <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
                             textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
                         ))}
@@ -1431,7 +1426,7 @@ function DashboardAdmin() {
                         <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                          <td data-label="Nom" className="td-nom" style={{ padding:"12px 14px" }}>
+                          <td data-label={tr("Nom")} className="td-nom" style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                               <div style={{ width:34,height:34,borderRadius:"50%",
                                 background:"linear-gradient(135deg,#FFD700,#ff8c00)",
@@ -1445,20 +1440,20 @@ function DashboardAdmin() {
                               </div>
                             </div>
                           </td>
-                          <td data-label="Téléphone" style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td data-label="Missions" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
-                          <td data-label="Note" style={{ padding:"12px 14px" }}>
+                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
+                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label={tr("Note")} style={{ padding:"12px 14px" }}>
                             {c.note > 0 ? (
                               <span style={{ display:"flex",alignItems:"center",gap:4,color:"#FFD700",fontWeight:700 }}>
                                 <MdStar style={{ fontSize:14 }}/> {c.note}/5
                               </span>
                             ) : <span style={{ color:"#555" }}>—</span>}
                           </td>
-                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
+                          <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               <button onClick={()=>setDetailUser({...c,type:"coursier"})}
-                                title="Voir"
+                                title={tr("Voir")}
                                 style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
                                   color:"#3b82f6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdVisibility style={{ fontSize:15 }}/>
@@ -1469,13 +1464,13 @@ function DashboardAdmin() {
                                 setCoursierForm({ id:c.id, nom:c.nom||"", prenom:c.prenom||"", email:c.email||"",
                                   telephone:c.telephone||"", adresse:c.adresse||"", cin:c.cin||"", password:"" });
                                 setCoursierErreur("");
-                              }} title="Modifier"
+                              }} title={tr("Modifier")}
                                 style={{ backgroundColor:"#8b5cf618",border:"1px solid #8b5cf633",
                                   color:"#8b5cf6",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdEdit style={{ fontSize:15 }}/>
                               </button>
                               <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                                title={c.statut==="actif"?"Désactiver":"Activer"}
+                                title={c.statut==="actif"? tr("Désactiver") : tr("Activer")}
                                 style={{ backgroundColor:c.statut==="actif"?"#ef444418":"#10b98118",
                                   border:`1px solid ${c.statut==="actif"?"#ef444433":"#10b98133"}`,
                                   color:c.statut==="actif"?"#ef4444":"#10b981",
@@ -1483,7 +1478,7 @@ function DashboardAdmin() {
                                 {c.statut==="actif"?<MdBlock style={{ fontSize:15 }}/>:<MdCheckCircle style={{ fontSize:15 }}/>}
                               </button>
                               <button onClick={()=>setConfirmDelete({id:c.id,nom:`${c.prenom} ${c.nom}`})}
-                                title="Supprimer"
+                                title={tr("Supprimer")}
                                 style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
                                   color:"#ef4444",borderRadius:8,padding:"5px 9px",cursor:"pointer",display:"flex",alignItems:"center" }}>
                                 <MdDelete style={{ fontSize:15 }}/>
@@ -1495,7 +1490,7 @@ function DashboardAdmin() {
                     </tbody>
                   </table>
                   {coursiersFiltres.length===0 && (
-                    <div style={{ textAlign:"center",padding:32,color:"#555" }}>Aucun coursier trouvé</div>
+                    <div style={{ textAlign:"center",padding:32,color:"#555" }}>{tr("Aucun coursier trouvé")}</div>
                   )}
 
                   {/* Pagination — 5 par page */}
@@ -1545,10 +1540,9 @@ function DashboardAdmin() {
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
                       border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
                       display:"flex",alignItems:"center",gap:6 }}>
-                    <MdAdd style={{ fontSize:18 }}/> Ajouter
-                  </button>
+                    <MdAdd style={{ fontSize:18 }}/>{" "}{tr("Ajouter")}</button>
                 </h4>
-                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{commandes.length} commande(s) au total</p>
+                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("{{nb}} commande(s) au total", { nb: commandes.length })}</p>
 
                 {/* 3 box statuts — même style que les cartes KPI de l'accueil */}
                 <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:16,marginBottom:24 }}>
@@ -1572,7 +1566,7 @@ function DashboardAdmin() {
                       </div>
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
-                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{s.label}</div>
+                        <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
                       </div>
                     </div>
@@ -1596,12 +1590,12 @@ function DashboardAdmin() {
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
                           <td data-label="#" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>#{cmd.id}</td>
-                          <td data-label="Service" style={{ padding:"12px 14px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                          <td data-label="Client" style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.client}</td>
-                          <td data-label="Coursier" style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.coursier||"Non assigné"}</td>
-                          <td data-label="Tarif" style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
-                          <td data-label="Statut" style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
-                          <td data-label="Date" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
+                          <td data-label={tr("Service")} style={{ padding:"12px 14px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
+                          <td data-label={tr("Client")} style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.client}</td>
+                          <td data-label={tr("Coursier")} style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.coursier||tr("Non assigné")}</td>
+                          <td data-label={tr("Tarif")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                          <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
+                          <td data-label={tr("Date")} style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           <td style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",gap:6 }}>
                               {/* Modifier */}
@@ -1612,14 +1606,14 @@ function DashboardAdmin() {
                                   adresse_pickup:cmd.adresse_pickup||"", statut:cmd.statut||"en_attente",
                                   coursier_id:cmd.coursier_id||"" });
                                 setCmdErreur("");
-                              }} title="Modifier"
+                              }} title={tr("Modifier")}
                                 style={{ background:"#3b82f618",border:"1px solid #3b82f633",
                                   color:"#3b82f6",borderRadius:6,padding:"5px 8px",cursor:"pointer",
                                   display:"flex",alignItems:"center" }}>
                                 <MdEdit style={{ fontSize:15 }}/>
                               </button>
                               {/* Supprimer */}
-                              <button onClick={()=>setConfirmDeleteCmd(cmd.id)} title="Supprimer"
+                              <button onClick={()=>setConfirmDeleteCmd(cmd.id)} title={tr("Supprimer")}
                                 style={{ background:"#ef444418",border:"1px solid #ef444433",
                                   color:"#ef6666",borderRadius:6,padding:"5px 8px",cursor:"pointer",
                                   display:"flex",alignItems:"center" }}>
@@ -1630,7 +1624,7 @@ function DashboardAdmin() {
                         </tr>
                       ))}
                       {commandes.length===0 && (
-                        <tr><td colSpan={8} style={{ padding:24,textAlign:"center",color:"#555" }}>Aucune commande</td></tr>
+                        <tr><td colSpan={8} style={{ padding:24,textAlign:"center",color:"#555" }}>{tr("Aucune commande")}</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -1672,12 +1666,8 @@ function DashboardAdmin() {
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#8b5cf618",
                     border:"1px solid #8b5cf633",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdAttachMoney style={{ color:"#8b5cf6",fontSize:22 }}/>
-                  </div>
-                  Abonnements coursiers
-                </h4>
-                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>
-                  Gestion des abonnements mensuels — 10 000 Ar/mois
-                </p>
+                  </div>{tr("Abonnements coursiers")}</h4>
+                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("Gestion des abonnements mensuels — 10 000 Ar/mois")}</p>
 
                 {/* 4 box BDD */}
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:16,marginBottom:28 }}>
@@ -1695,7 +1685,7 @@ function DashboardAdmin() {
                       </div>
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:20 }}>{s.val}</div>
-                        <div style={{ color:"#888",fontSize:11,marginTop:2 }}>{s.label}</div>
+                        <div style={{ color:"#888",fontSize:11,marginTop:2 }}>{tr(s.label)}</div>
                       </div>
                     </div>
                   ))}
@@ -1724,16 +1714,14 @@ function DashboardAdmin() {
                           <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
                             style={{ ...btnY,padding:"8px 16px",fontSize:12,
                               display:"flex",alignItems:"center",gap:6 }}>
-                            <MdVerified style={{ fontSize:16 }}/> Valider & Activer
-                          </button>
+                            <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Valider & Activer")}</button>
                         )}
                         {c.statut==="actif" && (
                           <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
                             style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
                               color:"#ef4444",borderRadius:10,padding:"8px 16px",cursor:"pointer",
                               fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
-                            <MdBlock style={{ fontSize:16 }}/> Suspendre
-                          </button>
+                            <MdBlock style={{ fontSize:16 }}/>{" "}{tr("Suspendre")}</button>
                         )}
                       </div>
                     </div>
@@ -1748,7 +1736,7 @@ function DashboardAdmin() {
                       style={{ backgroundColor:"#FFD70018",border:"1px solid #FFD70033",
                         color:"#FFD700",borderRadius:8,padding:"7px 16px",
                         cursor:abonnPage===1?"not-allowed":"pointer",fontWeight:700,fontSize:13,
-                        opacity:abonnPage===1?0.4:1 }}>← Précédent</button>
+                        opacity:abonnPage===1?0.4:1 }}>{tr("← Précédent")}</button>
                     {Array.from({length:totalAbonnPages},(_,i)=>i+1).map(p=>(
                       <button key={p} onClick={()=>setAbonnPage(p)}
                         style={{ backgroundColor:p===abonnPage?"#FFD700":"#FFD70018",
@@ -1763,7 +1751,7 @@ function DashboardAdmin() {
                       style={{ backgroundColor:"#FFD70018",border:"1px solid #FFD70033",
                         color:"#FFD700",borderRadius:8,padding:"7px 16px",
                         cursor:abonnPage===totalAbonnPages?"not-allowed":"pointer",fontWeight:700,fontSize:13,
-                        opacity:abonnPage===totalAbonnPages?0.4:1 }}>Suivant →</button>
+                        opacity:abonnPage===totalAbonnPages?0.4:1 }}>{tr("Suivant →")}</button>
                   </div>
                 )}
               </div>
@@ -1777,50 +1765,41 @@ function DashboardAdmin() {
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
                     border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdHistory style={{ color:"#FFD700",fontSize:22 }}/>
-                  </div>
-                  Historique & Classements
-                </h4>
-                <p style={{ color:"#555",marginBottom:20,fontSize:14 }}>
-                  Palmarès des coursiers et clients de la plateforme
-                </p>
+                  </div>{tr("Historique & Classements")}</h4>
+                <p style={{ color:"#555",marginBottom:20,fontSize:14 }}>{tr("Palmarès des coursiers et clients de la plateforme")}</p>
 
                 {/* Filtre période, partagé Top Coursiers + Top Clients */}
                 <div style={{ ...card,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:20 }}>
                   <span style={{ color:"#FFD700",fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                    <MdFilterList style={{ fontSize:18 }}/> Période :
-                  </span>
+                    <MdFilterList style={{ fontSize:18 }}/>{" "}{tr("Période :")}</span>
                   <select value={histMois} onChange={e=>setHistMois(e.target.value)}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                    <option value="">Tous les mois</option>
-                    {["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
-                      .map((m,i)=>(<option key={i} value={i+1}>{m}</option>))}
+                    <option value="">{tr("Tous les mois")}</option>
+                    {[tr("Janvier"),tr("Février"),tr("Mars"),tr("Avril"),tr("Mai"),tr("Juin"),tr("Juillet"),tr("Août"),tr("Septembre"),tr("Octobre"),tr("Novembre"),tr("Décembre")].map((m,i)=>(<option key={i} value={i+1}>{m}</option>))}
                   </select>
                   <select value={histAnnee} onChange={e=>setHistAnnee(e.target.value)}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                    <option value="">Toutes les années</option>
-                    {[2024,2025,2026,2027].map(a=>(<option key={a} value={a}>{a}</option>))}
+                    <option value="">{tr("Toutes les années")}</option>
+                    {[2024,2025,2026,2027].map(a=>(<option key={tr(a)} value={tr(a)}>{tr(a)}</option>))}
                   </select>
-                  {histLoading && <span style={{ color:"#555",fontSize:12 }}>Chargement…</span>}
+                  {histLoading && <span style={{ color:"#555",fontSize:12 }}>{tr("Chargement…")}</span>}
                 </div>
 
                 {/* ── TOP COURSIERS ── */}
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
-                      <MdEmojiEvents style={{ fontSize:20 }}/> Top coursiers — missions terminées
-                    </div>
+                      <MdEmojiEvents style={{ fontSize:20 }}/>{" "}{tr("Top coursiers — missions terminées")}</div>
                     <select value={limMissions} onChange={e=>setLimMissions(Number(e.target.value))}
                       style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                      <option value={5}>Top 5</option>
-                      <option value={10}>Top 10</option>
-                      <option value={20}>Top 20</option>
+                      <option value={5}>{tr("Top 5")}</option>
+                      <option value={10}>{tr("Top 10")}</option>
+                      <option value={20}>{tr("Top 20")}</option>
                     </select>
                   </div>
 
                   {topCoursiers.length===0 ? (
-                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>
-                      Aucune mission terminée sur cette période.
-                    </p>
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>{tr("Aucune mission terminée sur cette période.")}</p>
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {topCoursiers.map((c,i)=>{
@@ -1870,20 +1849,17 @@ function DashboardAdmin() {
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
-                      <MdEmojiEvents style={{ fontSize:20 }}/> Top clients — les plus fidèles
-                    </div>
+                      <MdEmojiEvents style={{ fontSize:20 }}/>{" "}{tr("Top clients — les plus fidèles")}</div>
                     <select value={limClientsTop} onChange={e=>setLimClientsTop(Number(e.target.value))}
                       style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                      <option value={5}>Top 5</option>
-                      <option value={10}>Top 10</option>
-                      <option value={20}>Top 20</option>
+                      <option value={5}>{tr("Top 5")}</option>
+                      <option value={10}>{tr("Top 10")}</option>
+                      <option value={20}>{tr("Top 20")}</option>
                     </select>
                   </div>
 
                   {topClients.length===0 ? (
-                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>
-                      Aucune commande sur cette période.
-                    </p>
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>{tr("Aucune commande sur cette période.")}</p>
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {topClients.map((c,i)=>{
@@ -1927,13 +1903,12 @@ function DashboardAdmin() {
                 {/* ── ANCIENNETÉ : COURSIERS + CLIENTS côte à côte ── */}
                 <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10 }}>
                   <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
-                    <MdWorkHistory style={{ fontSize:20 }}/> Ancienneté sur la plateforme
-                  </div>
+                    <MdWorkHistory style={{ fontSize:20 }}/>{" "}{tr("Ancienneté sur la plateforme")}</div>
                   <select value={limAnciens} onChange={e=>setLimAnciens(Number(e.target.value))}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
-                    <option value={5}>Top 5</option>
-                    <option value={10}>Top 10</option>
-                    <option value={20}>Top 20</option>
+                    <option value={5}>{tr("Top 5")}</option>
+                    <option value={10}>{tr("Top 10")}</option>
+                    <option value={20}>{tr("Top 20")}</option>
                   </select>
                 </div>
 
@@ -1942,10 +1917,9 @@ function DashboardAdmin() {
                   <div style={card}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
                       display:"flex",alignItems:"center",gap:8 }}>
-                      <MdDeliveryDining style={{ fontSize:18 }}/> Coursiers les plus anciens
-                    </div>
+                      <MdDeliveryDining style={{ fontSize:18 }}/>{" "}{tr("Coursiers les plus anciens")}</div>
                     {anciensCoursiers.length===0 ? (
-                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>Aucun coursier.</p>
+                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>{tr("Aucun coursier.")}</p>
                     ) : (
                       <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
                         {anciensCoursiers.map((c,i)=>(
@@ -1956,7 +1930,7 @@ function DashboardAdmin() {
                             <div style={{ flex:1 }}>
                               <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
                               <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
-                                Depuis le {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                                {tr("Depuis le")} {new Date(c.created_at).toLocaleDateString(localeDate())}
                               </div>
                             </div>
                           </div>
@@ -1969,10 +1943,9 @@ function DashboardAdmin() {
                   <div style={card}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
                       display:"flex",alignItems:"center",gap:8 }}>
-                      <MdPeople style={{ fontSize:18 }}/> Clients les plus anciens
-                    </div>
+                      <MdPeople style={{ fontSize:18 }}/>{" "}{tr("Clients les plus anciens")}</div>
                     {anciensClients.length===0 ? (
-                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>Aucun client.</p>
+                      <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"16px 0" }}>{tr("Aucun client.")}</p>
                     ) : (
                       <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
                         {anciensClients.map((c,i)=>(
@@ -1983,7 +1956,7 @@ function DashboardAdmin() {
                             <div style={{ flex:1 }}>
                               <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
                               <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
-                                Depuis le {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                                {tr("Depuis le")} {new Date(c.created_at).toLocaleDateString(localeDate())}
                               </div>
                             </div>
                           </div>
@@ -2034,9 +2007,7 @@ function DashboardAdmin() {
                   {/* Liste des conversations */}
                   <div style={{ ...card, padding:0, overflowY:"auto" }}>
                     {supportConvs.length === 0 ? (
-                      <div style={{ padding:32, textAlign:"center", color:"#555", fontSize:13 }}>
-                        Aucune conversation pour le moment.
-                      </div>
+                      <div style={{ padding:32, textAlign:"center", color:"#555", fontSize:13 }}>{tr("Aucune conversation pour le moment.")}</div>
                     ) : (
                       supportConvs.map(conv => (
                         <div key={conv.client_id}
@@ -2079,7 +2050,7 @@ function DashboardAdmin() {
                     {!supportSelected ? (
                       <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
                         <MdForum style={{ fontSize:44, color:"#FFD70044", marginBottom:10 }}/>
-                        <p style={{ fontSize:13 }}>Sélectionnez une conversation à gauche</p>
+                        <p style={{ fontSize:13 }}>{tr("Sélectionnez une conversation à gauche")}</p>
                       </div>
                     ) : (
                       <>
@@ -2103,8 +2074,7 @@ function DashboardAdmin() {
                                   fontSize:11.5, cursor: supportPdfLoading ? "not-allowed" : "pointer",
                                   display:"flex", alignItems:"center", gap:6, whiteSpace:"nowrap",
                                   opacity: supportPdfLoading ? 0.6 : 1 }}>
-                                <MdHistory style={{ fontSize:14 }}/> PDF de cette conversation
-                              </button>
+                                <MdHistory style={{ fontSize:14 }}/>{" "}{tr("PDF de cette conversation")}</button>
                             </div>
                           );
                         })()}
@@ -2113,7 +2083,7 @@ function DashboardAdmin() {
                         <div style={{ flex:1, overflowY:"auto", padding:16,
                           display:"flex", flexDirection:"column", gap:10 }}>
                           {supportLoading ? (
-                            <div style={{ margin:"auto", color:"#555", fontSize:13 }}>Chargement...</div>
+                            <div style={{ margin:"auto", color:"#555", fontSize:13 }}>{tr("Chargement...")}</div>
                           ) : (
                             supportMessages.map((m, i) => {
                               const estClient = m.sender_role === "client";
@@ -2130,7 +2100,7 @@ function DashboardAdmin() {
                                     {!estClient && (
                                       <div style={{ color: estBot ? "#8b5cf6" : "#FFD700", fontSize:10,
                                         fontWeight:700, marginBottom:4 }}>
-                                        {estBot ? "🤖 Assistant automatique" : "🧑‍💼 Vous (admin)"}
+                                        {estBot ? tr("🤖 Assistant automatique") : tr("🧑‍💼 Vous (admin)")}
                                       </div>
                                     )}
                                     <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
@@ -2149,7 +2119,7 @@ function DashboardAdmin() {
                           display:"flex", gap:10 }}>
                           <input value={supportReply} onChange={e=>setSupportReply(e.target.value)}
                             onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportReply.trim()&&envoyerReponseSupport()}
-                            placeholder="Répondre au client..."
+                            placeholder={tr("Répondre au client...")}
                             style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70033",
                               color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>
                           <button onClick={envoyerReponseSupport}
@@ -2158,7 +2128,7 @@ function DashboardAdmin() {
                               borderRadius:12, padding:"10px 18px", fontWeight:800, fontSize:13,
                               cursor: supportReply.trim() ? "pointer" : "not-allowed",
                               opacity: supportReply.trim() ? 1 : 0.5 }}>
-                            {supportEnvoi ? "..." : "Envoyer"}
+                            {supportEnvoi ? "..." : tr("Envoyer")}
                           </button>
                         </div>
                       </>
@@ -2176,27 +2146,23 @@ function DashboardAdmin() {
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#6b728018",
                     border:"1px solid #6b728033",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdSettings style={{ color:"#6b7280",fontSize:22 }}/>
-                  </div>
-                  Paramètres
-                </h4>
+                  </div>{tr("Paramètres")}</h4>
 
                 {/* ═══ GESTION DES TARIFS PAR MOYEN DE DÉPLACEMENT — dynamique BDD ═══ */}
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
-                      <MdAttachMoney style={{ fontSize:20 }}/> Tarifs par moyen de déplacement
-                    </div>
-                    <button onClick={ouvrirAjoutMoyen} title="Ajouter un moyen de transport"
+                      <MdAttachMoney style={{ fontSize:20 }}/>{" "}{tr("Tarifs par moyen de déplacement")}</div>
+                    <button onClick={ouvrirAjoutMoyen} title={tr("Ajouter un moyen de transport")}
                       style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
-                      <MdAdd style={{ fontSize:16 }}/> Ajouter
-                    </button>
+                      <MdAdd style={{ fontSize:16 }}/>{" "}{tr("Ajouter")}</button>
                   </div>
                   <p style={{ color:"#555",fontSize:12,marginTop:-10,marginBottom:16 }}>
-                    Ce tarif s'applique à tous les services (courses, livraison, JIRAMA, mentorat, documents), selon le moyen choisi par le client.
+                    {tr("Ce tarif s'applique à tous les services (courses, livraison, JIRAMA, mentorat, documents), selon le moyen choisi par le client.")}
                   </p>
 
                   {moyens.length===0 ? (
-                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>Aucun moyen de transport enregistré.</p>
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>{tr("Aucun moyen de transport enregistré.")}</p>
                   ) : (
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }} className="stats-grid">
                       {moyens.map(m=>(
@@ -2217,13 +2183,13 @@ function DashboardAdmin() {
                             </div>
                           </div>
                           <div style={{ display:"flex",alignItems:"center",gap:8,flexShrink:0 }}>
-                            <button onClick={()=>ouvrirModifierMoyen(m)} title="Modifier"
+                            <button onClick={()=>ouvrirModifierMoyen(m)} title={tr("Modifier")}
                               style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
                                 color:"#3b82f6",borderRadius:10,width:32,height:32,cursor:"pointer",
                                 display:"flex",alignItems:"center",justifyContent:"center" }}>
                               <MdEdit style={{ fontSize:15 }}/>
                             </button>
-                            <button onClick={()=>setConfirmDeleteMoyen({id:m.id,nom:m.nom})} title="Supprimer"
+                            <button onClick={()=>setConfirmDeleteMoyen({id:m.id,nom:m.nom})} title={tr("Supprimer")}
                               style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
                                 color:"#ef4444",borderRadius:10,width:32,height:32,cursor:"pointer",
                                 display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -2237,7 +2203,7 @@ function DashboardAdmin() {
                 </div>
 
                 <div style={{ ...card,marginTop:20 }}>
-                  <div style={{ color:"#FFD700",fontWeight:700,marginBottom:16,fontSize:15 }}>Compte administrateur</div>
+                  <div style={{ color:"#FFD700",fontWeight:700,marginBottom:16,fontSize:15 }}>{tr("Compte administrateur")}</div>
                   <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14 }}>
                     {[["Email admin","admin@iraky.mg"],["Rôle","Super Administrateur"],
                       ["Accès","Compte unique sécurisé"],["Plateforme","IRAKY Delivery Toliara"]].map(([k,v])=>(
@@ -2253,16 +2219,14 @@ function DashboardAdmin() {
                 <div style={{ ...card,marginTop:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
                     <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
-                      <MdAdminPanelSettings style={{ fontSize:20 }}/> Gestion des admins
-                    </div>
-                    <button onClick={ouvrirAjoutAdmin} title="Ajouter un admin"
+                      <MdAdminPanelSettings style={{ fontSize:20 }}/>{" "}{tr("Gestion des admins")}</div>
+                    <button onClick={ouvrirAjoutAdmin} title={tr("Ajouter un admin")}
                       style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
-                      <MdPersonAdd style={{ fontSize:16 }}/> Ajouter
-                    </button>
+                      <MdPersonAdd style={{ fontSize:16 }}/>{" "}{tr("Ajouter")}</button>
                   </div>
 
                   {admins.length===0 ? (
-                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>Aucun admin enregistré.</p>
+                    <p style={{ color:"#555",fontSize:13,textAlign:"center",padding:"24px 0" }}>{tr("Aucun admin enregistré.")}</p>
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {admins.map(a=>(
@@ -2278,14 +2242,14 @@ function DashboardAdmin() {
                             {a.telephone && <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{a.telephone}</div>}
                           </div>
                           <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-                            <button onClick={()=>ouvrirModifierAdmin(a)} title="Modifier"
+                            <button onClick={()=>ouvrirModifierAdmin(a)} title={tr("Modifier")}
                               style={{ backgroundColor:"#3b82f618",border:"1px solid #3b82f633",
                                 color:"#3b82f6",borderRadius:10,width:34,height:34,cursor:"pointer",
                                 display:"flex",alignItems:"center",justifyContent:"center" }}>
                               <MdEdit style={{ fontSize:16 }}/>
                             </button>
                             {!a.est_moi && (
-                              <button onClick={()=>setConfirmDeleteAdmin({id:a.id,nom:`${a.prenom} ${a.nom}`})} title="Supprimer"
+                              <button onClick={()=>setConfirmDeleteAdmin({id:a.id,nom:`${a.prenom} ${a.nom}`})} title={tr("Supprimer")}
                                 style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
                                   color:"#ef4444",borderRadius:10,width:34,height:34,cursor:"pointer",
                                   display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -2340,8 +2304,7 @@ function DashboardAdmin() {
             <div style={{ marginBottom:20 }}>
               <div style={{ color:"#06b6d4",fontWeight:700,fontSize:14,marginBottom:14,
                 display:"flex",alignItems:"center",gap:8 }}>
-                <MdBadge style={{ fontSize:18 }}/> Photos CIN
-              </div>
+                <MdBadge style={{ fontSize:18 }}/>{" "}{tr("Photos CIN")}</div>
               <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
                 {[{label:"CIN Recto",chemin:detailUser.photo_recto,color:"#06b6d4"},
                   {label:"CIN Verso",chemin:detailUser.photo_verso,color:"#8b5cf6"}].map(p=>(
@@ -2349,17 +2312,17 @@ function DashboardAdmin() {
                     border:`1px solid ${p.color}22`,overflow:"hidden" }}>
                     <div style={{ padding:"8px 12px",borderBottom:`1px solid ${p.color}18`,
                       color:"#aaa",fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
-                      <MdBadge style={{ color:p.color }}/> {p.label}
+                      <MdBadge style={{ color:p.color }}/> {tr(p.label)}
                     </div>
                     {p.chemin?(
-                      <img src={`${BASE_URL}/storage/${p.chemin}`} alt={p.label}
+                      <img src={`${BASE_URL}/storage/${p.chemin}`} alt={tr(p.label)}
                         style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                     ):(
                       <div style={{ aspectRatio: "85.6 / 54", display: "flex",alignItems:"center",
                         justifyContent:"center",flexDirection:"column",gap:8,color:"#444" }}>
                         <MdBadge style={{ fontSize:36 }}/>
-                        <span style={{ fontSize:12 }}>Non fourni</span>
+                        <span style={{ fontSize:12 }}>{tr("Non fourni")}</span>
                       </div>
                     )}
                   </div>
@@ -2374,14 +2337,13 @@ function DashboardAdmin() {
                 border:`1px solid ${detailUser.statut==="actif"?"#ef444433":"#10b98133"}`,
                 color:detailUser.statut==="actif"?"#ef4444":"#10b981",
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              {detailUser.statut==="actif"?<><MdBlock style={{ fontSize:18 }}/> Désactiver</>:<><MdCheckCircle style={{ fontSize:18 }}/> Activer</>}
+              {detailUser.statut==="actif"?<><MdBlock style={{ fontSize:18 }}/>{" "}{tr("Désactiver")}</>:<><MdCheckCircle style={{ fontSize:18 }}/>{" "}{tr("Activer")}</>}
             </button>
             <button onClick={()=>{ setDetailUser(null); setConfirmDelete({id:detailUser.id,nom:`${detailUser.prenom} ${detailUser.nom}`}); }}
               style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",color:"#ef4444",
                 borderRadius:10,padding:"11px 20px",cursor:"pointer",fontWeight:700,fontSize:14,
                 display:"flex",alignItems:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/> Supprimer
-            </button>
+              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
@@ -2390,24 +2352,18 @@ function DashboardAdmin() {
       {confirmDelete && (
         <Modal onClose={()=>setConfirmDelete(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/> Confirmer la suppression
-          </h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>
-            Supprimer <strong style={{ color:"#fff" }}>{confirmDelete.nom}</strong> ?
-            Cette action est <span style={{ color:"#ef4444" }}>irréversible</span>.
+            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
+          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer")}{" "}<strong style={{ color:"#fff" }}>{confirmDelete.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDelete(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>
-              Annuler
-            </button>
+                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>deleteUser(confirmDelete.id,confirmDelete.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/> Supprimer
-            </button>
+              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
@@ -2418,25 +2374,25 @@ function DashboardAdmin() {
           <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
             display:"flex",alignItems:"center",gap:10 }}>
             <MdAdminPanelSettings style={{ fontSize:22 }}/>
-            {adminModal==="ajouter" ? "Ajouter un admin" : "Modifier l'admin"}
+            {adminModal==="ajouter" ? tr("Ajouter un admin") : tr("Modifier l'admin")}
           </h5>
           <form onSubmit={soumettreAdmin} style={{ display:"flex",flexDirection:"column",gap:14 }}>
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
-              <input type="text" placeholder="Prénom" required style={inp}
+              <input type="text" placeholder={tr("Prénom")} required style={inp}
                 value={adminForm.prenom}
                 onChange={e=>setAdminForm({...adminForm,prenom:e.target.value})}/>
-              <input type="text" placeholder="Nom" required style={inp}
+              <input type="text" placeholder={tr("Nom")} required style={inp}
                 value={adminForm.nom}
                 onChange={e=>setAdminForm({...adminForm,nom:e.target.value})}/>
             </div>
-            <input type="email" placeholder="Email" required style={inp}
+            <input type="email" placeholder={tr("Email")} required style={inp}
               value={adminForm.email}
               onChange={e=>setAdminForm({...adminForm,email:e.target.value})}/>
-            <input type="text" placeholder="Téléphone" style={inp}
+            <input type="text" placeholder={tr("Téléphone")} style={inp}
               value={adminForm.telephone||""}
               onChange={e=>setAdminForm({...adminForm,telephone:e.target.value})}/>
             <input type="password" style={inp}
-              placeholder={adminModal==="ajouter" ? "Mot de passe" : "Nouveau mot de passe (optionnel)"}
+              placeholder={adminModal==="ajouter" ? tr("Mot de passe") : tr("Nouveau mot de passe (optionnel)")}
               required={adminModal==="ajouter"}
               value={adminForm.password}
               onChange={e=>setAdminForm({...adminForm,password:e.target.value})}/>
@@ -2446,7 +2402,7 @@ function DashboardAdmin() {
             <button type="submit" disabled={adminEnvoi}
               style={{ ...btnY,padding:"12px",fontSize:14,opacity:adminEnvoi?0.6:1,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              {adminEnvoi ? "Envoi..." : (adminModal==="ajouter" ? "Créer l'admin" : "Enregistrer")}
+              {adminEnvoi ? tr("Envoi...") : (adminModal==="ajouter" ? tr("Créer l'admin") : tr("Enregistrer"))}
             </button>
           </form>
         </Modal>
@@ -2456,24 +2412,18 @@ function DashboardAdmin() {
       {confirmDeleteAdmin && (
         <Modal onClose={()=>setConfirmDeleteAdmin(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/> Confirmer la suppression
-          </h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>
-            Supprimer l'admin <strong style={{ color:"#fff" }}>{confirmDeleteAdmin.nom}</strong> ?
-            Cette action est <span style={{ color:"#ef4444" }}>irréversible</span>.
+            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
+          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer l'admin")}{" "}<strong style={{ color:"#fff" }}>{confirmDeleteAdmin.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDeleteAdmin(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>
-              Annuler
-            </button>
+                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerAdmin(confirmDeleteAdmin.id,confirmDeleteAdmin.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/> Supprimer
-            </button>
+              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
@@ -2484,22 +2434,22 @@ function DashboardAdmin() {
           <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
             display:"flex",alignItems:"center",gap:10 }}>
             <MdAttachMoney style={{ fontSize:22 }}/>
-            {moyenModal==="ajouter" ? "Ajouter un moyen de transport" : "Modifier le moyen de transport"}
+            {moyenModal==="ajouter" ? tr("Ajouter un moyen de transport") : tr("Modifier le moyen de transport")}
           </h5>
           <form onSubmit={soumettreMoyen} style={{ display:"flex",flexDirection:"column",gap:14 }}>
             <div style={{ display:"grid",gridTemplateColumns:"1fr 3fr",gap:14 }}>
               <input type="text" placeholder="🚶" maxLength={2} style={{ ...inp,textAlign:"center",fontSize:20 }}
                 value={moyenForm.icone}
                 onChange={e=>setMoyenForm({...moyenForm,icone:e.target.value})}/>
-              <input type="text" placeholder="Nom (ex: Piéton)" required style={inp}
+              <input type="text" placeholder={tr("Nom (ex: Piéton)")} required style={inp}
                 value={moyenForm.nom}
                 onChange={e=>setMoyenForm({...moyenForm,nom:e.target.value})}/>
             </div>
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
-              <input type="number" placeholder="Prix (Ar)" required style={inp}
+              <input type="number" placeholder={tr("Prix (Ar)")} required style={inp}
                 value={moyenForm.prix}
                 onChange={e=>setMoyenForm({...moyenForm,prix:e.target.value})}/>
-              <input type="number" placeholder="Durée estimée (min)" style={inp}
+              <input type="number" placeholder={tr("Durée estimée (min)")} style={inp}
                 value={moyenForm.duree_estimee}
                 onChange={e=>setMoyenForm({...moyenForm,duree_estimee:e.target.value})}/>
             </div>
@@ -2509,7 +2459,7 @@ function DashboardAdmin() {
             <button type="submit" disabled={moyenEnvoi}
               style={{ ...btnY,padding:"12px",fontSize:14,opacity:moyenEnvoi?0.6:1,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              {moyenEnvoi ? "Envoi..." : (moyenModal==="ajouter" ? "Créer" : "Enregistrer")}
+              {moyenEnvoi ? tr("Envoi...") : (moyenModal==="ajouter" ? tr("Créer") : tr("Enregistrer"))}
             </button>
           </form>
         </Modal>
@@ -2519,24 +2469,18 @@ function DashboardAdmin() {
       {confirmDeleteMoyen && (
         <Modal onClose={()=>setConfirmDeleteMoyen(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/> Confirmer la suppression
-          </h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>
-            Supprimer le moyen de transport <strong style={{ color:"#fff" }}>{confirmDeleteMoyen.nom}</strong> ?
-            Cette action est <span style={{ color:"#ef4444" }}>irréversible</span>.
+            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
+          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer le moyen de transport")}{" "}<strong style={{ color:"#fff" }}>{confirmDeleteMoyen.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDeleteMoyen(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>
-              Annuler
-            </button>
+                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerMoyen(confirmDeleteMoyen.id,confirmDeleteMoyen.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/> Supprimer
-            </button>
+              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
@@ -2544,20 +2488,14 @@ function DashboardAdmin() {
     {/* MODAL CONFIRM DELETE NOTIF */}
       {confirmNotifDel !== null && (
         <Modal onClose={() => setConfirmNotifDel(null)}>
-          <h5 style={{ color:"#ef4444", marginBottom:12, fontWeight:800 }}>
-            Supprimer cette notification ?
-          </h5>
+          <h5 style={{ color:"#ef4444", marginBottom:12, fontWeight:800 }}>{tr("Supprimer cette notification ?")}</h5>
           <div style={{ display:"flex", gap:12, marginTop:20 }}>
             <button onClick={() => setConfirmNotifDel(null)}
               style={{ flex:1, padding:"11px", borderRadius:10, border:"1px solid #ffffff20",
-                backgroundColor:"transparent", color:"#fff", cursor:"pointer", fontWeight:700 }}>
-              Annuler
-            </button>
+                backgroundColor:"transparent", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={() => deleteNotif(confirmNotifDel)}
               style={{ flex:1, padding:"11px", borderRadius:10, border:"none",
-                backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>
-              Supprimer
-            </button>
+                backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
@@ -2605,13 +2543,13 @@ function DashboardAdmin() {
               <div key={p.label} style={{ backgroundColor: "#080820", borderRadius: 12,
                 border: `1px solid ${p.color}22`, overflow: "hidden" }}>
                 <div style={{ padding: "8px 12px", borderBottom: `1px solid ${p.color}18`,
-                  color: "#aaa", fontSize: 12 }}>{p.label}</div>
+                  color: "#aaa", fontSize: 12 }}>{tr(p.label)}</div>
                 {p.chemin ? (
-                  <img src={`${BASE_URL}/storage/${p.chemin}`} alt={p.label}
+                  <img src={`${BASE_URL}/storage/${p.chemin}`} alt={tr(p.label)}
                     style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}/>
                 ) : (
                   <div style={{ aspectRatio: "85.6 / 54", display: "flex", alignItems: "center",
-                    justifyContent: "center", color: "#444", fontSize: 13 }}>Non fourni</div>
+                    justifyContent: "center", color: "#444", fontSize: 13 }}>{tr("Non fourni")}</div>
                 )}
               </div>
             ))}
@@ -2620,13 +2558,11 @@ function DashboardAdmin() {
           {/* Zone message rejet — visible seulement si msgRejet n'est pas vide */}
           {msgRejet !== "" && (
             <div style={{ marginBottom: 16 }}>
-              <label style={{ color: "#aaa", fontSize: 13, marginBottom: 6, display: "block" }}>
-                ✏️ Message de rejet à envoyer au coursier :
-              </label>
+              <label style={{ color: "#aaa", fontSize: 13, marginBottom: 6, display: "block" }}>{tr("✏️ Message de rejet à envoyer au coursier :")}</label>
               <textarea
                 value={msgRejet}
                 onChange={e => setMsgRejet(e.target.value)}
-                placeholder="Expliquez pourquoi le dossier est rejeté (CIN illisible, paiement non confirmé, etc.)"
+                placeholder={tr("Expliquez pourquoi le dossier est rejeté (CIN illisible, paiement non confirmé, etc.)")}
                 rows={3}
                 style={{ width: "100%", backgroundColor: "#080820", border: "1px solid #ef444430",
                   color: "#fff", borderRadius: 10, padding: "10px 14px",
@@ -2644,20 +2580,19 @@ function DashboardAdmin() {
                   method: "POST", headers: getHeaders(),
                 });
                 if (res.ok) {
-                  showToast(`✅ ${coursierVerif.prenom} validé ! Il peut se connecter.`);
+                  showToast(tr("✅ {{prenom}} validé ! Il peut se connecter.", { prenom: coursierVerif.prenom }));
                   setCoursiersEnAttente(prev => prev.filter(c => c.id !== coursierVerif.id));
                   setCoursierVerif(null);
                   fetchAll();
                 } else {
-                  showToast("Erreur lors de la validation", "error");
+                  showToast(tr("Erreur lors de la validation"), "error");
                 }
               }}
               style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none",
                 background: "linear-gradient(135deg,#10b981,#059669)",
                 color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              <MdCheckCircle style={{ fontSize: 18 }}/> Valider le dossier
-            </button>
+              <MdCheckCircle style={{ fontSize: 18 }}/>{" "}{tr("Valider le dossier")}</button>
 
             {/* Rejeter */}
             {msgRejet === "" ? (
@@ -2667,8 +2602,7 @@ function DashboardAdmin() {
                   backgroundColor: "#ef444418", border: "1px solid #ef444433",
                   color: "#ef4444", cursor: "pointer", fontWeight: 700, fontSize: 14,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <MdClose style={{ fontSize: 18 }}/> Rejeter le dossier
-              </button>
+                <MdClose style={{ fontSize: 18 }}/>{" "}{tr("Rejeter le dossier")}</button>
             ) : (
               <button
                 disabled={!msgRejet.trim()}
@@ -2679,13 +2613,13 @@ function DashboardAdmin() {
                     body: JSON.stringify({ message: msgRejet.trim() }),
                   });
                   if (res.ok) {
-                    showToast(`❌ Dossier rejeté — ${coursierVerif.prenom} notifié.`, "error");
+                    showToast(tr("❌ Dossier rejeté — {{prenom}} notifié.", { prenom: coursierVerif.prenom }), "error");
                     setCoursiersEnAttente(prev => prev.filter(c => c.id !== coursierVerif.id));
                     setCoursierVerif(null);
                     setMsgRejet("");
                     fetchAll();
                   } else {
-                    showToast("Erreur lors du rejet", "error");
+                    showToast(tr("Erreur lors du rejet"), "error");
                   }
                 }}
                 style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none",
@@ -2693,8 +2627,7 @@ function DashboardAdmin() {
                   color: "#fff", cursor: msgRejet.trim() ? "pointer" : "not-allowed",
                   fontWeight: 700, fontSize: 14, opacity: msgRejet.trim() ? 1 : 0.5,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <MdClose style={{ fontSize: 18 }}/> Envoyer le rejet
-              </button>
+                <MdClose style={{ fontSize: 18 }}/>{" "}{tr("Envoyer le rejet")}</button>
             )}
           </div>
         </Modal>
@@ -2703,15 +2636,15 @@ function DashboardAdmin() {
 
       {/* ═══ MODAL AJOUTER/MODIFIER COMMANDE ═══ */}
       {cmdModal && (
-        <Modal titre={cmdModal==="ajouter" ? "Ajouter une commande" : "Modifier la commande"} onClose={()=>setCmdModal(null)}>
+        <Modal titre={cmdModal==="ajouter" ? tr("Ajouter une commande") : tr("Modifier la commande")} onClose={()=>setCmdModal(null)}>
           <div style={{ display:"grid", gap:12 }}>
             {cmdErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{cmdErreur}</div>}
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Client *</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Client *")}</label>
               <select value={cmdForm.client_id} onChange={e=>setCmdForm(f=>({...f,client_id:e.target.value}))}
                 style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
-                <option value="">— Sélectionner un client —</option>
+                <option value="">{tr("— Sélectionner un client —")}</option>
                 {clients.map(c=>(
                   <option key={c.id} value={c.id}>{c.prenom} {c.nom} ({c.email})</option>
                 ))}
@@ -2719,21 +2652,21 @@ function DashboardAdmin() {
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Service *</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Service *")}</label>
               <input value={cmdForm.service} onChange={e=>setCmdForm(f=>({...f,service:e.target.value}))}
-                placeholder="Ex: Livraison de colis" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Ex: Livraison de colis")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Moyen *</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Moyen *")}</label>
                 <select value={cmdForm.moyen} onChange={e=>setCmdForm(f=>({...f,moyen:e.target.value}))}
                   style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
-                  <option value="">— Moyen —</option>
-                  <option value="pieton">🚶 Piéton</option>
-                  <option value="bicyclette">🚲 Bicyclette</option>
-                  <option value="moto">🏍️ Moto</option>
-                  <option value="voiture">🚗 Voiture</option>
+                  <option value="">{tr("— Moyen —")}</option>
+                  <option value="pieton">{tr("🚶 Piéton")}</option>
+                  <option value="bicyclette">{tr("🚲 Bicyclette")}</option>
+                  <option value="moto">{tr("🏍️ Moto")}</option>
+                  <option value="voiture">{tr("🚗 Voiture")}</option>
                 </select>
               </div>
               <div>
@@ -2744,34 +2677,34 @@ function DashboardAdmin() {
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse de pickup</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse de pickup")}</label>
               <input value={cmdForm.adresse_pickup} onChange={e=>setCmdForm(f=>({...f,adresse_pickup:e.target.value}))}
-                placeholder="Adresse de prise en charge" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Adresse de prise en charge")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Détail</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Détail")}</label>
               <textarea value={cmdForm.detail} onChange={e=>setCmdForm(f=>({...f,detail:e.target.value}))}
-                placeholder="Description de la commande..." rows={3}
+                placeholder={tr("Description de la commande...")} rows={3}
                 style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none",resize:"vertical" }}/>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Statut</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Statut")}</label>
               <select value={cmdForm.statut} onChange={e=>setCmdForm(f=>({...f,statut:e.target.value}))}
                 style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
-                <option value="en_attente">En attente</option>
-                <option value="negociable">Négociable</option>
-                <option value="accepte">Accepté</option>
-                <option value="refuse">Refusé</option>
-                <option value="termine">Terminé</option>
+                <option value="en_attente">{tr("En attente")}</option>
+                <option value="negociable">{tr("Négociable")}</option>
+                <option value="accepte">{tr("Accepté")}</option>
+                <option value="refuse">{tr("Refusé")}</option>
+                <option value="termine">{tr("Terminé")}</option>
               </select>
             </div>
 
             <button onClick={sauvegarderCommande} disabled={cmdEnvoi}
               style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:cmdEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
-              {cmdEnvoi ? "Enregistrement..." : (cmdModal==="ajouter" ? "Créer la commande" : "Enregistrer")}
+              {cmdEnvoi ? tr("Enregistrement...") : (cmdModal==="ajouter" ? tr("Créer la commande") : tr("Enregistrer"))}
             </button>
           </div>
         </Modal>
@@ -2779,55 +2712,55 @@ function DashboardAdmin() {
 
       {/* MODAL AJOUTER / MODIFIER CLIENT */}
       {clientModal && (
-        <Modal titre={clientModal==="ajouter" ? "Ajouter un client" : "Modifier le client"} onClose={()=>setClientModal(null)}>
+        <Modal titre={clientModal==="ajouter" ? tr("Ajouter un client") : tr("Modifier le client")} onClose={()=>setClientModal(null)}>
           <div style={{ display:"grid", gap:12 }}>
             {clientErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{clientErreur}</div>}
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Prénom *</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
                 <input value={clientForm.prenom} onChange={e=>setClientForm(f=>({...f,prenom:e.target.value}))}
-                  placeholder="Prénom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Prénom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Nom *</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
                 <input value={clientForm.nom} onChange={e=>setClientForm(f=>({...f,nom:e.target.value}))}
-                  placeholder="Nom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Nom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Email *</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
               <input type="email" value={clientForm.email} onChange={e=>setClientForm(f=>({...f,email:e.target.value}))}
-                placeholder="client@email.com" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("client@email.com")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Téléphone</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
                 <input value={clientForm.telephone} onChange={e=>setClientForm(f=>({...f,telephone:e.target.value}))}
-                  placeholder="03X XX XXX XX" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
                 <input value={clientForm.adresse} onChange={e=>setClientForm(f=>({...f,adresse:e.target.value}))}
-                  placeholder="Adresse" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Adresse")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
               <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
-                {clientModal==="ajouter" ? "Mot de passe *" : "Nouveau mot de passe (optionnel)"}
+                {clientModal==="ajouter" ? tr("Mot de passe *") : tr("Nouveau mot de passe (optionnel)")}
               </label>
               <input type="password" value={clientForm.password} onChange={e=>setClientForm(f=>({...f,password:e.target.value}))}
-                placeholder={clientModal==="ajouter" ? "Mot de passe" : "Laisser vide pour ne pas changer"}
+                placeholder={clientModal==="ajouter" ? tr("Mot de passe") : tr("Laisser vide pour ne pas changer")}
                 style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <button onClick={sauvegarderClient} disabled={clientEnvoi}
               style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:clientEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
-              {clientEnvoi ? "Enregistrement..." : (clientModal==="ajouter" ? "Créer le client" : "Enregistrer")}
+              {clientEnvoi ? tr("Enregistrement...") : (clientModal==="ajouter" ? tr("Créer le client") : tr("Enregistrer"))}
             </button>
           </div>
         </Modal>
@@ -2835,61 +2768,61 @@ function DashboardAdmin() {
 
       {/* MODAL AJOUTER / MODIFIER COURSIER */}
       {coursierModal && (
-        <Modal titre={coursierModal==="ajouter" ? "Ajouter un coursier" : "Modifier le coursier"} onClose={()=>setCoursierModal(null)}>
+        <Modal titre={coursierModal==="ajouter" ? tr("Ajouter un coursier") : tr("Modifier le coursier")} onClose={()=>setCoursierModal(null)}>
           <div style={{ display:"grid", gap:12 }}>
             {coursierErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{coursierErreur}</div>}
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Prénom *</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
                 <input value={coursierForm.prenom} onChange={e=>setCoursierForm(f=>({...f,prenom:e.target.value}))}
-                  placeholder="Prénom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Prénom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Nom *</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
                 <input value={coursierForm.nom} onChange={e=>setCoursierForm(f=>({...f,nom:e.target.value}))}
-                  placeholder="Nom" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Nom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Email *</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
               <input type="email" value={coursierForm.email} onChange={e=>setCoursierForm(f=>({...f,email:e.target.value}))}
-                placeholder="coursier@email.com" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("coursier@email.com")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Téléphone</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
                 <input value={coursierForm.telephone} onChange={e=>setCoursierForm(f=>({...f,telephone:e.target.value}))}
-                  placeholder="03X XX XXX XX" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>CIN</label>
+                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("CIN")}</label>
                 <input value={coursierForm.cin} onChange={e=>setCoursierForm(f=>({...f,cin:e.target.value}))}
-                  placeholder="Numéro CIN" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Numéro CIN")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Adresse</label>
+              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
               <input value={coursierForm.adresse} onChange={e=>setCoursierForm(f=>({...f,adresse:e.target.value}))}
-                placeholder="Adresse" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Adresse")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div>
               <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
-                {coursierModal==="ajouter" ? "Mot de passe *" : "Nouveau mot de passe (optionnel)"}
+                {coursierModal==="ajouter" ? tr("Mot de passe *") : tr("Nouveau mot de passe (optionnel)")}
               </label>
               <input type="password" value={coursierForm.password} onChange={e=>setCoursierForm(f=>({...f,password:e.target.value}))}
-                placeholder={coursierModal==="ajouter" ? "Mot de passe" : "Laisser vide pour ne pas changer"}
+                placeholder={coursierModal==="ajouter" ? tr("Mot de passe") : tr("Laisser vide pour ne pas changer")}
                 style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <button onClick={sauvegarderCoursier} disabled={coursierEnvoi}
               style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:coursierEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
-              {coursierEnvoi ? "Enregistrement..." : (coursierModal==="ajouter" ? "Créer le coursier" : "Enregistrer")}
+              {coursierEnvoi ? tr("Enregistrement...") : (coursierModal==="ajouter" ? tr("Créer le coursier") : tr("Enregistrer"))}
             </button>
           </div>
         </Modal>
@@ -2897,19 +2830,13 @@ function DashboardAdmin() {
 
       {/* ═══ CONFIRMATION SUPPRESSION COMMANDE ═══ */}
       {confirmDeleteCmd && (
-        <Modal titre="Confirmer la suppression" onClose={()=>setConfirmDeleteCmd(null)}>
-          <p style={{ color:"#ccc",marginBottom:20 }}>
-            Supprimer la commande <strong style={{ color:"#fff" }}>#{confirmDeleteCmd}</strong> ? Cette action est irréversible.
-          </p>
+        <Modal titre={tr("Confirmer la suppression")} onClose={()=>setConfirmDeleteCmd(null)}>
+          <p style={{ color:"#ccc",marginBottom:20 }}>{tr("Supprimer la commande")}{" "}<strong style={{ color:"#fff" }}>#{confirmDeleteCmd}</strong>{" "}{tr("? Cette action est irréversible.")}</p>
           <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
             <button onClick={()=>setConfirmDeleteCmd(null)}
-              style={{ background:"#1a1a35",color:"#aaa",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>
-              Annuler
-            </button>
+              style={{ background:"#1a1a35",color:"#aaa",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerCommande(confirmDeleteCmd)}
-              style={{ background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",fontWeight:700,cursor:"pointer" }}>
-              Supprimer
-            </button>
+              style={{ background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",fontWeight:700,cursor:"pointer" }}>{tr("Supprimer")}</button>
           </div>
         </Modal>
       )}
