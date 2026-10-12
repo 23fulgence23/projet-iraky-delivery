@@ -440,5 +440,21 @@
   "basé sur {{nb}} missions terminées": "mifototra amin'ny iraka vita {{nb}}",
   "{{nb}} mission(s) en attente de coursier": "{{nb}} iraka miandry mpitatitra",
   "{{nb}} mission(s) assignée(s)": "{{nb}} iraka voatendry",
-  "Photos pièce d'identité (CIN)": "Sarin'ny karapanondro (CIN)"
+  "Photos pièce d'identité (CIN)": "Sarin'ny karapanondro (CIN)",
+  "CIN Recto": "CIN — Lohany",
+  "CIN Verso": "CIN — Fara",
+  "Client :": "Mpanjifa :",
+  "Coursier IRAKY": "Mpitatitra IRAKY",
+  "Détails": "Antsipiriany",
+  "Erreur envoi": "Hadisoana tamin'ny fandefasana",
+  "Je prends": "Raisiko",
+  "Message client": "Hafatry ny mpanjifa",
+  "Non fourni": "Tsy nomena",
+  "Vérifié": "Voamarina",
+  "Évaluation reçue du client": "Naoty azo avy amin'ny mpanjifa",
+  "🔒 Attendre client": "🔒 Miandry ny mpanjifa",
+  "Voulez-vous vraiment retirer cette commande de votre suivi en temps réel ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Tena hanala ity fangatahana ity amin'ny fanaraha-masonao mivantana ve ianao?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Tsy azo averina ity hetsika ity</span> : tsy hiseho intsony amin'ity efijery ity izy, na dia aorian'ny fidirana vaovao aza.<br/> Hijanona hita sy arahina tsara amin'ny ilany mpitantana anefa izy.",
+  "Voulez-vous vraiment retirer cette commande de votre historique ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Tena hanala ity fangatahana ity amin'ny tantaranao ve ianao?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Tsy azo averina ity hetsika ity</span> : tsy hiseho intsony amin'ity efijery ity izy, na dia aorian'ny fidirana vaovao aza.<br/> Hijanona hita sy arahina tsara amin'ny ilany mpitantana anefa izy.",
+  "Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Tena hanala ity resaka ity amin'ny lisitry ny hafatrao ve ianao?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Tsy azo averina ity hetsika ity</span> : tsy hiseho intsony amin'ity efijery ity izy, na dia aorian'ny fidirana vaovao aza.<br/> Hijanona hita sy arahina tsara amin'ny ilany mpitantana anefa izy.",
+  "Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Tena hanala ity iraka ity amin'ny lisitrao ve ianao?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Tsy azo averina ity hetsika ity</span> : tsy hiseho intsony amin'ity efijery ity izy, na dia aorian'ny fidirana vaovao aza.<br/> Hijanona hita sy arahina tsara amin'ny ilany mpitantana anefa izy."
 }

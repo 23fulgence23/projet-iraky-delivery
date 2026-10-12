@@ -540,7 +540,7 @@ useEffect(() => {
     Swal.fire({
       icon: "warning",
       title: tr("Retirer de mes missions"),
-      html: tr("Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">{tr(\"Cette action est définitive\")}</span>{\" \"}{tr(\": elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.\")}<br/> Elle restera toutefois visible et suivie normalement côté administration."),
+      html: tr("Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
       background: "#131330",
       color: "#fff",
       iconColor: "#ef4444",
@@ -575,7 +575,7 @@ useEffect(() => {
     Swal.fire({
       icon: "warning",
       title: tr("Retirer cette conversation"),
-      html: tr("Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">{tr(\"Cette action est définitive\")}</span>{\" \"}{tr(\": elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.\")}<br/> Elle restera toutefois visible et suivie normalement côté administration."),
+      html: tr("Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
       background: "#131330",
       color: "#fff",
       iconColor: "#ef4444",

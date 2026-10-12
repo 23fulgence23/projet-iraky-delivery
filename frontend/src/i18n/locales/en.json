@@ -440,5 +440,21 @@
   "basé sur {{nb}} missions terminées": "based on {{nb}} completed missions",
   "{{nb}} mission(s) en attente de coursier": "{{nb}} mission(s) waiting for a courier",
   "{{nb}} mission(s) assignée(s)": "{{nb}} mission(s) assigned",
-  "Photos pièce d'identité (CIN)": "Identity document photos (CIN)"
+  "Photos pièce d'identité (CIN)": "Identity document photos (CIN)",
+  "CIN Recto": "CIN Front",
+  "CIN Verso": "CIN Back",
+  "Client :": "Client:",
+  "Coursier IRAKY": "IRAKY Courier",
+  "Détails": "Details",
+  "Erreur envoi": "Sending error",
+  "Je prends": "I take it",
+  "Message client": "Client message",
+  "Non fourni": "Not provided",
+  "Vérifié": "Verified",
+  "Évaluation reçue du client": "Rating received from the client",
+  "🔒 Attendre client": "🔒 Wait for the client",
+  "Voulez-vous vraiment retirer cette commande de votre suivi en temps réel ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Do you really want to remove this order from your real-time tracking?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">This action is final</span> : it will never reappear on this screen, even after logging in again.<br/> It will nevertheless remain visible and tracked normally on the administration side.",
+  "Voulez-vous vraiment retirer cette commande de votre historique ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Do you really want to remove this order from your history?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">This action is final</span> : it will never reappear on this screen, even after logging in again.<br/> It will nevertheless remain visible and tracked normally on the administration side.",
+  "Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Do you really want to remove this conversation from your message list?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">This action is final</span> : it will never reappear on this screen, even after logging in again.<br/> It will nevertheless remain visible and tracked normally on the administration side.",
+  "Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration.": "Do you really want to remove this mission from your list?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">This action is final</span> : it will never reappear on this screen, even after logging in again.<br/> It will nevertheless remain visible and tracked normally on the administration side."
 }
