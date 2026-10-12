@@ -14,6 +14,9 @@ import {
   MdPhone, MdEmail, MdBadge, MdVerified,MdDoneAll,
   MdDelete, MdArrowBack, MdSupportAgent, MdInfo, MdMenuBook, MdKeyboardArrowUp, MdKeyboardArrowDown,
 } from "react-icons/md";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+const tr = (cle, opts) => (typeof cle === "string" ? i18n.t(cle, opts) : cle);
 
 // ══════════════════════════════════════════════
 //  MOCK DATA
@@ -102,7 +105,7 @@ function StatutBadge({ statut }) {
       border: `1px solid ${s.color}44`,
       display: "inline-flex", alignItems: "center", gap: 5,
     }}>
-      {s.icon} {s.label}
+      {s.icon} {tr(s.label)}
     </span>
   );
 }
@@ -175,8 +178,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
           <div>
             <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{profil.prenom} {profil.nom}</div>
             <div style={{ color: "#FFD700", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-              <MdDeliveryDining style={{ fontSize: 13 }}/> Coursier IRAKY
-            </div>
+              <MdDeliveryDining style={{ fontSize: 13 }}/>{" "}{tr("Coursier IRAKY")}</div>
           </div>
         </div>
       </div>
@@ -195,7 +197,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
             onMouseEnter={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "#ffffff08"; e.currentTarget.style.color = "#fff"; }}}
             onMouseLeave={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#8888aa"; }}}>
             <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <item.Icon style={{ fontSize: 18 }}/> {item.label}
+              <item.Icon style={{ fontSize: 18 }}/> {tr(item.label)}
             </span>
             {item.id === "mes_missions" && enCours > 0 && (
               <span style={{ background: "#f59e0b", color: "#000", borderRadius: 12,
@@ -223,8 +225,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
           }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = "#ef444425"}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = "#ef444410"}>
-          <MdLogout style={{ fontSize: 18 }}/> Se déconnecter
-        </button>
+          <MdLogout style={{ fontSize: 18 }}/>{" "}{tr("Se déconnecter")}</button>
       </div>
     </div>
   );
@@ -234,6 +235,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
 //  COMPOSANT PRINCIPAL
 // ══════════════════════════════════════════════
 function DashboardCoursier() {
+  useTranslation();
   const [onglet, setOnglet]             = useState("accueil");
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [notifOpen, setNotifOpen]       = useState(false);
@@ -537,17 +539,14 @@ useEffect(() => {
   const demanderRetraitMission = (id) => {
     Swal.fire({
       icon: "warning",
-      title: "Retirer de mes missions",
-      html: `Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/>
-        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
-        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
-        Elle restera toutefois visible et suivie normalement côté administration.`,
+      title: tr("Retirer de mes missions"),
+      html: tr("Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">{tr(\"Cette action est définitive\")}</span>{\" \"}{tr(\": elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.\")}<br/> Elle restera toutefois visible et suivie normalement côté administration."),
       background: "#131330",
       color: "#fff",
       iconColor: "#ef4444",
       showCancelButton: true,
-      confirmButtonText: "Retirer définitivement",
-      cancelButtonText: "Annuler",
+      confirmButtonText: tr("Retirer définitivement"),
+      cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#333355",
       reverseButtons: true,
@@ -559,7 +558,7 @@ useEffect(() => {
           try { localStorage.setItem("coursier_missions_masques", JSON.stringify(next)); } catch {}
           return next;
         });
-        showToast("Retirée définitivement de vos missions");
+        showToast(tr("Retirée définitivement de vos missions"));
       }
     });
   };
@@ -575,17 +574,14 @@ useEffect(() => {
   const demanderRetraitMessageCoursier = (id) => {
     Swal.fire({
       icon: "warning",
-      title: "Retirer cette conversation",
-      html: `Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/>
-        <span style="color:#ef4444;font-weight:700;">Cette action est définitive</span> :
-        elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/>
-        Elle restera toutefois visible et suivie normalement côté administration.`,
+      title: tr("Retirer cette conversation"),
+      html: tr("Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">{tr(\"Cette action est définitive\")}</span>{\" \"}{tr(\": elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.\")}<br/> Elle restera toutefois visible et suivie normalement côté administration."),
       background: "#131330",
       color: "#fff",
       iconColor: "#ef4444",
       showCancelButton: true,
-      confirmButtonText: "Retirer définitivement",
-      cancelButtonText: "Annuler",
+      confirmButtonText: tr("Retirer définitivement"),
+      cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#333355",
       reverseButtons: true,
@@ -597,7 +593,7 @@ useEffect(() => {
           try { localStorage.setItem("coursier_messages_masques", JSON.stringify(next)); } catch {}
           return next;
         });
-        showToast("Conversation retirée définitivement");
+        showToast(tr("Conversation retirée définitivement"));
       }
     });
   };
@@ -616,8 +612,8 @@ const prendreMission = async (pub) => {
       setPublications(prev => prev.filter(p => p.id !== pub.id));
       setNotifs(prev => [{
         id: Date.now(),
-        texte: `Vous avez pris la mission : ${pub.service} — En négociation`,
-        lu: false, time: "À l'instant",
+        texte: tr("Vous avez pris la mission : {{service}} — En négociation", { service: pub.service }),
+        lu: false, time: tr("À l'instant"),
       }, ...prev]);
       showToast(`Mission "${pub.service}" prise !`);
       setOnglet("mes_missions");
@@ -625,7 +621,7 @@ const prendreMission = async (pub) => {
       showToast(data.message || "Erreur", "error");
     }
   } catch {
-    showToast("Erreur de connexion", "error");
+    showToast(tr("Erreur de connexion"), "error");
   }
 };
 
@@ -692,11 +688,11 @@ const envoyerMessage = async () => {
       ));
     } else {
       setMessages(prev => prev.filter(m => m.id !== msgTemp.id));
-      showToast(data.message || "Erreur envoi", "error");
+      showToast(data.message || tr("Erreur envoi"), "error");
     }
   } catch {
     setMessages(prev => prev.filter(m => m.id !== msgTemp.id));
-    showToast("Erreur de connexion", "error");
+    showToast(tr("Erreur de connexion"), "error");
   }
 };
 
@@ -730,8 +726,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       }));
       showToast(
         nouveauStatut === "accepte"
-          ? "✅ Accord accepté — client notifié !"
-          : "❌ Mission refusée — client notifié",
+          ? tr("✅ Accord accepté — client notifié !") : tr("❌ Mission refusée — client notifié"),
         nouveauStatut === "accepte" ? "success" : "error"
       );
     } else {
@@ -739,7 +734,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       showToast(data.message || "Erreur", "error");
     }
   } catch {
-    showToast("Erreur de connexion", "error");
+    showToast(tr("Erreur de connexion"), "error");
   }
 };
   const card = { backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24, transition: "all 0.3s ease" };
@@ -752,12 +747,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       border: `1px solid ${couleur}22`, overflow: "hidden" }}>
       <div style={{ padding: "10px 14px", borderBottom: `1px solid ${couleur}18`,
         color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-        <MdBadge style={{ color: couleur }}/> {label}
+        <MdBadge style={{ color: couleur }}/> {tr(label)}
       </div>
       {chemin ? (
         <img
           src={`${BASE_URL}/storage/${chemin}`}
-          alt={label}
+          alt={tr(label)}
           style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}
           onError={e => {
             // ✅ Si l'image ne charge pas, affiche un message d'erreur
@@ -773,7 +768,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
         flexDirection: "column", gap: 8, color: "#555",
       }}>
         <MdBadge style={{ fontSize: 40 }}/>
-        <span style={{ fontSize: 12 }}>Non fourni</span>
+        <span style={{ fontSize: 12 }}>{tr("Non fourni")}</span>
       </div>
     </div>
   );
@@ -809,10 +804,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src={logo} alt="IRAKY" style={{ width: 60, height: 60, borderRadius: "50%" }}/>
-          <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">
-            IRAKY Delivery
-          </span>
+          <img src={logo} alt={tr("IRAKY")} style={{ width: 60, height: 60, borderRadius: "50%" }}/>
+          <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -857,17 +850,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0 }}>
                           <span style={{ color:"#FFD700", fontWeight:700, fontSize:14,
                             display:"flex", alignItems:"center", gap:6 }}>
-                            <MdNotifications style={{ fontSize:18 }}/> Notifications
-                          </span>
+                            <MdNotifications style={{ fontSize:18 }}/>{" "}{tr("Notifications")}</span>
                           <span style={{ color:"#666", fontSize:12 }}>{nbNonLus} non lues</span>
                         </div>
 
                         {/* Liste */}
                         <div style={{ overflowY:"auto", flex:1 }}>
                           {notifs.length === 0 && (
-                            <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>
-                              Aucune notification
-                            </div>
+                            <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>{tr("Aucune notification")}</div>
                           )}
                           {notifs.map(n => (
                             <div key={n.id} style={{
@@ -913,8 +903,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                     style={{ background:"#3b82f618", border:"1px solid #3b82f633",
                                       color:"#3b82f6", borderRadius:8, padding:"4px 10px",
                                       cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
-                                    <MdChat style={{ fontSize:14 }}/> Répondre
-                                  </button>
+                                    <MdChat style={{ fontSize:14 }}/>{" "}{tr("Répondre")}</button>
                                 )}
                                 
                                 <button
@@ -929,8 +918,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                   style={{ background:"#ef444415", border:"1px solid #ef444430",
                                     color:"#ef6666", borderRadius:8, padding:"4px 10px",
                                     cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
-                                  <MdClose style={{ fontSize:14 }}/> Supprimer
-                                </button>
+                                  <MdClose style={{ fontSize:14 }}/>{" "}{tr("Supprimer")}</button>
                               </div>
                             </div>
                           ))}
@@ -950,8 +938,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             }}
                             style={{ color:"#FFD700", fontSize:12, cursor:"pointer",
                               display:"inline-flex", alignItems:"center", gap:6 }}>
-                            <MdDoneAll style={{ fontSize:16 }}/> Tout marquer comme lu
-                          </span>
+                            <MdDoneAll style={{ fontSize:16 }}/>{" "}{tr("Tout marquer comme lu")}</span>
                         </div>
                       </div>
                     </>
@@ -989,10 +976,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {onglet === "accueil" && (
               <div>
                 <div style={{ marginBottom: 28 }}>
-                  <h3 style={{ color: "#fff", fontWeight: 800, margin: 0, fontSize: 22 }}>
-                    Bonjour, <span style={{ color: "#FFD700" }}>{profil.prenom}</span> 👋
+                  <h3 style={{ color: "#fff", fontWeight: 800, margin: 0, fontSize: 22 }}>{tr("Bonjour,")}{" "}<span style={{ color: "#FFD700" }}>{profil.prenom}</span> 👋
                   </h3>
-                  <p style={{ color: "#666", marginTop: 4, fontSize: 14 }}>Bienvenue sur votre espace coursier IRAKY</p>
+                  <p style={{ color: "#666", marginTop: 4, fontSize: 14 }}>{tr("Bienvenue sur votre espace coursier IRAKY")}</p>
                 </div>
 
                 <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
@@ -1016,7 +1002,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       </div>
                       <div>
                         <div style={{ color: "#fff", fontWeight: 800, fontSize: 24, lineHeight: 1 }}>{s.val}</div>
-                        <div style={{ color: "#888", fontWeight: 600, fontSize: 11, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
+                        <div style={{ color: "#888", fontWeight: 600, fontSize: 11, letterSpacing: 1.5, marginTop: 4 }}>{tr(s.label)}</div>
                       </div>
                     </div>
                   ))}
@@ -1028,25 +1014,22 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
                     </div>
-                    <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Ma réputation</span>
+                    <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>{tr("Ma réputation")}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                     <EtoilesAvecTrophees trophees={profil.trophees} etoilesActuelles={profil.etoiles_actuelles} />
                     <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
-                    <span style={{ color: "#888", fontSize: 13 }}>basé sur {profil.nb_terminees} missions terminées</span>
+                    <span style={{ color: "#888", fontSize: 13 }}>{tr("basé sur {{nb}} missions terminées", { nb: profil.nb_terminees })}</span>
                   </div>
                 </div>
 
                 <div style={card}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
                     <h5 style={{ color: "#FFD700", margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
-                      <MdCampaign style={{ fontSize: 20 }}/> Missions disponibles
-                    </h5>
+                      <MdCampaign style={{ fontSize: 20 }}/>{" "}{tr("Missions disponibles")}</h5>
                     <button onClick={() => setOnglet("missions")}
                       style={{ background: "transparent", border: "1px solid #FFD70030", color: "#FFD700",
-                        borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 12 }}>
-                      Voir tout
-                    </button>
+                        borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 12 }}>{tr("Voir tout")}</button>
                   </div>
                   {publications.slice(0, 3).map(pub => (
                     <div key={pub.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -1058,13 +1041,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ color: "#FFD700", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
                         <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "6px 14px", fontSize: 12 }}>
-                          <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/> Je prends
-                        </button>
+                          <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/>{" "}{tr("Je prends")}</button>
                       </div>
                     </div>
                   ))}
                   {publications.length === 0 && (
-                    <p style={{ color: "#555", textAlign: "center", padding: "20px 0" }}>Aucune mission disponible</p>
+                    <p style={{ color: "#555", textAlign: "center", padding: "20px 0" }}>{tr("Aucune mission disponible")}</p>
                   )}
                 </div>
               </div>
@@ -1078,17 +1060,15 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
                     border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <MdCampaign style={{ color: "#FFD700", fontSize: 22 }}/>
-                  </div>
-                  Missions disponibles
-                </h4>
+                  </div>{tr("Missions disponibles")}</h4>
                 <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>
-                  {publications.length} mission(s) en attente de coursier
+                  {tr("{{nb}} mission(s) en attente de coursier", { nb: publications.length })}
                 </p>
 
                 {publications.length === 0 && (
                   <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
                     <MdDeliveryDining style={{ fontSize: 56, color: "#333", marginBottom: 12 }}/>
-                    <p>Aucune mission disponible pour l'instant.</p>
+                    <p>{tr("Aucune mission disponible pour l'instant.")}</p>
                   </div>
                 )}
 
@@ -1114,14 +1094,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     </div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                       <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "10px 22px", fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
-                        <MdThumbUp style={{ fontSize: 18 }}/> Je prends cette mission
-                      </button>
+                        <MdThumbUp style={{ fontSize: 18 }}/>{" "}{tr("Je prends cette mission")}</button>
                       <button onClick={() => setDetailModal(pub)}
                         style={{ background: "transparent", border: "1px solid #FFD70033", color: "#FFD700",
                           borderRadius: 25, padding: "10px 22px", cursor: "pointer", fontWeight: 700, fontSize: 14,
                           display: "flex", alignItems: "center", gap: 8 }}>
-                        <MdListAlt style={{ fontSize: 18 }}/> Détails
-                      </button>
+                        <MdListAlt style={{ fontSize: 18 }}/>{" "}{tr("Détails")}</button>
                     </div>
                   </div>
                 ))}
@@ -1136,18 +1114,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#3b82f618",
                     border: "1px solid #3b82f633", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <MdWork style={{ color: "#3b82f6", fontSize: 22 }}/>
-                  </div>
-                  Mes missions
-                </h4>
-                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>{missions.filter(m=>!missionsMasques.includes(m.id)).length} mission(s) assignée(s)</p>
+                  </div>{tr("Mes missions")}</h4>
+                <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>{tr("{{nb}} mission(s) assignée(s)", { nb: missions.filter(m=>!missionsMasques.includes(m.id)).length })}</p>
 
                 {missions.filter(m=>!missionsMasques.includes(m.id)).length === 0 && (
                   <div style={{ ...card, textAlign: "center", color: "#666", padding: 48 }}>
                     <MdWork style={{ fontSize: 56, color: "#333", marginBottom: 12 }}/>
-                    <p>Vous n'avez pas encore pris de mission.</p>
-                    <button onClick={() => setOnglet("missions")} style={{ ...btnY, marginTop: 16, fontSize: 13 }}>
-                      Voir les missions disponibles
-                    </button>
+                    <p>{tr("Vous n'avez pas encore pris de mission.")}</p>
+                    <button onClick={() => setOnglet("missions")} style={{ ...btnY, marginTop: 16, fontSize: 13 }}>{tr("Voir les missions disponibles")}</button>
                   </div>
                 )}
 
@@ -1161,7 +1135,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{mission.service}</div>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                              <MdPerson style={{ color: "#FFD700" }}/> Client : <strong style={{ color: "#FFD700" }}>{mission.client}</strong>
+                              <MdPerson style={{ color: "#FFD700" }}/>{" "}{tr("Client :")}{" "}<strong style={{ color: "#FFD700" }}>{mission.client}</strong>
                             </span>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
                               <MdAttachMoney style={{ color: "#10b981" }}/> {mission.tarif.toLocaleString()} Ar
@@ -1175,7 +1149,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           <StatutBadge statut={mission.statut}/>
                           <button
                             onClick={()=>demanderRetraitMission(mission.id)}
-                            title="Retirer de mes missions (reste visible côté admin)"
+                            title={tr("Retirer de mes missions (reste visible côté admin)")}
                             style={{ background:"#ef444415", border:"1px solid #ef444430",
                               color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
                               display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -1209,7 +1183,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         })}
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-                        {["En attente","Négociation","Accepté","Terminé"].map((l, i) => (
+                        {[tr("En attente"), tr("Négociation"), tr("Accepté"), tr("Terminé")].map((l, i) => (
                           <span key={l} style={{ fontSize: 10, color: i <= idx ? "#FFD700" : "#444",
                             flex: 1, textAlign: i === 0 ? "left" : i === 3 ? "right" : "center",
                             fontWeight: i <= idx ? 600 : 400 }}>{l}</span>
@@ -1222,18 +1196,16 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             color: "#3b82f6", borderRadius: 12, padding: "8px 18px",
                             cursor: "pointer", fontWeight: 700, fontSize: 13,
                             display: "flex", alignItems: "center", gap: 6 }}>
-                          <MdChat style={{ fontSize: 16 }}/> Message client
-                        </button>
+                          <MdChat style={{ fontSize: 16 }}/>{" "}{tr("Message client")}</button>
                       </div>
 
                       {mission.statut === "termine" && (
                         <div style={{ marginTop: 14, padding: 14, backgroundColor: "#FFD70011",
                           borderRadius: 12, border: "1px solid #FFD70025" }}>
                           <div style={{ color: "#FFD700", fontWeight: 700, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                            <MdStar style={{ fontSize: 18 }}/> Évaluation reçue du client
-                          </div>
+                            <MdStar style={{ fontSize: 18 }}/>{" "}{tr("Évaluation reçue du client")}</div>
                           <Etoiles value={mission.note || 0}/>
-                          {!mission.note && <small style={{ color: "#888", fontSize: 12 }}>En attente d'évaluation...</small>}
+                          {!mission.note && <small style={{ color: "#888", fontSize: 12 }}>{tr("En attente d'évaluation...")}</small>}
                         </div>
                       )}
                     </div>
@@ -1249,17 +1221,13 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#3b82f618",
                       border:"1px solid #3b82f633", display:"flex", alignItems:"center", justifyContent:"center" }}>
                       <MdChat style={{ color:"#3b82f6", fontSize:22 }}/>
-                    </div>
-                    Mes messages
-                  </h4>
-                  <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>
-                    Vos conversations avec les clients
-                  </p>
+                    </div>{tr("Mes messages")}</h4>
+                  <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>{tr("Vos conversations avec les clients")}</p>
 
                   {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
                     <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
                       <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
-                      <p>Aucune conversation active.</p>
+                      <p>{tr("Aucune conversation active.")}</p>
                     </div>
                   ) : (
                     missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(mission => (
@@ -1287,7 +1255,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <StatutBadge statut={mission.statut}/>
                             <button
                               onClick={e=>{ e.stopPropagation(); demanderRetraitMessageCoursier(mission.id); }}
-                              title="Retirer de mes messages (reste visible côté admin)"
+                              title={tr("Retirer de mes messages (reste visible côté admin)")}
                               style={{ background:"#ef444415", border:"1px solid #ef444430",
                                 color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
                                 display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -1296,8 +1264,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
                               color:"#3b82f6", borderRadius:10, padding:"7px 16px",
                               fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
-                              <MdChat style={{ fontSize:16 }}/> Ouvrir
-                            </div>
+                              <MdChat style={{ fontSize:16 }}/>{" "}{tr("Ouvrir")}</div>
                           </div>
                         </div>
                       </div>
@@ -1339,14 +1306,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       {/* Accord coursier */}
                       <div style={{ padding:"10px 14px", backgroundColor:"#0a0a1e",
                         borderBottom:"1px solid #FFD70018" }}>
-                        <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>
-                          Accord de service :
-                        </div>
+                        <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>{tr("Accord de service :")}</div>
                         <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                           <button
                             onClick={async () => {
                               if (!chatModal.accord_client) {
-                                showToast("🔒 Le client doit accepter en premier", "error");
+                                showToast(tr("🔒 Le client doit accepter en premier"), "error");
                                 return;
                               }
                               const token = localStorage.getItem("token");
@@ -1360,7 +1325,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 setMissions(prev => prev.map(m =>
                                   m.id === chatModal.id ? {...m, statut:"accepte", accord_coursier:true} : m
                                 ));
-                                showToast("✅ Accord validé — statut : Accepté !");
+                                showToast(tr("✅ Accord validé — statut : Accepté !"));
                               } else {
                                 showToast(data.message || "Erreur", "error");
                               }
@@ -1375,8 +1340,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               color: chatModal.accord_coursier ? "#fff"
                                 : !chatModal.accord_client ? "#555" : "#10b981",
                             }}>
-                            {chatModal.accord_coursier ? "✅ Accepté"
-                              : !chatModal.accord_client ? "🔒 Attendre client" : "✅ Accepter"}
+                            {chatModal.accord_coursier ? tr("✅ Accepté") : !chatModal.accord_client ? tr("🔒 Attendre client") : tr("✅ Accepter")}
                           </button>
                           <button
                             onClick={async () => {
@@ -1389,14 +1353,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 setMissions(prev => prev.filter(m => m.id !== chatModal.id));
                                 setChatModal(null);
                                 setMessages([]);
-                                showToast("❌ Mission refusée — remise en attente", "error");
+                                showToast(tr("❌ Mission refusée — remise en attente"), "error");
                               }
                             }}
                             style={{ padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12,
                               border:"none", cursor:"pointer",
-                              backgroundColor:"#ef444422", color:"#ef4444" }}>
-                            ❌ Refuser
-                          </button>
+                              backgroundColor:"#ef444422", color:"#ef4444" }}>{tr("❌ Refuser")}</button>
                         </div>
                         <div style={{ marginTop:6, display:"flex", gap:12 }}>
                           <span style={{ fontSize:11, color: chatModal.accord_client ? "#10b981" : "#666" }}>
@@ -1430,7 +1392,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 setMessages(prev => prev.filter(m => !selectedMsgs.has(m.id)));
                                 setSelectedMsgs(new Set());
                                 setModeSelection(false);
-                                showToast("Messages supprimés");
+                                showToast(tr("Messages supprimés"));
                               }}
                               style={{ background:"#ef444420", border:"1px solid #ef444430",
                                 color:"#ef6666", borderRadius:8, padding:"4px 12px",
@@ -1448,7 +1410,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               color: modeSelection ? "#FFD700" : "#666",
                               borderRadius:8, padding:"4px 10px",
                               cursor:"pointer", fontSize:11 }}>
-                            {modeSelection ? "✕ Annuler" : "☑ Sélectionner"}
+                            {modeSelection ? tr("✕ Annuler") : tr("☑ Sélectionner")}
                           </button>
                         </div>
                       </div>
@@ -1457,9 +1419,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <div style={{ height:240, overflowY:"auto", padding:14,
                         display:"flex", flexDirection:"column", gap:10 }}>
                         {messages.length === 0 && (
-                          <div style={{ color:"#555", textAlign:"center", fontSize:13, marginTop:40 }}>
-                            Commencez la conversation
-                          </div>
+                          <div style={{ color:"#555", textAlign:"center", fontSize:13, marginTop:40 }}>{tr("Commencez la conversation")}</div>
                         )}
                         {messages.map((m, i) => {
                           const isCoursier = m.sender_role === "coursier"
@@ -1522,7 +1482,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 <div style={{ color:"#666", fontSize:10, marginTop:3,
                                   textAlign:"right", display:"flex", gap:6,
                                   justifyContent:"flex-end", alignItems:"center" }}>
-                                  {m.modifie && <span style={{ color:"#888" }}>modifié ·</span>}
+                                  {m.modifie && <span style={{ color:"#888" }}>{tr("modifié ·")}</span>}
                                   {m.time || (m.created_at
                                     ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
                                     : "")}
@@ -1539,7 +1499,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         display:"flex", gap:8 }}>
                         <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
                           onKeyDown={e => e.key==="Enter" && newMsg.trim() && envoyerMessage()}
-                          placeholder="Écrire au client..."
+                          placeholder={tr("Écrire au client...")}
                           style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70030",
                             color:"#fff", borderRadius:12, padding:"9px 14px",
                             fontSize:13, outline:"none" }}
@@ -1571,9 +1531,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
                     border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <MdPerson style={{ color: "#FFD700", fontSize: 22 }}/>
-                  </div>
-                  Mon profil
-                </h4>
+                  </div>{tr("Mon profil")}</h4>
 
                 <div style={{ backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
 
@@ -1585,13 +1543,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,
                         padding: "3px 14px", fontSize: 12, border: "1px solid #FFD70033",
                         display: "flex", alignItems: "center", gap: 5 }}>
-                        <MdDeliveryDining style={{ fontSize: 14 }}/> Coursier IRAKY
-                      </span>
+                        <MdDeliveryDining style={{ fontSize: 14 }}/>{" "}{tr("Coursier IRAKY")}</span>
                       <span style={{ backgroundColor: "#10b98118", color: "#10b981", borderRadius: 20,
                         padding: "3px 14px", fontSize: 12, border: "1px solid #10b98133",
                         display: "flex", alignItems: "center", gap: 5 }}>
-                        <MdVerified style={{ fontSize: 14 }}/> Vérifié
-                      </span>
+                        <MdVerified style={{ fontSize: 14 }}/>{" "}{tr("Vérifié")}</span>
                     </div>
                     <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
                       <Etoiles value={profil.note}/>
@@ -1601,7 +1557,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   {profilLoading ? (
                     <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
                       <MdAccessTime style={{ fontSize: 40, marginBottom: 10 }}/>
-                      <p>Chargement du profil...</p>
+                      <p>{tr("Chargement du profil...")}</p>
                     </div>
                   ) : (
                     <>
@@ -1626,7 +1582,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               <Icon style={{ color, fontSize: 20 }}/>
                             </div>
                             <div>
-                              <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{label}</div>
+                              <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{tr(label)}</div>
                               <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
                             </div>
                           </div>
@@ -1641,14 +1597,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <MdBadge style={{ color: "#06b6d4", fontSize: 20 }}/>
                           </div>
                           <span style={{ color: "#06b6d4", fontWeight: 700, fontSize: 15 }}>
-                            Photos pièce d'identité (CIN)
+                            {tr("Photos pièce d'identité (CIN)")}
                           </span>
                         </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
                           {/* ✅ Seulement recto et verso — photo_identite supprimée */}
-                          <PhotoCIN chemin={profil.photo_recto} label="CIN Recto" couleur="#06b6d4" />
-                          <PhotoCIN chemin={profil.photo_verso} label="CIN Verso" couleur="#8b5cf6" />
+                          <PhotoCIN chemin={profil.photo_recto} label={tr("CIN Recto")} couleur="#06b6d4" />
+                          <PhotoCIN chemin={profil.photo_verso} label={tr("CIN Verso")} couleur="#8b5cf6" />
                         </div>
                       </div>
 
@@ -1660,7 +1616,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
                           </div>
-                          <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>Mes statistiques</span>
+                          <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>{tr("Mes statistiques")}</span>
                         </div>
                         <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
                           {[
@@ -1681,7 +1637,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               </div>
                               <div>
                                 <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
-                                <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{s.label}</div>
+                                <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{tr(s.label)}</div>
                               </div>
                             </div>
                           ))}
@@ -1701,10 +1657,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#10b98118",
                     border: "1px solid #10b98133", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <MdHelp style={{ color: "#10b981", fontSize: 22 }}/>
-                  </div>
-                  Aide & Support
-                </h4>
-                <p style={{ color: "#666", marginBottom: 28, fontSize: 14 }}>Comment pouvons-nous vous aider ?</p>
+                  </div>{tr("Aide & Support")}</h4>
+                <p style={{ color: "#666", marginBottom: 28, fontSize: 14 }}>{tr("Comment pouvons-nous vous aider ?")}</p>
 
                 {aideVue === "menu" && (<>
                 <div className="aide-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 28 }}>
@@ -1732,8 +1686,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         justifyContent: "center", marginBottom: 16 }}>
                         <item.Icon style={{ color: item.color, fontSize: 26 }}/>
                       </div>
-                      <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{item.title}</div>
-                      <div style={{ color: "#888", fontSize: 12, lineHeight: 1.5, marginBottom: 14 }}>{item.desc}</div>
+                      <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{tr(item.title)}</div>
+                      <div style={{ color: "#888", fontSize: 12, lineHeight: 1.5, marginBottom: 14 }}>{tr(item.desc)}</div>
                       <div style={{ color: item.color, fontSize: 12, fontWeight: 700 }}>{item.action}</div>
                       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
                         background: `linear-gradient(90deg,${item.color},transparent)` }}/>
@@ -1745,8 +1699,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                 <div style={{ ...card }}>
                   <div style={{ color:"#FFD700", fontWeight:700, marginBottom:16, fontSize:15,
                     display:"flex", alignItems:"center", gap:8 }}>
-                    <MdMenuBook style={{ fontSize:20 }}/> Questions fréquentes
-                  </div>
+                    <MdMenuBook style={{ fontSize:20 }}/>{" "}{tr("Questions fréquentes")}</div>
                   {[
                     ["Comment prendre une mission ?", "Allez dans « Missions disponibles », consultez le détail d'une offre puis cliquez sur « Je prends cette mission »."],
                     ["Comment sont calculés mes gains ?", "Le tarif affiché sur chaque mission (selon le moyen : Piéton 5000 Ar, Vélo 6000 Ar, Moto 8000 Ar, Voiture 12000 Ar) vous revient intégralement."],
@@ -1757,10 +1710,10 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       borderRadius:12, border:"1px solid #FFD70015", padding:"14px 18px" }}>
                       <summary style={{ color:"#fff", fontWeight:600, cursor:"pointer", fontSize:14,
                         listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                        {q}
+                        {tr(q)}
                         <MdKeyboardArrowDown className="faq-chevron" style={{ color:"#FFD700", fontSize:24, flexShrink:0 }}/>
                       </summary>
-                      <p style={{ color:"#888", fontSize:13, marginTop:10, lineHeight:1.6, marginBottom:0 }}>{a}</p>
+                      <p style={{ color:"#888", fontSize:13, marginTop:10, lineHeight:1.6, marginBottom:0 }}>{tr(a)}</p>
                     </details>
                   ))}
                 </div>
@@ -1790,10 +1743,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <MdSupportAgent style={{ color:"#fff", fontSize:20 }}/>
                       </div>
                       <div style={{ flex:1 }}>
-                        <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>Support IRAKY Delivery</div>
+                        <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>{tr("Support IRAKY Delivery")}</div>
                         <div style={{ color:"#3b82f6", fontSize:11, display:"flex", alignItems:"center", gap:5 }}>
-                          <span className="aide-dot-online"/> En ligne · répond sous 5 min
-                        </div>
+                          <span className="aide-dot-online"/>{" "}{tr("En ligne · répond sous 5 min")}</div>
                       </div>
                     </div>
 
@@ -1804,14 +1756,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           flexDirection:"column", alignItems:"center", gap:10 }}>
                           <div style={{ width:22, height:22, border:"3px solid #3b82f640",
                             borderTop:"3px solid #3b82f6", borderRadius:"50%",
-                            animation:"spin 0.7s linear infinite" }}/>
-                          Chargement de la conversation...
-                        </div>
+                            animation:"spin 0.7s linear infinite" }}/>{tr("Chargement de la conversation...")}</div>
                       )}
                       {!supportLoading && supportMessages.length === 0 && (
                         <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
                           <MdSupportAgent style={{ fontSize:40, color:"#3b82f660", marginBottom:8 }}/>
-                          <p style={{ fontSize:13 }}>Bonjour {profil.prenom} 👋<br/>Posez-nous votre question, notre équipe vous répond ici.</p>
+                          <p style={{ fontSize:13 }}>Bonjour {profil.prenom} 👋<br/>{tr("Posez-nous votre question, notre équipe vous répond ici.")}</p>
                         </div>
                       )}
                       {supportMessages.map((m, i) => {
@@ -1836,14 +1786,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               padding:"9px 14px", maxWidth:"75%", opacity: m.envoi ? 0.6 : 1 }}>
                               {estBot && (
                                 <div style={{ color:"#3b82f6", fontSize:10, fontWeight:700,
-                                  marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>
-                                  🤖 Assistant automatique
-                                </div>
+                                  marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>{tr("🤖 Assistant automatique")}</div>
                               )}
                               <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
                               <div style={{ color: m.echec ? "#ef6666" : "#666", fontSize:10, marginTop:3,
                                 textAlign:"right" }}>
-                                {m.echec ? "Échec de l'envoi" : (m.time || (m.created_at
+                                {m.echec ? tr("Échec de l'envoi") : (m.time || (m.created_at
                                   ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
                                   : "..."))}
                               </div>
@@ -1875,7 +1823,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       display:"flex", gap:10 }}>
                       <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
                         onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
-                        placeholder="Écrivez votre message au support..."
+                        placeholder={tr("Écrivez votre message au support...")}
                         style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #3b82f640",
                           color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
                           transition:"border-color 0.2s" }}
@@ -1912,16 +1860,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         borderRadius:10, padding:"8px 16px", cursor:"pointer",
                         color:"#fff", display:"flex", alignItems:"center", gap:8,
                         fontSize:12, marginBottom:18 }}>
-                      <MdArrowBack style={{ fontSize:16 }}/> Retour
-                    </button>
+                      <MdArrowBack style={{ fontSize:16 }}/>{" "}{tr("Retour")}</button>
 
                     <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,#131330)",
                       border:"1px solid #f59e0b30", display:"flex", alignItems:"center", gap:14 }}>
                       <MdInfo style={{ color:"#f59e0b", fontSize:28, flexShrink:0 }}/>
-                      <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>
-                        Ce guide couvre toutes les fonctionnalités de votre espace coursier IRAKY Delivery.
-                        Cliquez sur une section pour dérouler les explications.
-                      </div>
+                      <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>{tr("Ce guide couvre toutes les fonctionnalités de votre espace coursier IRAKY Delivery. Cliquez sur une section pour dérouler les explications.")}</div>
                     </div>
 
                     {GUIDE_SECTIONS_COURSIER.map((s, i) => {
@@ -1942,7 +1886,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               <s.Icon style={{ color:s.color, fontSize:20 }}/>
                             </div>
                             <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
-                              {s.titre}
+                              {tr(s.titre)}
                             </div>
                             {ouvert ? <MdKeyboardArrowUp style={{ color:s.color, fontSize:24 }}/> : <MdKeyboardArrowDown style={{ color:"#666", fontSize:24 }}/>}
                           </div>
@@ -1954,7 +1898,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <div style={{ padding:"0 18px 18px 74px", color:"#999",
                               fontSize:13, lineHeight:1.7, display:"flex", gap:8 }}>
                               <MdCheckCircle style={{ color:s.color, fontSize:15, flexShrink:0, marginTop:2 }}/>
-                              <span>{s.texte}</span>
+                              <span>{tr(s.texte)}</span>
                             </div>
                           </div>
                         </div>
@@ -1995,13 +1939,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           </div>
           <div style={{ marginTop: 14, padding: "12px 16px", backgroundColor: "#0a0a1e",
             borderRadius: 12, border: "1px solid #FFD70018" }}>
-            <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>Description</div>
+            <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>{tr("Description")}</div>
             <div style={{ color: "#fff", fontSize: 13, lineHeight: 1.6 }}>{detailModal.detail}</div>
           </div>
           <button onClick={() => { prendreMission(detailModal); setDetailModal(null); }}
             style={{ ...btnY, width: "100%", marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <MdThumbUp style={{ fontSize: 18 }}/> Je prends cette mission
-          </button>
+            <MdThumbUp style={{ fontSize: 18 }}/>{" "}{tr("Je prends cette mission")}</button>
         </Modal>
       )}
 
