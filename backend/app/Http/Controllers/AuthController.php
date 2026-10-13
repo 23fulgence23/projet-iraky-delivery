@@ -124,6 +124,7 @@ public function login(Request $request)
     }
 
     $user = JWTAuth::user();
+    if ($user) { \App\Models\User::suspendreAbonnementsExpires(); $user->refresh(); }
 
     // ✅ Bloquer la connexion si coursier inactif (en attente de vérification)
     if ($user->role === 'coursier' && $user->statut === 'inactif') {
@@ -178,6 +179,7 @@ public function login(Request $request)
     {
         try {
             $user = JWTAuth::user();
+    if ($user) { \App\Models\User::suspendreAbonnementsExpires(); $user->refresh(); }
 
             if (!$user) {
                 return response()->json(['message' => 'Utilisateur non trouvé'], 404);

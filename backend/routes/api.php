@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
@@ -20,6 +21,17 @@ Route::middleware('auth:api')->group(function () {
     Route::get ('/me',     [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/profil/photo', [AuthController::class, 'updatePhotoProfil']);
+
+    // ── Abonnement coursier ──
+    Route::get ('/abonnement',           [AbonnementController::class, 'etat']);
+    Route::post('/abonnement/paiements', [AbonnementController::class, 'soumettre']);
+    Route::prefix('admin/abonnements')->group(function () {
+        Route::get ('/paiements',                [AbonnementController::class, 'liste']);
+        Route::post('/paiements/{id}/valider',   [AbonnementController::class, 'valider']);
+        Route::post('/paiements/{id}/rejeter',   [AbonnementController::class, 'rejeter']);
+        Route::post('/coursiers/{id}/reactiver', [AbonnementController::class, 'reactiver']);
+        Route::post('/coursiers/{id}/echeance',  [AbonnementController::class, 'echeance']);
+    });
 
     // ── ADMIN — toutes les routes admin sont ICI dans le groupe ──
     Route::prefix('admin')->group(function () {
@@ -86,11 +98,11 @@ Route::middleware('auth:api')->group(function () {
     // ── Commandes (client/coursier) ──────────────
     Route::post('/commandes',                          [CommandeController::class, 'store']);
     Route::get ('/commandes/mes-commandes',            [CommandeController::class, 'mesCommandes']);
-    Route::get ('/commandes/disponibles',              [CommandeController::class, 'disponibles']);
+    Route::get ('/commandes/disponibles',              [CommandeController::class, 'disponibles'])->middleware(\App\Http\Middleware\AbonnementActif::class);
     Route::get ('/commandes/mes-missions',             [CommandeController::class, 'mesMissions']);
-    Route::post  ('/commandes/{id}/prendre',           [CommandeController::class, 'prendre']);
+    Route::post  ('/commandes/{id}/prendre',           [CommandeController::class, 'prendre'])->middleware(\App\Http\Middleware\AbonnementActif::class);
     Route::post  ('/commandes/{id}/accepter-client',   [CommandeController::class, 'accepterParClient']);
-    Route::post  ('/commandes/{id}/accepter-coursier', [CommandeController::class, 'accepterParCoursier']);
+    Route::post  ('/commandes/{id}/accepter-coursier', [CommandeController::class, 'accepterParCoursier'])->middleware(\App\Http\Middleware\AbonnementActif::class);
     Route::post  ('/commandes/{id}/refuser',           [CommandeController::class, 'refuser']);
     Route::post  ('/commandes/{id}/terminer',          [CommandeController::class, 'terminer']);
     Route::delete('/commandes/{id}',                   [CommandeController::class, 'destroy']);

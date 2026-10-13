@@ -25,6 +25,7 @@ class AdminController extends Controller
     // ── Stats globales dashboard ───────────────────
 public function stats()
 {
+        \App\Models\User::suspendreAbonnementsExpires();
     $this->checkAdmin();
 
     $clientsActifs     = User::where('role', 'client')->where('statut', 'actif')->count();
@@ -47,7 +48,7 @@ public function stats()
     $revenus        = Commande::where('statut', 'termine')->sum('tarif');
 
     $abonnesPayes   = $coursiersActifs;
-    $abonnesImpayes = $coursiersInactifs + $coursiersEnAttente;
+    $abonnesImpayes = $coursiersInactifs + $coursiersEnAttente + \App\Models\User::where('role', 'coursier')->where('statut', 'suspendu')->count();
 
     return response()->json([
         'clients_actifs'       => (int) $clientsActifs,
@@ -142,6 +143,7 @@ public function commandesMensuelles()
     // ── Liste coursiers ────────────────────────────
     public function coursiers()
     {
+        \App\Models\User::suspendreAbonnementsExpires();
         $this->checkAdmin();
         $coursiers = User::where('role','coursier')
             ->orderByDesc('created_at')
@@ -170,7 +172,12 @@ public function commandesMensuelles()
     {
         $this->checkAdmin();
         $user = User::findOrFail($id);
-        $user->statut = $user->statut === 'actif' ? 'inactif' : 'actif';
+        $nouveau = $user->statut === 'actif' ? 'inactif' : 'actif';
+        if ($nouveau === 'actif' && $user->role === 'coursier' && $user->abonnement_expire
+            && \Illuminate\Support\Carbon::parse($user->abonnement_expire)->isPast()) {
+            return response()->json(['message' => "Abonnement échu : validez d'abord un paiement d'abonnement."], 422);
+        }
+        $user->statut = $nouveau;
         $user->save();
         return response()->json(['message' => 'Statut mis à jour', 'statut' => $user->statut]);
     }
@@ -261,6 +268,7 @@ public function validerCoursier($id)
     }
 
     $coursier->statut = 'actif';
+    if (!$coursier->abonnement_expire) { $coursier->abonnement_expire = now()->addMonth(); }
     $coursier->save();
 
     // ✅ Notifier le coursier qu'il peut se connecter

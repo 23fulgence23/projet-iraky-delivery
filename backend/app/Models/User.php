@@ -42,4 +42,38 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    // ── Abonnement coursier : suspension automatique a l'echeance ──
+    public static function suspendreAbonnementsExpires(): int
+    {
+        $expires = static::where('role', 'coursier')
+            ->where('statut', 'actif')
+            ->whereNotNull('abonnement_expire')
+            ->where('abonnement_expire', '<', now())
+            ->get();
+
+        $nb = 0;
+        foreach ($expires as $c) {
+            $modifie = static::where('id', $c->id)->where('statut', 'actif')->update(['statut' => 'suspendu']);
+            if (!$modifie) { continue; }
+            $nb++;
+
+            \App\Models\Notification::create([
+                'user_id'     => $c->id,
+                'texte'       => "⚠️ Vous n'avez pas encore payé votre abonnement : votre compte est suspendu. Envoyez le paiement et soumettez la référence pour le réactiver.",
+                'type'        => 'info',
+                'commande_id' => null,
+            ]);
+
+            foreach (static::where('role', 'admin')->get() as $admin) {
+                \App\Models\Notification::create([
+                    'user_id'     => $admin->id,
+                    'texte'       => "⚠️ Abonnement échu : {$c->prenom} {$c->nom} a été suspendu automatiquement.",
+                    'type'        => 'info',
+                    'commande_id' => null,
+                ]);
+            }
+        }
+        return $nb;
+    }
 }
