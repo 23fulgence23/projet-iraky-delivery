@@ -2205,8 +2205,8 @@ function DashboardAdmin() {
                 <div style={{ ...card,marginTop:20 }}>
                   <div style={{ color:"#FFD700",fontWeight:700,marginBottom:16,fontSize:15 }}>{tr("Compte administrateur")}</div>
                   <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14 }}>
-                    {[["Email admin","admin@iraky.mg"],["Rôle","Super Administrateur"],
-                      ["Accès","Compte unique sécurisé"],["Plateforme","IRAKY Delivery Toliara"]].map(([k,v])=>(
+                    {[["Email admin","admin@iraky.mg"],["Rôle",tr("Super Administrateur")],
+                      ["Accès",tr("Compte unique sécurisé")],["Plateforme",tr("IRAKY Delivery Toliara")]].map(([k,v])=>(
                       <div key={k} style={{ backgroundColor:"#080820",borderRadius:12,padding:"14px 18px",border:"1px solid #FFD70018" }}>
                         <div style={{ color:"#555",fontSize:11,marginBottom:4 }}>{tr(k)}</div>
                         <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{v}</div>
