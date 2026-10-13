@@ -2208,7 +2208,7 @@ function DashboardAdmin() {
                     {[["Email admin","admin@iraky.mg"],["Rôle","Super Administrateur"],
                       ["Accès","Compte unique sécurisé"],["Plateforme","IRAKY Delivery Toliara"]].map(([k,v])=>(
                       <div key={k} style={{ backgroundColor:"#080820",borderRadius:12,padding:"14px 18px",border:"1px solid #FFD70018" }}>
-                        <div style={{ color:"#555",fontSize:11,marginBottom:4 }}>{k}</div>
+                        <div style={{ color:"#555",fontSize:11,marginBottom:4 }}>{tr(k)}</div>
                         <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{v}</div>
                       </div>
                     ))}
@@ -2527,7 +2527,7 @@ function DashboardAdmin() {
               ["Réf. MVola", coursierVerif.mvola_transaction || "—"],
             ].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 0", borderBottom: "1px solid #ffffff08" }}>
-                <div style={{ color: "#555", fontSize: 11, marginBottom: 3 }}>{k}</div>
+                <div style={{ color: "#555", fontSize: 11, marginBottom: 3 }}>{tr(k)}</div>
                 <div style={{ color: k === "Réf. MVola" ? "#FFD700" : "#fff",
                   fontWeight: k === "Réf. MVola" ? 700 : 600, fontSize: 13 }}>{v}</div>
               </div>
