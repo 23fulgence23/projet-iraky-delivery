@@ -1040,7 +1040,7 @@ function DashboardAdmin() {
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
-                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
+                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
                     </div>
                   ))}
@@ -1094,7 +1094,7 @@ function DashboardAdmin() {
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
-                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
+                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
                     </div>
                   ))}
@@ -1227,7 +1227,7 @@ function DashboardAdmin() {
                     border:"1px solid #3b82f633",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdPeople style={{ color:"#3b82f6",fontSize:22 }}/>
                   </div>
-                  Gestion des clients
+                  {tr("Gestion des clients")}
                   {/* ✅ Bouton Ajouter */}
                   <button onClick={()=>{ setClientModal("ajouter"); setClientForm({id:null,nom:"",prenom:"",email:"",telephone:"",adresse:"",password:""}); setClientErreur(""); }}
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
@@ -1235,7 +1235,7 @@ function DashboardAdmin() {
                       display:"flex",alignItems:"center",gap:6 }}>
                     <MdAdd style={{ fontSize:18 }}/>{" "}{tr("Ajouter")}</button>
                 </h4>
-                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{clients.length} client(s) enregistré(s)</p>
+                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("{{nb}} client(s) enregistré(s)", { nb: clients.length })}</p>
 
                 <div style={{ display:"flex",gap:12,marginBottom:20,flexWrap:"wrap" }}>
                   <div style={{ flex:1,position:"relative",minWidth:200 }}>
@@ -1384,7 +1384,7 @@ function DashboardAdmin() {
                     border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdDeliveryDining style={{ color:"#FFD700",fontSize:22 }}/>
                   </div>
-                  Gestion des coursiers
+                  {tr("Gestion des coursiers")}
                   {/* ✅ Bouton Ajouter */}
                   <button onClick={()=>{ setCoursierModal("ajouter"); setCoursierForm({id:null,nom:"",prenom:"",email:"",telephone:"",adresse:"",cin:"",password:""}); setCoursierErreur(""); }}
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
@@ -1392,7 +1392,7 @@ function DashboardAdmin() {
                       display:"flex",alignItems:"center",gap:6 }}>
                     <MdAdd style={{ fontSize:18 }}/>{" "}{tr("Ajouter")}</button>
                 </h4>
-                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{coursiers.length} coursier(s) enregistré(s)</p>
+                <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("{{nb}} coursier(s) enregistré(s)", { nb: coursiers.length })}</p>
 
                 {/* Barre recherche + filtre */}
                 <div style={{ display:"flex",gap:12,marginBottom:20,flexWrap:"wrap" }}>
@@ -1534,7 +1534,7 @@ function DashboardAdmin() {
                     border:"1px solid #10b98133",display:"flex",alignItems:"center",justifyContent:"center" }}>
                     <MdListAlt style={{ color:"#10b981",fontSize:22 }}/>
                   </div>
-                  Toutes les commandes
+                  {tr("Toutes les commandes")}
                   {/* ✅ Bouton Ajouter */}
                   <button onClick={()=>{ setCmdModal("ajouter"); setCmdForm({id:null,client_id:"",service:"",moyen:"",tarif:"",detail:"",adresse_pickup:"",statut:"en_attente",coursier_id:""}); setCmdErreur(""); }}
                     style={{ marginLeft:"auto",background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",
@@ -1567,7 +1567,7 @@ function DashboardAdmin() {
                       <div>
                         <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
-                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{s.sub}</div>
+                        <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
                     </div>
                   ))}
@@ -2236,7 +2236,7 @@ function DashboardAdmin() {
                           <div>
                             <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>
                               {a.prenom} {a.nom}
-                              {a.est_moi && <span style={{ color:"#10b981",fontSize:11,marginLeft:8 }}>(vous)</span>}
+                              {a.est_moi && <span style={{ color:"#10b981",fontSize:11,marginLeft:8 }}>{tr("(vous)")}</span>}
                             </div>
                             <div style={{ color:"#888",fontSize:12,marginTop:2 }}>{a.email}</div>
                             {a.telephone && <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{a.telephone}</div>}
