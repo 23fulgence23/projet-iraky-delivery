@@ -11,6 +11,7 @@ import {
   MdForum,
 } from "react-icons/md";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import PaiementsAbonnementAdmin from "../../components/PaiementsAbonnementAdmin";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
 const tr = (cle, opts) => (typeof cle === "string" ? i18n.t(cle, opts) : cle);
@@ -1668,6 +1669,7 @@ function DashboardAdmin() {
                     <MdAttachMoney style={{ color:"#8b5cf6",fontSize:22 }}/>
                   </div>{tr("Abonnements coursiers")}</h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("Gestion des abonnements mensuels — 10 000 Ar/mois")}</p>
+                <PaiementsAbonnementAdmin apiUrl={BASE_URL} />
 
                 {/* 4 box BDD */}
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:16,marginBottom:28 }}>

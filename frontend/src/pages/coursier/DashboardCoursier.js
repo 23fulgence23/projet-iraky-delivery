@@ -2,6 +2,7 @@ import { useState, useEffect, useRef  } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import AbonnementImpaye from "../../components/AbonnementImpaye";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
 import EtoilesAvecTrophees from "../../pages/etoiles/EtoilesAvecTrophees";
@@ -419,6 +420,8 @@ function DashboardCoursier() {
           photo_recto:  data.photo_recto  || null,
           photo_verso:  data.photo_verso  || null,
           photo_profil: data.photo_profil || null,
+          statut: data.statut || "actif",
+          abonnement_expire: data.abonnement_expire || null,
           note:         data.note         || 0,
           nb_missions:  data.nb_missions  || 0,
           nb_terminees: data.nb_terminees || 0,
@@ -494,6 +497,8 @@ useEffect(() => {
           trophees: d.trophees || 0,
           etoiles_actuelles: d.etoiles_actuelles || 0,
           photo_profil: d.photo_profil || null,
+          statut: d.statut || p.statut,
+          abonnement_expire: d.abonnement_expire || null,
         }));
       })
       .catch(() => {});
@@ -772,6 +777,10 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       </div>
     </div>
   );
+
+  if (profil.statut === "suspendu") {
+    return <AbonnementImpaye profil={profil} apiUrl={BASE_URL} />;
+  }
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#080820", fontFamily: "'Segoe UI', sans-serif", color: "#fff" }}>
