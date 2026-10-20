@@ -268,7 +268,7 @@ public function validerCoursier($id)
     }
 
     $coursier->statut = 'actif';
-    if (!$coursier->abonnement_expire) { $coursier->abonnement_expire = now()->addMonth(); }
+    if (!$coursier->abonnement_expire) { $coursier->abonnement_expire = \Illuminate\Support\Carbon::parse($coursier->created_at)->addDays(30)->endOfDay(); }
     $coursier->save();
 
     // ✅ Notifier le coursier qu'il peut se connecter

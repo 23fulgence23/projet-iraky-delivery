@@ -13,7 +13,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AbonnementController extends Controller
 {
     const MONTANT         = 10000;
-    const NUMERO_PAIEMENT = '+261 38 56 040 35';
+    const NUMERO_PAIEMENT = '+261 32 53 200 54';
     const BENEFICIAIRE    = 'Administrateur';
 
     private function coursier(): User
@@ -55,7 +55,8 @@ class AbonnementController extends Controller
         $dernier = AbonnementPaiement::where('user_id', $u->id)->orderByDesc('id')->first();
 
         return response()->json([
-            'statut'            => $u->statut,
+            'nom' => $u->nom, 'prenom' => $u->prenom, 'email' => $u->email,
+            'statut' => $u->statut,
             'suspendu'          => $u->statut === 'suspendu',
             'abonnement_expire' => $expire ? $expire->toIso8601String() : null,
             'jours_restants'    => $expire ? (int) now()->startOfDay()->diffInDays($expire->copy()->startOfDay(), false) : null,
@@ -84,7 +85,8 @@ class AbonnementController extends Controller
         $data = $request->validate([
             'numero_envoi' => 'required|string|max:30',
             'reference'    => 'required|string|max:60',
-            'paye_le'      => 'required|date',
+            'paye_le'      => 'nullable|date',
+            'montant'      => 'required|integer|min:10000',
         ]);
         $reference = trim($data['reference']);
 
@@ -99,14 +101,14 @@ class AbonnementController extends Controller
             'user_id'      => $u->id,
             'numero_envoi' => trim($data['numero_envoi']),
             'reference'    => $reference,
-            'paye_le'      => Carbon::parse($data['paye_le']),
-            'montant'      => self::MONTANT,
+            'paye_le'      => !empty($data['paye_le']) ? Carbon::parse($data['paye_le']) : now(),
+            'montant'      => (int) $data['montant'],
             'statut'       => 'en_attente',
         ]);
 
         foreach (User::where('role', 'admin')->get() as $admin) {
             $this->notifier($admin->id,
-                "💳 Paiement d'abonnement à valider : {$u->prenom} {$u->nom} — réf. {$reference}", 'info');
+                "💳 Paiement à valider : {$u->prenom} {$u->nom} — {$data['montant']} Ar — réf. {$reference} — depuis {$data['numero_envoi']}", 'info');
         }
 
         return response()->json([
@@ -143,9 +145,9 @@ class AbonnementController extends Controller
 
         $c = $p->coursier;
         $actuelle = $c->abonnement_expire ? Carbon::parse($c->abonnement_expire) : null;
-        $base     = ($actuelle && $actuelle->isFuture()) ? $actuelle : now();
-
-        $c->abonnement_expire = $base->copy()->addMonth();
+        $nouvelle = $actuelle ? $actuelle->copy() : Carbon::parse($c->created_at)->addDays(30);
+        do { $nouvelle = $nouvelle->copy()->addMonthNoOverflow(); } while ($nouvelle->isPast());
+        $c->abonnement_expire = $nouvelle->endOfDay();
         $c->save();
 
         $p->update(['statut' => 'valide', 'traite_par' => $admin->id, 'traite_le' => now(), 'motif_rejet' => null]);
