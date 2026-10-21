@@ -1669,8 +1669,6 @@ function DashboardAdmin() {
                     <MdAttachMoney style={{ color:"#8b5cf6",fontSize:22 }}/>
                   </div>{tr("Abonnements coursiers")}</h4>
                 <p style={{ color:"#555",marginBottom:24,fontSize:14 }}>{tr("Gestion des abonnements mensuels — 10 000 Ar/mois")}</p>
-                <PaiementsAbonnementAdmin apiUrl={BASE_URL} />
-
                 {/* 4 box BDD */}
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:16,marginBottom:28 }}>
                   {[
@@ -1692,6 +1690,8 @@ function DashboardAdmin() {
                     </div>
                   ))}
                 </div>
+
+                <PaiementsAbonnementAdmin apiUrl={BASE_URL} onChange={fetchAll} />
 
                 {/* Liste coursiers paginée BDD */}
                 {coursiersPage.map(c=>(
@@ -1724,6 +1724,12 @@ function DashboardAdmin() {
                               color:"#ef4444",borderRadius:10,padding:"8px 16px",cursor:"pointer",
                               fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
                             <MdBlock style={{ fontSize:16 }}/>{" "}{tr("Suspendre")}</button>
+                        )}
+                        {c.statut==="suspendu" && (
+                          <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
+                            style={{ ...btnY,padding:"8px 16px",fontSize:12,
+                              display:"flex",alignItems:"center",gap:6 }}>
+                            <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Réactiver le compte")}</button>
                         )}
                       </div>
                     </div>
