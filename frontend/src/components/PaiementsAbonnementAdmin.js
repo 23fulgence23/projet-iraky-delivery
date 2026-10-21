@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { formatDateHeure } from "../utils/formatDateHeure";
 
 const COULEURS = { en_attente: "#f59e0b", valide: "#10b981", rejete: "#ef4444" };
+const PAR_PAGE = 5;
 
 export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
   const { t } = useTranslation();
@@ -11,6 +12,7 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
   const [motif, setMotif] = useState("");
   const [occupe, setOccupe] = useState(null);
   const [message, setMessage] = useState(null);
+  const [page, setPage] = useState(1);
 
   const entetes = () => ({
     "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -49,8 +51,11 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
   };
 
   const enAttente = paiements.filter((p) => p.statut === "en_attente");
-  const traites = paiements.filter((p) => p.statut !== "en_attente").slice(0, 10);
-  const visibles = enAttente.concat(traites);
+  const traites = paiements.filter((p) => p.statut !== "en_attente");
+  const tous = enAttente.concat(traites);
+  const nbPages = Math.max(1, Math.ceil(tous.length / PAR_PAGE));
+  const pageCourante = Math.min(page, nbPages);
+  const visibles = tous.slice((pageCourante - 1) * PAR_PAGE, pageCourante * PAR_PAGE);
   const dernierParCoursier = {};
   paiements.forEach((p) => { if (!dernierParCoursier[p.user_id] || p.id > dernierParCoursier[p.user_id]) dernierParCoursier[p.user_id] = p.id; });
 
@@ -138,6 +143,18 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
           </div>
         );
       })}
+
+      {nbPages > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 6, flexWrap: "wrap" }}>
+          <button type="button" disabled={pageCourante === 1}
+            style={{ ...bouton("#FFD700"), opacity: pageCourante === 1 ? 0.4 : 1 }}
+            onClick={() => setPage(pageCourante - 1)}>{t("Précédent")}</button>
+          <span style={{ color: "#aaa", fontSize: 12 }}>{t("Page {{page}} / {{total}}", { page: pageCourante, total: nbPages })}</span>
+          <button type="button" disabled={pageCourante === nbPages}
+            style={{ ...bouton("#FFD700"), opacity: pageCourante === nbPages ? 0.4 : 1 }}
+            onClick={() => setPage(pageCourante + 1)}>{t("Suivant")}</button>
+        </div>
+      )}
     </div>
   );
 }

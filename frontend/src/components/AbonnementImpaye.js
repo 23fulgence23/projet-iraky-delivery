@@ -159,58 +159,70 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
           <div onClick={() => setOuvert(false)} style={{ position: "fixed", inset: 0, zIndex: 1000,
             backgroundColor: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center",
             justifyContent: "center", padding: 16 }}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={soumettre} style={{ backgroundColor: "#131330",
-            borderRadius: 16, border: "1px solid #FFD70025", padding: 20, width: "100%", maxWidth: 460,
-            maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <div style={{ color: "#FFD700", fontWeight: 800 }}>{t("Payer un abonnement")}</div>
-              <button type="button" onClick={() => setOuvert(false)}
-                style={{ background: "transparent", border: "none", color: "#aaa", cursor: "pointer",
-                  display: "flex", alignItems: "center", gap: 4, fontSize: 13 }}>
-                <MdArrowBack /> {t("Retour")}
-              </button>
-            </div>
-
-            <label style={etiquette}>{t("Nom")}</label>
-            <input type="text" value={(etat && etat.nom) || ""} readOnly style={champLecture} />
-
-            <label style={etiquette}>{t("Prénom")}</label>
-            <input type="text" value={(etat && etat.prenom) || ""} readOnly style={champLecture} />
-
-            <label style={etiquette}>{t("Email")}</label>
-            <input type="email" value={(etat && etat.email) || ""} readOnly style={champLecture} />
-
-            <label style={etiquette}>{t("Numéro de l'administrateur (envoyez le paiement ici)")}</label>
-            <input type="text" value={(etat && etat.numero_paiement) || "+261 32 53 200 54"} readOnly
-              style={{ ...champLecture, color: "#3b82f6", fontWeight: 700 }} />
-
-            <label style={etiquette}>{t("Numéro utilisé pour l'envoi")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" value={form.numero_envoi} placeholder="03X XX XXX XX" style={champ}
-              onChange={(e) => setForm({ ...form, numero_envoi: e.target.value })} />
-
-            <label style={etiquette}>{t("Référence de la transaction")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" value={form.reference} placeholder={t("Ex: MVOLA-2026-XXXXXXXX")} style={champ}
-              onChange={(e) => setForm({ ...form, reference: e.target.value })} />
-
-            <label style={etiquette}>{t("Montant payé (Ar)")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="number" min={MONTANT_MIN} value={form.montant} style={champ}
-              onChange={(e) => setForm({ ...form, montant: e.target.value })} />
-
-            {message.texte && (
-              <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 8, fontSize: 13,
-                backgroundColor: message.type === "success" ? "#10b98122" : "#ef444422",
-                color: message.type === "success" ? "#10b981" : "#ef4444" }}>
-                {message.texte}
+            <form onClick={(e) => e.stopPropagation()} onSubmit={soumettre} style={{ backgroundColor: "#131330",
+              borderRadius: 16, border: "1px solid #FFD70025", padding: 22, width: "100%", maxWidth: 780,
+              maxHeight: "92vh", overflowY: "auto", colorScheme: "dark",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 16 }}>{t("Payer un abonnement")}</div>
+                <button type="button" onClick={() => setOuvert(false)}
+                  style={{ background: "transparent", border: "none", color: "#aaa", cursor: "pointer",
+                    display: "flex", alignItems: "center", gap: 4, fontSize: 13 }}>
+                  <MdArrowBack /> {t("Retour")}
+                </button>
               </div>
-            )}
 
-            <button type="submit" disabled={envoi}
-              style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 15,
-                background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000",
-                cursor: envoi ? "not-allowed" : "pointer", opacity: envoi ? 0.7 : 1 }}>
-              {envoi ? t("Envoi en cours...") : t("Envoyer mon paiement")}
-            </button>
-          </form>
+              {message.texte && (
+                <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 8, fontSize: 13,
+                  backgroundColor: message.type === "success" ? "#10b98122" : "#ef444422",
+                  color: message.type === "success" ? "#10b981" : "#ef4444" }}>
+                  {message.texte}
+                </div>
+              )}
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", columnGap: 16 }}>
+                <div>
+                  <label style={etiquette}>{t("Nom")}</label>
+                  <input type="text" value={(etat && etat.nom) || ""} readOnly style={champLecture} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Prénom")}</label>
+                  <input type="text" value={(etat && etat.prenom) || ""} readOnly style={champLecture} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Email")}</label>
+                  <input type="email" value={(etat && etat.email) || ""} readOnly style={champLecture} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Numéro de l'administrateur (envoyez le paiement ici)")}</label>
+                  <input type="text" value={(etat && etat.numero_paiement) || "+261 32 53 200 54"} readOnly
+                    style={{ ...champLecture, color: "#3b82f6", fontWeight: 700 }} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Numéro utilisé pour l'envoi")} <span style={{ color: "#ef4444" }}>*</span></label>
+                  <input type="text" value={form.numero_envoi} placeholder="03X XX XXX XX" style={champ}
+                    onChange={(e) => setForm({ ...form, numero_envoi: e.target.value })} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Référence de la transaction")} <span style={{ color: "#ef4444" }}>*</span></label>
+                  <input type="text" value={form.reference} placeholder={t("Ex: MVOLA-2026-XXXXXXXX")} style={champ}
+                    onChange={(e) => setForm({ ...form, reference: e.target.value })} />
+                </div>
+                <div>
+                  <label style={etiquette}>{t("Montant payé (Ar)")} <span style={{ color: "#ef4444" }}>*</span></label>
+                  <input type="number" min={MONTANT_MIN} value={form.montant} style={champ}
+                    onChange={(e) => setForm({ ...form, montant: e.target.value })} />
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 12 }}>
+                  <button type="submit" disabled={envoi}
+                    style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 15,
+                      background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000",
+                      cursor: envoi ? "not-allowed" : "pointer", opacity: envoi ? 0.7 : 1 }}>
+                    {envoi ? t("Envoi en cours...") : t("Envoyer mon paiement")}
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         )}
       </div>

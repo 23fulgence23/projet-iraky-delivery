@@ -713,5 +713,8 @@
   "Compte réactivé.": "Nampiasaina indray ny kaontina.",
   "Ce paiement a déjà été traité.": "Efa voafehy ity fandoavana ity.",
   "Abonnement échu : validez d'abord un paiement.": "Tapitra ny famandrihana : hamarino aloha ny fandoavana.",
-  "Abonnement échu : validez d'abord un paiement d'abonnement.": "Tapitra ny famandrihana : hamarino aloha ny fandoavan'ny famandrihana."
+  "Abonnement échu : validez d'abord un paiement d'abonnement.": "Tapitra ny famandrihana : hamarino aloha ny fandoavan'ny famandrihana.",
+  "Précédent": "Aloha",
+  "Suivant": "Manaraka",
+  "Page {{page}} / {{total}}": "Pejy {{page}} / {{total}}"
 }

@@ -713,5 +713,8 @@
   "Compte réactivé.": "Account reactivated.",
   "Ce paiement a déjà été traité.": "This payment has already been processed.",
   "Abonnement échu : validez d'abord un paiement.": "Subscription expired: validate a payment first.",
-  "Abonnement échu : validez d'abord un paiement d'abonnement.": "Subscription expired: validate a subscription payment first."
+  "Abonnement échu : validez d'abord un paiement d'abonnement.": "Subscription expired: validate a subscription payment first.",
+  "Précédent": "Previous",
+  "Suivant": "Next",
+  "Page {{page}} / {{total}}": "Page {{page}} / {{total}}"
 }
