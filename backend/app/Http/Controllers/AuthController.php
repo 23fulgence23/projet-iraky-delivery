@@ -128,7 +128,7 @@ public function login(Request $request)
 
     // ✅ Bloquer la connexion si coursier inactif (en attente de vérification)
     if ($user->role === 'coursier' && $user->statut === 'inactif') {
-        JWTAuth::invalidate($token); // invalide le token généré
+        JWTAuth::setToken($token)->invalidate(); // invalide le token généré
         return response()->json([
             'message' => 'Votre compte est en attente de vérification par l\'administrateur. Veuillez réessayer plus tard.',
             'pending' => true,

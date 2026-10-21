@@ -9,6 +9,10 @@ return new class extends Migration
     {
         DB::statement("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_statut_check");
         DB::statement("ALTER TABLE users ADD CONSTRAINT users_statut_check CHECK (statut IN ('actif', 'inactif', 'rejete', 'suspendu'))");
+
+        // Coursiers deja valides puis desactives : ils deviennent suspendus (les dossiers en attente n'ont pas d'echeance)
+        DB::table('users')->where('role', 'coursier')->where('statut', 'inactif')
+            ->whereNotNull('abonnement_expire')->update(['statut' => 'suspendu']);
     }
 
     public function down(): void
