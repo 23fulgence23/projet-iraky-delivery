@@ -176,9 +176,9 @@ function Inscription() {
   };
 
   const inp = (champ) => ({
-    backgroundColor: "#0a0a1e",
+    backgroundColor: "var(--d-bg2)",
     border: `1px solid ${errors[champ] ? "#ef4444" : "#FFD70033"}`,
-    color: "#ffffff",
+    color: "var(--d-text)",
     borderRadius: "10px",
     transition: "border-color 0.2s",
   });
@@ -216,7 +216,7 @@ useEffect(() => {
   return () => clearInterval(iv);
 }, [modalSucces, userIdCree]);
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#0a0a1e",
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg2)",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "40px 20px" }}>
       <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
@@ -226,22 +226,22 @@ useEffect(() => {
         <div style={{ position: "fixed", inset: 0, zIndex: 500,
           backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)",
           display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-          <div style={{ backgroundColor: "#131330", borderRadius: 20, padding: 36,
+          <div style={{ backgroundColor: "var(--d-card)", borderRadius: 20, padding: 36,
             width: "100%", maxWidth: 480, border: "1px solid #FFD70040",
             boxShadow: "0 0 60px rgba(255,215,0,0.15)", textAlign: "center",
             animation: "modalIn 0.3s ease" }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%",
-              background: "linear-gradient(135deg,#f59e0b,#FFD700)",
+              background: "linear-gradient(135deg,#f59e0b,var(--d-gold))",
               display: "flex", alignItems: "center", justifyContent: "center",
               margin: "0 auto 20px", boxShadow: "0 0 30px #FFD70055" }}>
               <MdDeliveryDining style={{ fontSize: 42, color: "#000" }}/>
             </div>
-            <h4 style={{ color: "#FFD700", fontWeight: 800, marginBottom: 12, fontSize: 20 }}>{t("Inscription reçue ! 🎉")}</h4>
-            <p style={{ color: "#fff", fontSize: 15, lineHeight: 1.7, marginBottom: 8 }}>
-              {t("Merci")} <strong style={{ color: "#FFD700" }}>{form.prenom} {form.nom}</strong> {t("pour votre inscription.")}
+            <h4 style={{ color: "var(--d-gold)", fontWeight: 800, marginBottom: 12, fontSize: 20 }}>{t("Inscription reçue ! 🎉")}</h4>
+            <p style={{ color: "var(--d-text)", fontSize: 15, lineHeight: 1.7, marginBottom: 8 }}>
+              {t("Merci")} <strong style={{ color: "var(--d-gold)" }}>{form.prenom} {form.nom}</strong> {t("pour votre inscription.")}
             </p>
-            <p style={{ color: "#aaa", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t("Votre dossier est en cours de vérification par l'administrateur. Vous recevrez une notification dès que votre compte sera validé.")}</p>
-              <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+            <p style={{ color: "var(--d-c-aaa)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t("Votre dossier est en cours de vérification par l'administrateur. Vous recevrez une notification dès que votre compte sera validé.")}</p>
+              <div style={{ backgroundColor: "var(--d-bg2)", borderRadius: 14,
                 padding: 16, marginBottom: 24, textAlign: "left" }}>
                 {[
                   { step: "1", text: t("Dossier envoyé à l'administrateur") },
@@ -255,14 +255,14 @@ useEffect(() => {
             <div key={s.step} style={{ display: "flex", alignItems: "center",
               gap: 12, marginBottom: 10 }}>
               <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                backgroundColor: done ? "#FFD700" : "#1a1a35",
-                border: `2px solid ${done ? "#FFD700" : "#ffffff20"}`,
+                backgroundColor: done ? "var(--d-gold)" : "var(--d-card3)",
+                border: `2px solid ${done ? "var(--d-gold)" : "#ffffff20"}`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 12, fontWeight: 800, color: done ? "#000" : "#555",
                 transition: "all 0.4s ease" }}>
                 {done ? "✓" : s.step}
               </div>
-              <span style={{ color: done ? "#FFD700" : "#666", fontSize: 13,
+              <span style={{ color: done ? "var(--d-gold)" : "#666", fontSize: 13,
                 transition: "color 0.4s ease" }}>
                 {s.text}
               </span>
@@ -285,14 +285,14 @@ useEffect(() => {
     {msgRejetRecu && (
       <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
         padding: "10px 12px", marginBottom: 10 }}>
-        <p style={{ color: "#aaa", fontSize: 12, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
-        <p style={{ color: "#fff", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--d-c-aaa)", fontSize: 12, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
+        <p style={{ color: "var(--d-text)", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
           {msgRejetRecu.replace("❌ Votre dossier a été rejeté. Raison : ", "").replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
         </p>
       </div>
     )}
     <p style={{ color: "#888", fontSize: 12, margin: "0 0 10px" }}>
-      {t("📧 Un email de notification a été envoyé à")} <strong style={{ color: "#fff" }}>{form.email}</strong>
+      {t("📧 Un email de notification a été envoyé à")} <strong style={{ color: "var(--d-text)" }}>{form.email}</strong>
     </p>
     <button
       onClick={() => { setModalSucces(false); setEtapeValidation(1); }}
@@ -308,21 +308,21 @@ useEffect(() => {
                 : {}
             })}
             style={{ width: "100%", padding: "13px", borderRadius: 12,
-              background: "linear-gradient(135deg,#FFD700,#ff9500)",
+              background: "linear-gradient(135deg,var(--d-gold),#ff9500)",
               color: "#000", border: "none", cursor: "pointer",
               fontWeight: 800, fontSize: 15 }}>{t("Retour à la connexion")}</button>
           </div>
         </div>
       )}
 
-      <div style={{ backgroundColor: "#1a1a35", borderRadius: "20px",
+      <div style={{ backgroundColor: "var(--d-card3)", borderRadius: "20px",
         padding: "40px", width: "100%", maxWidth: "640px",
         boxShadow: "0 0 50px #FFD70022" }}>
 
         <div className="text-center mb-4">
           <img src={logo} alt="IRAKY" style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>{t("Créer un compte")}</h4>
-          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Rejoignez IRAKY Delivery")}</p>
+          <h4 className="fw-bold mt-3" style={{ color: "var(--d-gold)" }}>{t("Créer un compte")}</h4>
+          <p style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rejoignez IRAKY Delivery")}</p>
         </div>
 
         {error && (
@@ -340,7 +340,7 @@ useEffect(() => {
             <div>
               <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 13, margin: 0 }}>{t("Inscription coursier — Vérification requise")}</p>
               <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>
-                {t("Votre compte sera vérifié par l'administrateur avant activation. Payez le droit d'inscription de")} <strong style={{ color: "#FFD700" }}>10 000 Ar</strong> {t("par MVola au")} <strong style={{ color: "#FFD700" }}>+261 38 56 040 35</strong> {t("(Administrateur) puis renseignez la référence ci-dessous.")}
+                {t("Votre compte sera vérifié par l'administrateur avant activation. Payez le droit d'inscription de")} <strong style={{ color: "var(--d-gold)" }}>10 000 Ar</strong> {t("par MVola au")} <strong style={{ color: "var(--d-gold)" }}>+261 38 56 040 35</strong> {t("(Administrateur) puis renseignez la référence ci-dessous.")}
               </p>
             </div>
           </div>
@@ -350,7 +350,7 @@ useEffect(() => {
 
           {/* Nom */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Nom")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Nom")} <span style={{ color: "#ef4444" }}>*</span></label>
             <input type="text" name="nom" className="form-control mt-1"
               placeholder={t("Votre nom")} value={form.nom} onChange={handleChange} style={inp("nom")} />
             {errors.nom && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.nom)}</small>}
@@ -358,7 +358,7 @@ useEffect(() => {
 
           {/* Prénom */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Prénom")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Prénom")} <span style={{ color: "#ef4444" }}>*</span></label>
             <input type="text" name="prenom" className="form-control mt-1"
               placeholder={t("Votre prénom")} value={form.prenom} onChange={handleChange} style={inp("prenom")} />
             {errors.prenom && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.prenom)}</small>}
@@ -366,7 +366,7 @@ useEffect(() => {
 
           {/* Email */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Email")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Email")} <span style={{ color: "#ef4444" }}>*</span></label>
             <input type="email" name="email" className="form-control mt-1"
               placeholder="votre@email.com" value={form.email} onChange={handleChange} style={inp("email")} />
             {errors.email && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.email)}</small>}
@@ -374,7 +374,7 @@ useEffect(() => {
 
           {/* Téléphone */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Téléphone")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Téléphone")} <span style={{ color: "#ef4444" }}>*</span></label>
             <input type="text" name="telephone" className="form-control mt-1"
               placeholder="+261 XX XX XXX XX" value={form.telephone} onChange={handleChange} style={inp("telephone")} />
             {errors.telephone && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.telephone)}</small>}
@@ -382,7 +382,7 @@ useEffect(() => {
 
           {/* Adresse */}
           <div className="col-12">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Adresse")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Adresse")} <span style={{ color: "#ef4444" }}>*</span></label>
             <input type="text" name="adresse" className="form-control mt-1"
               placeholder={t("Votre adresse à Toliara")} value={form.adresse} onChange={handleChange} style={inp("adresse")} />
             {errors.adresse && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.adresse)}</small>}
@@ -390,7 +390,7 @@ useEffect(() => {
 
           {/* Mot de passe */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Mot de passe")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Mot de passe")} <span style={{ color: "#ef4444" }}>*</span></label>
             <div style={{ position: "relative" }}>
               <input type={showPassword ? "text" : "password"} name="password"
                 className="form-control mt-1" placeholder="••••••••"
@@ -398,7 +398,7 @@ useEffect(() => {
                 style={{ ...inp("password"), paddingRight: "42px" }} />
               <span onClick={() => setShowPassword(!showPassword)}
                 style={{ position: "absolute", right: 12, top: "calc(50% + 4px)",
-                  transform: "translateY(-50%)", cursor: "pointer", color: "#aaaaaa",
+                  transform: "translateY(-50%)", cursor: "pointer", color: "var(--d-c-aaa)",
                   display: "flex", alignItems: "center" }}>
                 {showPassword ? <MdVisibilityOff style={{ fontSize: 20 }}/> : <MdVisibility style={{ fontSize: 20 }}/>}
               </span>
@@ -408,7 +408,7 @@ useEffect(() => {
 
           {/* Confirmation */}
           <div className="col-md-6">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Confirmation")} <span style={{ color: "#ef4444" }}>*</span></label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Confirmation")} <span style={{ color: "#ef4444" }}>*</span></label>
             <div style={{ position: "relative" }}>
               <input type={showPasswordConfirm ? "text" : "password"} name="password_confirmation"
                 className="form-control mt-1" placeholder="••••••••"
@@ -416,7 +416,7 @@ useEffect(() => {
                 style={{ ...inp("password_confirmation"), paddingRight: "42px" }} />
               <span onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                 style={{ position: "absolute", right: 12, top: "calc(50% + 4px)",
-                  transform: "translateY(-50%)", cursor: "pointer", color: "#aaaaaa",
+                  transform: "translateY(-50%)", cursor: "pointer", color: "var(--d-c-aaa)",
                   display: "flex", alignItems: "center" }}>
                 {showPasswordConfirm ? <MdVisibilityOff style={{ fontSize: 20 }}/> : <MdVisibility style={{ fontSize: 20 }}/>}
               </span>
@@ -426,7 +426,7 @@ useEffect(() => {
 
           {/* Rôle */}
           <div className="col-12">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Rôle")}</label>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rôle")}</label>
             <select className="form-select mt-1" value={role}
               onChange={(e) => setRole(e.target.value)} style={inp("role")}>
               <option value="client">{"👤 " + t("Client — Gratuit")}</option>
@@ -436,14 +436,14 @@ useEffect(() => {
 
           {/* ✅ Localisation optionnelle pour tous */}
           <div className="col-12">
-            <label style={{ color: "#aaaaaa", fontSize: "14px" }}>
+            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
               📍 {t("Localisation")} <span style={{ color: "#666", fontSize: 12 }}>{t("(optionnelle)")}</span>
             </label>
             <div className="d-flex gap-2 mt-1 align-items-center flex-wrap">
               <button type="button" onClick={getLocalisation} disabled={locLoading}
                 className="btn fw-bold"
                 style={{ backgroundColor: localisation ? "#10b98122" : "#FFD70022",
-                  color: localisation ? "#10b981" : "#FFD700",
+                  color: localisation ? "#10b981" : "var(--d-gold)",
                   border: `1px solid ${localisation ? "#10b98133" : "#FFD70033"}`,
                   borderRadius: "10px", padding: "8px 16px", fontSize: "13px" }}>
                 {locLoading ? t("⏳ En cours...") : localisation ? t("✅ Position obtenue") : t("📍 Activer ma localisation")}
@@ -471,7 +471,7 @@ useEffect(() => {
             <>
               {/* Zone de livraison */}
               <div className="col-12">
-                <label style={{ color: "#aaaaaa", fontSize: "14px" }}>
+                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
                   🏙️ {t("Zone d'opération")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <select name="zone" className="form-select mt-1"
@@ -493,7 +493,7 @@ useEffect(() => {
 
               {/* CIN */}
               <div className="col-12">
-                <label style={{ color: "#aaaaaa", fontSize: "14px" }}>
+                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
                   {t("Numéro CIN")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input type="text" name="cin" className="form-control mt-1"
@@ -504,7 +504,7 @@ useEffect(() => {
 
               {/* Photos CIN */}
               <div className="col-md-6">
-                <label style={{ color: "#aaaaaa", fontSize: "14px" }}>
+                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
                   📷 {t("Photo CIN — Recto")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input type="file" name="photo_recto" className="form-control mt-1"
@@ -514,7 +514,7 @@ useEffect(() => {
               </div>
 
               <div className="col-md-6">
-                <label style={{ color: "#aaaaaa", fontSize: "14px" }}>
+                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
                   📷 {t("Photo CIN — Verso")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input type="file" name="photo_verso" className="form-control mt-1"
@@ -528,12 +528,12 @@ useEffect(() => {
                 <div style={{ backgroundColor: "#FFD70010", border: "1px solid #FFD70030",
                   borderRadius: 14, padding: 18 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <MdAttachMoney style={{ color: "#FFD700", fontSize: 22 }}/>
-                    <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 14 }}>{t("Paiement du droit d'inscription")}</span>
+                    <MdAttachMoney style={{ color: "var(--d-gold)", fontSize: 22 }}/>
+                    <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 14 }}>{t("Paiement du droit d'inscription")}</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                     {[
-                      { label: t("Montant"),          val: "10 000 Ar",         color: "#FFD700" },
+                      { label: t("Montant"),          val: "10 000 Ar",         color: "var(--d-gold)" },
                       { label: t("Service"),           val: "MVola",             color: "#10b981" },
                       { label: t("Numéro admin"),      val: "+261 38 56 040 35", color: "#3b82f6" },
                       { label: t("Nom bénéficiaire"),  val: t("Administrateur"),    color: "#8b5cf6" },
@@ -545,9 +545,9 @@ useEffect(() => {
                       </div>
                     ))}
                   </div>
-                  <label style={{ color: "#aaaaaa", fontSize: "14px",
+                  <label style={{ color: "var(--d-c-aaa)", fontSize: "14px",
                     display: "flex", alignItems: "center", gap: 6 }}>
-                    <MdReceipt style={{ color: "#FFD700", fontSize: 16 }}/>
+                    <MdReceipt style={{ color: "var(--d-gold)", fontSize: 16 }}/>
                     {t("Référence de transaction MVola")} <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input type="text" name="mvola_transaction"
@@ -568,7 +568,7 @@ useEffect(() => {
           <div className="col-12 mt-2">
             <button onClick={handleSubmit} disabled={loading}
               className="btn fw-bold w-100 py-2"
-              style={{ backgroundColor: loading ? "#FFD70077" : "#FFD700", color: "#000",
+              style={{ backgroundColor: loading ? "#FFD70077" : "var(--d-gold)", color: "#000",
                 borderRadius: "10px", fontSize: "16px",
                 cursor: loading ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -586,12 +586,12 @@ useEffect(() => {
 
         </div>
 
-        <p className="text-center mt-3" style={{ color: "#aaaaaa", fontSize: "14px" }}>
+        <p className="text-center mt-3" style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
           {t("Déjà un compte ?")}{" "}
-          <Link to="/connexion" style={{ color: "#FFD700" }}>{t("Se connecter")}</Link>
+          <Link to="/connexion" style={{ color: "var(--d-gold)" }}>{t("Se connecter")}</Link>
         </p>
         <p className="text-center mt-2">
-          <Link to="/" style={{ color: "#aaaaaa", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
+          <Link to="/" style={{ color: "var(--d-c-aaa)", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
         </p>
       </div>
 

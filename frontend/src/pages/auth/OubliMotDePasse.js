@@ -29,7 +29,7 @@ function OubliMotDePasse() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#0a0a1e",
+        backgroundColor: "var(--d-bg2)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -38,7 +38,7 @@ function OubliMotDePasse() {
       <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
       <div
         style={{
-          backgroundColor: "#1a1a35",
+          backgroundColor: "var(--d-card3)",
           borderRadius: "20px",
           padding: "40px",
           width: "100%",
@@ -50,8 +50,8 @@ function OubliMotDePasse() {
           <img src={logo} alt="IRAKY"
             style={{ width: "80px", height: "80px", borderRadius: "50%" }}
           />
-          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>{t("Mot de passe oublié")}</h4>
-          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Entrez votre email pour recevoir un lien de réinitialisation")}</p>
+          <h4 className="fw-bold mt-3" style={{ color: "var(--d-gold)" }}>{t("Mot de passe oublié")}</h4>
+          <p style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Entrez votre email pour recevoir un lien de réinitialisation")}</p>
         </div>
 
         {sent ? (
@@ -67,21 +67,21 @@ function OubliMotDePasse() {
         ) : (
           <>
             <div className="mb-3">
-              <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Email")}</label>
+              <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Email")}</label>
               <input
                 type="email"
                 className="form-control mt-1"
                 placeholder="votre@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ backgroundColor: "#0a0a1e", border: "1px solid #FFD70033", color: "#ffffff", borderRadius: "10px" }}
+                style={{ backgroundColor: "var(--d-bg2)", border: "1px solid #FFD70033", color: "var(--d-text)", borderRadius: "10px" }}
               />
             </div>
             <button
               onClick={handleSubmit}
               disabled={loading}
               className="btn fw-bold w-100 py-2"
-              style={{ backgroundColor: "#FFD700", color: "#000", borderRadius: "10px", fontSize: "16px" }}
+              style={{ backgroundColor: "var(--d-gold)", color: "#000", borderRadius: "10px", fontSize: "16px" }}
             >
               {loading ? t("Envoi...") : t("Envoyer le lien")}
             </button>
@@ -89,7 +89,7 @@ function OubliMotDePasse() {
         )}
 
         <p className="text-center mt-3">
-          <Link to="/connexion" style={{ color: "#FFD700", fontSize: "14px" }}>{t("← Retour à la connexion")}</Link>
+          <Link to="/connexion" style={{ color: "var(--d-gold)", fontSize: "14px" }}>{t("← Retour à la connexion")}</Link>
         </p>
       </div>
     </div>

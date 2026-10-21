@@ -316,8 +316,7 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
       </div>
 
       {/* bouton déconnexion */}
-      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
-        <ThemeToggle size={40} />
+      <div style={{ padding:16 }}>
         <button onClick={() => {
             const CLES_A_GARDER = ["suivi_masques", "historique_masques", "messages_masques", "messages_effaces"];
             const sauvegarde = {};
@@ -941,6 +940,7 @@ const noterCoursier = async (id, note) => {
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
           {/* cloche */}
          
+          <ThemeToggle size={38} />
           <div style={{ position:"relative", cursor:"pointer" }}
             onClick={()=>{ setNotifOpen(!notifOpen); setNotifs(p=>p.map(n=>({...n,lu:true}))); }}>
             <div style={{ width:38, height:38, borderRadius:"50%", backgroundColor:"#FFD70015",

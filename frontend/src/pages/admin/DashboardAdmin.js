@@ -186,8 +186,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
           </div>
         ))}
       </div>
-      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
-        <ThemeToggle size={40} />
+      <div style={{ padding:16 }}>
         <button onClick={()=>{ localStorage.clear(); window.location.href="/connexion"; }}
           style={{ width:"100%", padding:"10px", borderRadius:12,
             border:"1px solid #ef444430", backgroundColor:"#ef444410",
@@ -818,6 +817,7 @@ function DashboardAdmin() {
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
           <LanguageSwitcher />
           {/* Cloche notifs — polling 2s */}
+          <ThemeToggle size={38} />
           <div style={{ position:"relative", cursor:"pointer" }}
             onClick={()=>setNotifOpen(!notifOpen)}>
             <div style={{ width:38,height:38,borderRadius:"50%",backgroundColor:"#FFD70015",

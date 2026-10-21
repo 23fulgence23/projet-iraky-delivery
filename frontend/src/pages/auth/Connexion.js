@@ -95,11 +95,11 @@ function Connexion() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#0a0a1e",
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg2)",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "80px 16px 40px 16px" }}>
       <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
-      <div style={{ backgroundColor: "#1a1a35", borderRadius: "20px",
+      <div style={{ backgroundColor: "var(--d-card3)", borderRadius: "20px",
         padding: "clamp(20px, 5vw, 40px)",
         width: "100%", maxWidth: "450px",
         boxShadow: "0 0 50px #FFD70022" }}>
@@ -108,8 +108,8 @@ function Connexion() {
         <div className="text-center mb-4">
           <img src={logo} alt="IRAKY"
             style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-          <h4 className="fw-bold mt-3" style={{ color: "#FFD700" }}>{t("Se connecter")}</h4>
-          <p style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Accédez à votre espace IRAKY Delivery")}</p>
+          <h4 className="fw-bold mt-3" style={{ color: "var(--d-gold)" }}>{t("Se connecter")}</h4>
+          <p style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Accédez à votre espace IRAKY Delivery")}</p>
         </div>
 
         {/* ✅ Bandeau attente vérification — polling en cours */}
@@ -159,8 +159,8 @@ function Connexion() {
             {msgRejetConnexion && (
               <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
                 padding: "10px 12px", marginBottom: 10 }}>
-                <p style={{ color: "#aaa", fontSize: 11, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
-                <p style={{ color: "#fff", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+                <p style={{ color: "var(--d-c-aaa)", fontSize: 11, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
+                <p style={{ color: "var(--d-text)", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
                   {msgRejetConnexion
                     .replace("❌ Votre dossier a été rejeté. Raison : ", "")
                     .replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
@@ -184,7 +184,7 @@ function Connexion() {
               borderRadius: "10px", display: "flex", alignItems: "center",
               gap: 10, justifyContent: "center" }}>
             <span style={{ fontSize: 22 }}>🎉</span>
-            <span style={{ color: "#FFD700", fontSize: 14, fontWeight: 700 }}>
+            <span style={{ color: "var(--d-gold)", fontSize: 14, fontWeight: 700 }}>
               {t("Bravo {{prenom}} ! Votre compte coursier est validé et activé. Vous pouvez vous connecter dès maintenant.", { prenom: prenomCoursier })}
             </span>
           </div>
@@ -208,16 +208,16 @@ function Connexion() {
 
         {/* Email */}
         <div className="mb-3">
-          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Email")}</label>
+          <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Email")}</label>
           <input type="email" name="email" className="form-control mt-1"
             placeholder="votre@email.com" value={form.email} onChange={handleChange}
-            style={{ backgroundColor: "#0a0a1e", border: "1px solid #FFD70033",
-              color: "#ffffff", borderRadius: "10px" }} />
+            style={{ backgroundColor: "var(--d-bg2)", border: "1px solid #FFD70033",
+              color: "var(--d-text)", borderRadius: "10px" }} />
         </div>
 
         {/* Mot de passe */}
         <div className="mb-3">
-          <label style={{ color: "#aaaaaa", fontSize: "14px" }}>{t("Mot de passe")}</label>
+          <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Mot de passe")}</label>
           <div style={{ position: "relative" }}>
             <input
               type={showPassword ? "text" : "password"}
@@ -227,9 +227,9 @@ function Connexion() {
               value={form.password}
               onChange={handleChange}
               style={{
-                backgroundColor: "#0a0a1e",
+                backgroundColor: "var(--d-bg2)",
                 border: "1px solid #FFD70033",
-                color: "#ffffff",
+                color: "var(--d-text)",
                 borderRadius: "10px",
                 paddingRight: "42px",
               }}
@@ -242,7 +242,7 @@ function Connexion() {
                 top: "calc(50% + 4px)",
                 transform: "translateY(-50%)",
                 cursor: "pointer",
-                color: "#aaaaaa",
+                color: "var(--d-c-aaa)",
                 display: "flex",
                 alignItems: "center",
               }}
@@ -256,26 +256,26 @@ function Connexion() {
 
         {/* Mot de passe oublié */}
         <div className="text-end mb-3">
-          <Link to="/oubli-mot-de-passe" style={{ color: "#FFD700", fontSize: "13px" }}>{t("Mot de passe oublié ?")}</Link>
+          <Link to="/oubli-mot-de-passe" style={{ color: "var(--d-gold)", fontSize: "13px" }}>{t("Mot de passe oublié ?")}</Link>
         </div>
 
         {/* Bouton connexion */}
         <button onClick={handleSubmit} disabled={loading}
           className="btn fw-bold w-100 py-2"
-          style={{ backgroundColor: "#FFD700", color: "#000",
+          style={{ backgroundColor: "var(--d-gold)", color: "#000",
             borderRadius: "10px", fontSize: "16px" }}>
           {loading ? t("Connexion...") : t("Se connecter")}
         </button>
 
         {/* Lien inscription */}
-        <p className="text-center mt-3" style={{ color: "#aaaaaa", fontSize: "14px" }}>
+        <p className="text-center mt-3" style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
           {t("Pas encore de compte ?")}{" "}
-          <Link to="/inscription" style={{ color: "#FFD700" }}>{t("S'inscrire gratuitement")}</Link>
+          <Link to="/inscription" style={{ color: "var(--d-gold)" }}>{t("S'inscrire gratuitement")}</Link>
         </p>
 
         {/* Retour portail */}
         <p className="text-center mt-2">
-          <Link to="/" style={{ color: "#aaaaaa", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
+          <Link to="/" style={{ color: "var(--d-c-aaa)", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
         </p>
       </div>
 

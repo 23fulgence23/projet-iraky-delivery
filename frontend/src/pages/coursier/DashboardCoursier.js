@@ -209,8 +209,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
         ))}
       </div>
 
-      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
-        <ThemeToggle size={40} />
+      <div style={{ padding:16 }}>
         <button onClick={() => {
             const CLES_A_GARDER = ["coursier_missions_masques", "coursier_messages_masques"];
             const sauvegarde = {};
@@ -820,6 +819,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <ThemeToggle size={38} />
           <div style={{ position: "relative", cursor: "pointer" }}
             onClick={() => { setNotifOpen(!notifOpen); setNotifs(p => p.map(n => ({ ...n, lu: true }))); }}>
             <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: "#FFD70015",
