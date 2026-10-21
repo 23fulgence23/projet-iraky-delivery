@@ -1,3 +1,4 @@
+import ThemeToggle from "../../components/ThemeToggle";
 import React, { useState, useEffect, useRef } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
@@ -149,7 +150,7 @@ function Etoiles({ value, onChange }) {
           onMouseEnter={() => onChange && setHov(i)}
           onMouseLeave={() => onChange && setHov(0)}
           style={{ fontSize:24, cursor:onChange?"pointer":"default",
-            color: i<=(hov||valeur) ? "#FFD700":"#ffffff18",
+            color: i<=(hov||valeur) ? "var(--d-gold)":"#ffffff18",
             transition:"color 0.15s, transform 0.15s",
             display:"inline-block",
             transform: i<=(hov||valeur) ? "scale(1.2)":"scale(1)" }}>★</span>
@@ -173,7 +174,7 @@ function Modal({ children, onClose, size="md" }) {
       display:"flex", alignItems:"center", justifyContent:"center", padding:16,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        backgroundColor:"#131330", borderRadius:20, padding:28,
+        backgroundColor:"var(--d-card)", borderRadius:20, padding:28,
         width:"100%", maxWidth: size==="lg"?640:480,
         border:"1px solid #FFD70030",
         boxShadow:"0 24px 60px rgba(0,0,0,0.7)",
@@ -184,7 +185,7 @@ function Modal({ children, onClose, size="md" }) {
           float:"right", background:"transparent", border:"none",
           color:"#666", fontSize:22, cursor:"pointer", lineHeight:1,
           transition:"color 0.2s",
-        }} onMouseEnter={e=>e.target.style.color="#fff"}
+        }} onMouseEnter={e=>e.target.style.color="var(--d-text)"}
           onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
         {children}
       </div>
@@ -260,10 +261,10 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={42} fontSize={16} style={{ boxShadow:"0 0 12px #FFD70044" }} />
           <div>
-            <div style={{ color:"#fff", fontWeight:700, fontSize:13 }}>
+            <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:13 }}>
               {profil.prenom} {profil.nom}
             </div>
-            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>{tr("✦ Client IRAKY")}</div>
+            <div style={{ color:"var(--d-gold)", fontSize:11, fontWeight:600 }}>{tr("✦ Client IRAKY")}</div>
           </div>
         </div>
       </div>
@@ -276,13 +277,13 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
               display:"flex", alignItems:"center", justifyContent:"space-between",
               padding:"11px 20px", cursor:"pointer", fontSize:13.5,
               backgroundColor: onglet===item.id ? "#FFD70012":"transparent",
-              borderLeft: onglet===item.id ? "3px solid #FFD700":"3px solid transparent",
-              color: onglet===item.id ? "#FFD700":"#8888aa",
+              borderLeft: onglet===item.id ? "3px solid var(--d-gold)":"3px solid transparent",
+              color: onglet===item.id ? "var(--d-gold)":"#8888aa",
               transition:"all 0.18s", borderRadius:"0 10px 10px 0", marginRight:8,
             }}
             onMouseEnter={e=>{ if(onglet!==item.id){
               e.currentTarget.style.backgroundColor="#ffffff08";
-              e.currentTarget.style.color="#fff";
+              e.currentTarget.style.color="var(--d-text)";
             }}}
             onMouseLeave={e=>{ if(onglet!==item.id){
               e.currentTarget.style.backgroundColor="transparent";
@@ -315,7 +316,8 @@ function SidebarContent({ onglet, setOnglet, profil, commandes }) {
       </div>
 
       {/* bouton déconnexion */}
-      <div style={{ padding:16 }}>
+      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
+        <ThemeToggle size={40} />
         <button onClick={() => {
             const CLES_A_GARDER = ["suivi_masques", "historique_masques", "messages_masques", "messages_effaces"];
             const sauvegarde = {};
@@ -368,14 +370,14 @@ const [notifs, setNotifs] = useState([]);
       icon: "warning",
       title: tr("Retirer de mon suivi"),
       html: tr("Voulez-vous vraiment retirer cette commande de votre suivi en temps réel ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
-      background: "#131330",
-      color: "#fff",
+      background: "var(--d-card)",
+      color: "var(--d-text)",
       iconColor: "#ef4444",
       showCancelButton: true,
       confirmButtonText: tr("Retirer définitivement"),
       cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#333355",
+      cancelButtonColor: "var(--d-border)",
       reverseButtons: true,
       customClass: { popup: "swal-iraky" },
     }).then((result) => {
@@ -403,14 +405,14 @@ const [notifs, setNotifs] = useState([]);
       icon: "warning",
       title: tr("Retirer de mes commandes"),
       html: tr("Voulez-vous vraiment retirer cette commande de votre historique ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
-      background: "#131330",
-      color: "#fff",
+      background: "var(--d-card)",
+      color: "var(--d-text)",
       iconColor: "#ef4444",
       showCancelButton: true,
       confirmButtonText: tr("Retirer définitivement"),
       cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#333355",
+      cancelButtonColor: "var(--d-border)",
       reverseButtons: true,
       customClass: { popup: "swal-iraky" },
     }).then((result) => {
@@ -438,14 +440,14 @@ const [notifs, setNotifs] = useState([]);
       icon: "warning",
       title: tr("Retirer cette conversation"),
       html: tr("Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
-      background: "#131330",
-      color: "#fff",
+      background: "var(--d-card)",
+      color: "var(--d-text)",
       iconColor: "#ef4444",
       showCancelButton: true,
       confirmButtonText: tr("Retirer définitivement"),
       cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#333355",
+      cancelButtonColor: "var(--d-border)",
       reverseButtons: true,
       customClass: { popup: "swal-iraky" },
     }).then((result) => {
@@ -557,7 +559,7 @@ const [notifs, setNotifs] = useState([]);
   // ══════ Guide interactif — contenu 100% aligné sur les fonctionnalités réelles d'IRAKY Delivery ══════
   const GUIDE_SECTIONS = [
     {
-      Icon: MdAddCircle, color:"#FFD700",
+      Icon: MdAddCircle, color:"var(--d-gold)",
       titre: "Créer une nouvelle commande",
       texte: "Depuis l'onglet « Nouvelle commande », choisissez un service (Achat, Facture JIRAMA, Banque BFV, Légalisation, Éducation, Livraison, Bazary…), précisez votre besoin puis sélectionnez un moyen de transport (Piéton, Vélo, Moto, Voiture). Votre commande apparaît ensuite en statut « En attente » jusqu'à ce qu'un coursier disponible la prenne en charge.",
     },
@@ -893,19 +895,19 @@ const noterCoursier = async (id, note) => {
   const nbNonLus = notifs.filter(n=>!n.lu).length;
 
   // styles
-  const card = { backgroundColor:"#131330", borderRadius:18, border:"1px solid #FFD70018", padding:24, transition:"all 0.3s ease" };
-  const inp  = { backgroundColor:"#0a0a1e", border:"1px solid #FFD70030", color:"#fff", borderRadius:12, padding:"11px 16px", width:"100%", fontSize:14, outline:"none", transition:"border-color 0.2s" };
-  const btnY = { background:"linear-gradient(135deg,#FFD700,#ff9500)", color:"#000", border:"none", borderRadius:25, padding:"11px 28px", fontWeight:800, cursor:"pointer", fontSize:15, transition:"all 0.2s", boxShadow:"0 4px 20px #FFD70033" };
+  const card = { backgroundColor:"var(--d-card)", borderRadius:18, border:"1px solid #FFD70018", padding:24, transition:"all 0.3s ease" };
+  const inp  = { backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030", color:"var(--d-text)", borderRadius:12, padding:"11px 16px", width:"100%", fontSize:14, outline:"none", transition:"border-color 0.2s" };
+  const btnY = { background:"linear-gradient(135deg,var(--d-gold),#ff9500)", color:"#000", border:"none", borderRadius:25, padding:"11px 28px", fontWeight:800, cursor:"pointer", fontSize:15, transition:"all 0.2s", boxShadow:"0 4px 20px #FFD70033" };
 
   return (
-    <div style={{ minHeight:"100vh", backgroundColor:"#080820", fontFamily:"'Segoe UI', sans-serif", color:"#fff" }}>
+    <div style={{ minHeight:"100vh", backgroundColor:"var(--d-bg)", fontFamily:"'Segoe UI', sans-serif", color:"var(--d-text)" }}>
 
       {/* TOAST */}
       {toast && (
         <div style={{
           position:"fixed", top:20, right:20, zIndex:9999,
           backgroundColor: toast.type==="error"?"#ef4444":"#10b981",
-          color:"#fff", padding:"14px 22px", borderRadius:14,
+          color:"var(--d-text)", padding:"14px 22px", borderRadius:14,
           boxShadow:"0 8px 30px rgba(0,0,0,0.4)", fontWeight:700, fontSize:14,
           animation:"slideIn 0.3s ease", display:"flex", alignItems:"center", gap:10,
           maxWidth:340,
@@ -917,7 +919,7 @@ const noterCoursier = async (id, note) => {
       {/* NAVBAR */}
       <nav style={{
         position:"fixed", top:0, left:0, right:0, zIndex:100,
-        backgroundColor:"rgba(8,8,32,0.97)", backdropFilter:"blur(16px)",
+        backgroundColor:"var(--d-glass)", backdropFilter:"blur(16px)",
         borderBottom:"1px solid #FFD70020", padding:"0 24px", height:66,
         display:"flex", alignItems:"center", justifyContent:"space-between",
       }}>
@@ -925,14 +927,14 @@ const noterCoursier = async (id, note) => {
           style={{ background:"transparent", border:"1px solid #FFD70044", borderRadius:10,
             padding:"7px 10px", cursor:"pointer" }}>
           {[0,1,2].map(i=>(
-            <div key={i} style={{ width:20,height:2,backgroundColor:"#FFD700",margin:i<2?"0 0 4px 0":"0" }}/>
+            <div key={i} style={{ width:20,height:2,backgroundColor:"var(--d-gold)",margin:i<2?"0 0 4px 0":"0" }}/>
           ))}
         </button>
 
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <img src={logo} alt={tr("IRAKY")}
               style={{ width:70, height:70, borderRadius:"50%" }}/>
-            <span style={{ color:"#FFD700", fontWeight:800, fontSize:19,
+            <span style={{ color:"var(--d-gold)", fontWeight:800, fontSize:19,
               letterSpacing:-0.5 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
           </div>
 
@@ -943,7 +945,7 @@ const noterCoursier = async (id, note) => {
             onClick={()=>{ setNotifOpen(!notifOpen); setNotifs(p=>p.map(n=>({...n,lu:true}))); }}>
             <div style={{ width:38, height:38, borderRadius:"50%", backgroundColor:"#FFD70015",
               border:"1px solid #FFD70030", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <MdNotifications style={{ color:"#FFD700", fontSize:20 }}/>
+              <MdNotifications style={{ color:"var(--d-gold)", fontSize:20 }}/>
             </div>
             {nbNonLus > 0 && (
               <span style={{
@@ -951,7 +953,7 @@ const noterCoursier = async (id, note) => {
                 backgroundColor:"#ef4444", color:"#fff",
                 borderRadius:"50%", width:19, height:19, fontSize:10, fontWeight:800,
                 display:"flex", alignItems:"center", justifyContent:"center",
-                border:"2px solid #080820",
+                border:"2px solid var(--d-bg)",
               }}>{nbNonLus}</span>
             )}
 </div>
@@ -959,7 +961,7 @@ const noterCoursier = async (id, note) => {
           {/* avatar */}
           <div style={{
             width:38, height:38, borderRadius:"50%",
-            background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+            background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
             display:"flex", alignItems:"center", justifyContent:"center",
             color:"#000", fontWeight:800, fontSize:15,
             boxShadow:"0 0 12px #FFD70044", cursor:"pointer", overflow:"hidden",
@@ -967,7 +969,7 @@ const noterCoursier = async (id, note) => {
             {profil.photo_profil ? <img src={profil.photo_profil} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/> : <>{profil.prenom[0]}{profil.nom[0]}</>}
           </div>
 
-          <span style={{ color:"#ccc", fontSize:14 }} className="d-none d-md-inline">
+          <span style={{ color:"var(--d-c-ccc)", fontSize:14 }} className="d-none d-md-inline">
             {profil.prenom}
           </span>
         </div>
@@ -980,7 +982,7 @@ const noterCoursier = async (id, note) => {
       style={{ position:"fixed", inset:0, zIndex:149 }}/>
     <div style={{
       position:"fixed", top:74, right:20, zIndex:150, maxWidth:"calc(100vw - 40px)",
-      backgroundColor:"#131330", border:"1px solid #FFD70025",
+      backgroundColor:"var(--d-card)", border:"1px solid #FFD70025",
       borderRadius:16, width:360, maxHeight:"min(480px, calc(100vh - 100px))",
       boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
       display:"flex", flexDirection:"column", overflow:"hidden",
@@ -989,7 +991,7 @@ const noterCoursier = async (id, note) => {
       <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
         display:"flex", justifyContent:"space-between", alignItems:"center",
         flexShrink:0 }}>
-        <span style={{ color:"#FFD700", fontWeight:700, fontSize:14,
+        <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:14,
           display:"flex", alignItems:"center", gap:6 }}>
           <MdNotifications style={{ fontSize:18 }}/>{" "}{tr("Notifications")}</span>
         <span style={{ color:"#666", fontSize:12 }}>
@@ -1012,11 +1014,11 @@ const noterCoursier = async (id, note) => {
               <div style={{ paddingTop:5, flexShrink:0 }}>
                 <div style={{
                   width:8, height:8, borderRadius:"50%",
-                  backgroundColor: n.lu ? "transparent" : "#FFD700",
+                  backgroundColor: n.lu ? "transparent" : "var(--d-gold)",
                 }}/>
               </div>
               <div style={{ flex:1 }}>
-                <p style={{ color:n.lu?"#888":"#fff", fontSize:13,
+                <p style={{ color:n.lu?"#888":"var(--d-text)", fontSize:13,
                   margin:"0 0 4px 0", lineHeight:1.5 }}>{n.texte}</p>
                 <small style={{ color:"#555", fontSize:11 }}>{n.time}</small>
               </div>
@@ -1099,7 +1101,7 @@ const noterCoursier = async (id, note) => {
             });
             setNotifs(p => p.map(n => ({...n, lu:true})));
           }}
-          style={{ color:"#FFD700", fontSize:12, cursor:"pointer",
+          style={{ color:"var(--d-gold)", fontSize:12, cursor:"pointer",
             display:"inline-flex", alignItems:"center", gap:6 }}>
           <MdDoneAll style={{ fontSize:16 }}/>{" "}{tr("Tout marquer comme lu")}</span>
       </div>
@@ -1113,7 +1115,7 @@ const noterCoursier = async (id, note) => {
         {/* SIDEBAR desktop */}
         <aside className="d-none d-lg-block" style={{
           width:248, minHeight:"calc(100vh - 66px)",
-          backgroundColor:"#0d0d28", borderRight:"1px solid #FFD70015",
+          backgroundColor:"var(--d-bg3)", borderRight:"1px solid #FFD70015",
           padding:"28px 0", position:"fixed", top:66, left:0, zIndex:50,
         }}>
           <SidebarContent onglet={onglet} setOnglet={setOnglet} profil={profil} commandes={commandes}/>
@@ -1124,7 +1126,7 @@ const noterCoursier = async (id, note) => {
           <>
             <div onClick={()=>setSidebarOpen(false)} style={{ position:"fixed",inset:0,backgroundColor:"#000a",zIndex:49 }}/>
             <aside style={{ width:248, position:"fixed", top:66, left:0, bottom:0,
-              backgroundColor:"#0d0d28", borderRight:"1px solid #FFD70015",
+              backgroundColor:"var(--d-bg3)", borderRight:"1px solid #FFD70015",
               padding:"28px 0", zIndex:50, overflowY:"auto" }}>
               <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}}
                 profil={profil} commandes={commandes}/>
@@ -1140,7 +1142,7 @@ const noterCoursier = async (id, note) => {
             {onglet==="accueil" && (
               <div>
                 <div style={{ marginBottom:28 }}>
-                  <h3 style={{ color:"#fff", fontWeight:800, margin:0, fontSize:22 }}>{tr("Bonjour,")}{" "}<span style={{ color:"#FFD700" }}>{profil.prenom}</span> 👋
+                  <h3 style={{ color:"var(--d-text)", fontWeight:800, margin:0, fontSize:22 }}>{tr("Bonjour,")}{" "}<span style={{ color:"var(--d-gold)" }}>{profil.prenom}</span> 👋
                   </h3>
                   <p style={{ color:"#666", marginTop:4, fontSize:14 }}>{tr("Bienvenue sur votre espace IRAKY Delivery")}</p>
                 </div>
@@ -1155,7 +1157,7 @@ const noterCoursier = async (id, note) => {
                     { label:"REFUSÉES",  val:commandes.filter(c=>c.statut==="refuse").length,                                             Icon:FaTimesCircle, color:"#ef4444" },
                   ].map(s=>(
                     <div key={s.label} style={{
-                      backgroundColor:"#131330",
+                      backgroundColor:"var(--d-card)",
                       borderRadius:12,
                       padding:"14px 20px",
                       border:`1px solid ${s.color}33`,
@@ -1176,7 +1178,7 @@ const noterCoursier = async (id, note) => {
                       </div>
 
                       <div>
-                        <div style={{ color:"#fff", fontWeight:800, fontSize:26, lineHeight:1 }}>{s.val}</div>
+                        <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:26, lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888", fontWeight:600, fontSize:11, letterSpacing:1.5, marginTop:4 }}>{tr(s.label)}</div>
                       </div>
                     </div>
@@ -1188,7 +1190,7 @@ const noterCoursier = async (id, note) => {
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
                                         <h5
                       style={{
-                        color: "#FFD700",
+                        color: "var(--d-gold)",
                         margin: 0,
                         fontWeight: 700,
                         display: "flex",
@@ -1198,7 +1200,7 @@ const noterCoursier = async (id, note) => {
                     >
                       <MdListAlt style={{ fontSize: 20 }} />{tr("Dernières commandes")}</h5>
                     <button onClick={()=>setOnglet("historique")}
-                      style={{ background:"transparent", border:"1px solid #FFD70030", color:"#FFD700",
+                      style={{ background:"transparent", border:"1px solid #FFD70030", color:"var(--d-gold)",
                         borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:12 }}>{tr("Voir tout")}</button>
                   </div>
                   {commandes.slice(0,3).map(cmd=>(
@@ -1207,12 +1209,12 @@ const noterCoursier = async (id, note) => {
                         padding:"12px 0", borderBottom:"1px solid #ffffff08", cursor:"pointer",
                         flexWrap:"wrap", gap:8 }}>
                       <div>
-                        <div style={{ color:"#fff", fontWeight:600, fontSize:14 }}>{cmd.service}</div>
+                        <div style={{ color:"var(--d-text)", fontWeight:600, fontSize:14 }}>{cmd.service}</div>
                         <div style={{ color:"#666", fontSize:12 }}>{cmd.moyen} · {cmd.date}</div>
                       </div>
                       <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                         <StatutBadge statut={cmd.statut}/>
-                        <span style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}>{cmd.tarif.toLocaleString()} Ar</span>
+                        <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:14 }}>{cmd.tarif.toLocaleString()} Ar</span>
                       </div>
                     </div>
                   ))}
@@ -1242,12 +1244,12 @@ const noterCoursier = async (id, note) => {
             {/* ═══ NOUVELLE COMMANDE ═══ */}
             {onglet==="nouvelle" && (
               <div>
-                <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+                <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
   display:"flex", alignItems:"center", gap:12 }}>
   <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
     border:"1px solid #FFD70033", display:"flex", alignItems:"center",
     justifyContent:"center", flexShrink:0 }}>
-    <MdAddCircle style={{ color:"#FFD700", fontSize:22 }}/>
+    <MdAddCircle style={{ color:"var(--d-gold)", fontSize:22 }}/>
   </div>{tr("Nouvelle commande")}</h4>
                 <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>{tr("Remplissez le formulaire et publiez votre demande aux coursiers disponibles.")}</p>
 
@@ -1255,9 +1257,9 @@ const noterCoursier = async (id, note) => {
 
                   {/* ── ÉTAPE 1 : Service ── */}
                   <div style={{ marginBottom:28 }}>
-                    <label style={{ color:"#FFD700", fontSize:13, fontWeight:700,
+                    <label style={{ color:"var(--d-gold)", fontSize:13, fontWeight:700,
                       display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-                      <span style={{ backgroundColor:"#FFD700", color:"#000", borderRadius:"50%",
+                      <span style={{ backgroundColor:"var(--d-gold)", color:"#000", borderRadius:"50%",
                         width:22, height:22, display:"inline-flex", alignItems:"center",
                         justifyContent:"center", fontSize:12, fontWeight:800 }}>1</span>{tr("Choisissez votre type de service")}</label>
 
@@ -1275,7 +1277,7 @@ const noterCoursier = async (id, note) => {
                               borderRadius:16, padding:"20px 12px", textAlign:"center",
                               cursor:"pointer",
                               border: sel?`2px solid ${s.color}`:`1px solid ${hov?s.color+"44":"#ffffff12"}`,
-                              background: sel?`${s.color}18`:(hov?`${s.color}0a`:"#0a0a1e"),
+                              background: sel?`${s.color}18`:(hov?`${s.color}0a`:"var(--d-bg2)"),
                               transition:"all 0.22s ease",
                               transform: sel||hov?"translateY(-3px)":"translateY(0)",
                               boxShadow: sel?`0 8px 24px ${s.color}30`:hov?`0 4px 16px ${s.color}20`:"none",
@@ -1311,7 +1313,7 @@ const noterCoursier = async (id, note) => {
                                           />
                                         )}
                                       </div>
-                                            <div style={{ color: sel?s.color:(hov?"#fff":"#aaa"),
+                                            <div style={{ color: sel?s.color:(hov?"var(--d-text)":"var(--d-c-aaa)"),
                               fontWeight:700, fontSize:12, lineHeight:1.3, marginBottom:6,
                               transition:"color 0.2s" }}>{tr(s.label)}</div>
                             <div style={{ color:"#555", fontSize:10, lineHeight:1.4,
@@ -1325,9 +1327,9 @@ const noterCoursier = async (id, note) => {
 
                   {/* ── ÉTAPE 2 : Moyen ── */}
                   <div style={{ marginBottom:28 }}>
-                    <label style={{ color:"#FFD700", fontSize:13, fontWeight:700,
+                    <label style={{ color:"var(--d-gold)", fontSize:13, fontWeight:700,
                       display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-                      <span style={{ backgroundColor:"#FFD700", color:"#000", borderRadius:"50%",
+                      <span style={{ backgroundColor:"var(--d-gold)", color:"#000", borderRadius:"50%",
                         width:22, height:22, display:"inline-flex", alignItems:"center",
                         justifyContent:"center", fontSize:12, fontWeight:800 }}>2</span>{tr("Choisissez votre moyen de course")}</label>
                     <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
@@ -1343,7 +1345,7 @@ const noterCoursier = async (id, note) => {
                               borderRadius:16, padding:"18px 10px", textAlign:"center",
                               cursor:"pointer",
                               border: sel?`2px solid ${m.color}`:`1px solid ${hov?m.color+"44":"#ffffff12"}`,
-                              background: sel?`${m.color}18`:(hov?`${m.color}0a`:"#0a0a1e"),
+                              background: sel?`${m.color}18`:(hov?`${m.color}0a`:"var(--d-bg2)"),
                               transition:"all 0.22s ease",
                               transform: sel||hov?"translateY(-3px)":"translateY(0)",
                               boxShadow: sel?`0 8px 24px ${m.color}30`:hov?`0 4px 12px ${m.color}20`:"none",
@@ -1356,8 +1358,8 @@ const noterCoursier = async (id, note) => {
                                 justifyContent:"center", fontSize:11, color:"#000", fontWeight:800 }}>✓</div>
                             )}
                             <div style={{ fontSize:32, marginBottom:8 }}>{m.icon}</div>
-                            <div style={{ color:sel?m.color:"#fff", fontWeight:700, fontSize:13 }}>{tr(m.label)}</div>
-                            <div style={{ color:"#FFD700", fontSize:13, fontWeight:800, marginTop:4 }}>
+                            <div style={{ color:sel?m.color:"var(--d-text)", fontWeight:700, fontSize:13 }}>{tr(m.label)}</div>
+                            <div style={{ color:"var(--d-gold)", fontSize:13, fontWeight:800, marginTop:4 }}>
                               {m.tarif.toLocaleString()} Ar
                             </div>
                             <div style={{ color:"#666", fontSize:11, marginTop:3 }}>⏱ ~{m.temps}</div>
@@ -1369,9 +1371,9 @@ const noterCoursier = async (id, note) => {
 
                   {/* ── ÉTAPE 3 : Détails ── */}
 <div style={{ marginBottom:28 }}>
-  <label style={{ color:"#FFD700", fontSize:13, fontWeight:700,
+  <label style={{ color:"var(--d-gold)", fontSize:13, fontWeight:700,
     display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-    <span style={{ backgroundColor:"#FFD700", color:"#000", borderRadius:"50%",
+    <span style={{ backgroundColor:"var(--d-gold)", color:"#000", borderRadius:"50%",
       width:22, height:22, display:"inline-flex", alignItems:"center",
       justifyContent:"center", fontSize:12, fontWeight:800 }}>3</span>{tr("Détails de la commande")}</label>
 
@@ -1379,44 +1381,44 @@ const noterCoursier = async (id, note) => {
 
     {/* Description */}
     <div style={{ gridColumn:"1/-1" }}>
-      <label style={{ color:"#aaa", fontSize:12, display:"flex",
+      <label style={{ color:"var(--d-c-aaa)", fontSize:12, display:"flex",
         alignItems:"center", gap:6, marginBottom:6 }}>
-        <MdDescription style={{ color:"#FFD700", fontSize:15 }}/>{tr("Description de la course")}<span style={{ color:"#ef4444" }}>*</span>
+        <MdDescription style={{ color:"var(--d-gold)", fontSize:15 }}/>{tr("Description de la course")}<span style={{ color:"#ef4444" }}>*</span>
       </label>
       <textarea value={form.detail}
         onChange={e=>setForm(f=>({...f,detail:e.target.value}))}
         placeholder={tr("Ex: Payer facture JIRAMA N°12345, acheter riz 5kg + huile 2L...")}
         rows={3}
         style={{ ...inp, resize:"vertical" }}
-        onFocus={e=>e.target.style.borderColor="#FFD700"}
+        onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
         onBlur={e=>e.target.style.borderColor="#FFD70030"}
       />
     </div>
 
     {/* Adresse */}
     <div style={{ gridColumn:"1/-1" }}>
-      <label style={{ color:"#aaa", fontSize:12, display:"flex",
+      <label style={{ color:"var(--d-c-aaa)", fontSize:12, display:"flex",
         alignItems:"center", gap:6, marginBottom:6 }}>
         <MdLocationOn style={{ color:"#f59e0b", fontSize:15 }}/>{tr("Adresse de prise en charge")}</label>
       <input type="text" value={form.adresse_pickup}
         onChange={e=>setForm(f=>({...f,adresse_pickup:e.target.value}))}
         placeholder={tr("Ex: Rue de l'Église, Toliara centre...")}
         style={inp}
-        onFocus={e=>e.target.style.borderColor="#FFD700"}
+        onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
         onBlur={e=>e.target.style.borderColor="#FFD70030"}
       />
     </div>
 
     {/* Heure début */}
     <div>
-      <label style={{ color:"#aaa", fontSize:12, display:"flex",
+      <label style={{ color:"var(--d-c-aaa)", fontSize:12, display:"flex",
         alignItems:"center", gap:6, marginBottom:6 }}>
         <MdAccessTime style={{ color:"#f59e0b", fontSize:15 }}/>{tr("Heure de début souhaitée")}<span style={{ color:"#ef4444" }}>*</span>
       </label>
       <input type="datetime-local" value={form.heure_debut}
         onChange={e=>setForm(f=>({...f,heure_debut:e.target.value}))}
         style={inp}
-        onFocus={e=>e.target.style.borderColor="#FFD700"}
+        onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
         onBlur={e=>e.target.style.borderColor="#FFD70030"}
       />
       <small style={{ color:"#555", fontSize:11, marginTop:4, display:"block" }}>{tr("Quand souhaitez-vous que le coursier parte ?")}</small>
@@ -1424,14 +1426,14 @@ const noterCoursier = async (id, note) => {
 
     {/* Heure livraison */}
     <div>
-      <label style={{ color:"#aaa", fontSize:12, display:"flex",
+      <label style={{ color:"var(--d-c-aaa)", fontSize:12, display:"flex",
         alignItems:"center", gap:6, marginBottom:6 }}>
         <MdLocalShipping style={{ color:"#ec4899", fontSize:15 }}/>{tr("Heure de livraison souhaitée")}<span style={{ color:"#ef4444" }}>*</span>
       </label>
       <input type="datetime-local" value={form.heure_livraison}
         onChange={e=>setForm(f=>({...f,heure_livraison:e.target.value}))}
         style={inp}
-        onFocus={e=>e.target.style.borderColor="#FFD700"}
+        onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
         onBlur={e=>e.target.style.borderColor="#FFD70030"}
       />
       <small style={{ color:"#555", fontSize:11, marginTop:4, display:"block" }}>{tr("Heure limite de livraison")}</small>
@@ -1444,19 +1446,19 @@ const noterCoursier = async (id, note) => {
     border:"1px solid #FFD70030", borderRadius:14, padding:18, marginBottom:24 }}>
 
     {/* Titre récap */}
-    <div style={{ color:"#FFD700", fontWeight:700, marginBottom:12, fontSize:14,
+    <div style={{ color:"var(--d-gold)", fontWeight:700, marginBottom:12, fontSize:14,
       display:"flex", alignItems:"center", gap:8 }}>
       <MdSummarize style={{ fontSize:18 }}/>{" "}{tr("Récapitulatif de la commande")}</div>
 
     <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:12 }}>
       {[
-        { Icon:MdMiscellaneousServices, label:"Service",    val:SERVICES.find(s=>s.id===form.service)?.label||"—", color:"#FFD700" },
+        { Icon:MdMiscellaneousServices, label:"Service",    val:SERVICES.find(s=>s.id===form.service)?.label||"—", color:"var(--d-gold)" },
         { Icon:MdDirectionsBike,        label:"Moyen",      val:moyens.find(m=>m.id===form.moyen)?.label||"—",     color:"#3b82f6" },
         { Icon:MdAttachMoney,           label:"Tarif",      val:`${tarifSel.toLocaleString()} Ar`,                  color:"#10b981" },
         { Icon:MdAccessTime,            label:"Début",      val:formatDateHeure(form.heure_debut),                              color:"#f59e0b" },
         { Icon:MdLocalShipping,         label:"Livraison",  val:formatDateHeure(form.heure_livraison),                          color:"#ec4899" },
       ].map(({Icon, label, val, color})=>(
-        <div key={label} style={{ backgroundColor:"#0a0a1e40", borderRadius:10,
+        <div key={label} style={{ backgroundColor:"var(--d-bg2-a)", borderRadius:10,
           padding:"10px 14px", display:"flex", alignItems:"center", gap:10 }}>
           <div style={{ width:32, height:32, borderRadius:8, flexShrink:0,
             backgroundColor:`${color}18`, border:`1px solid ${color}33`,
@@ -1465,7 +1467,7 @@ const noterCoursier = async (id, note) => {
           </div>
           <div>
             <div style={{ color:"#666", fontSize:11 }}>{tr(label)}</div>
-            <div style={{ color:"#FFD700", fontWeight:700, fontSize:13, marginTop:2 }}>{val}</div>
+            <div style={{ color:"var(--d-gold)", fontWeight:700, fontSize:13, marginTop:2 }}>{val}</div>
           </div>
         </div>
       ))}
@@ -1488,12 +1490,12 @@ const noterCoursier = async (id, note) => {
             {/* ═══ HISTORIQUE ═══ */}
             {onglet==="historique" && (
               <div>
-                            <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+                            <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
               display:"flex", alignItems:"center", gap:12 }}>
               <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
                 border:"1px solid #FFD70033", display:"flex", alignItems:"center",
                 justifyContent:"center", flexShrink:0 }}>
-                <MdListAlt style={{ color:"#FFD700", fontSize:22 }}/>
+                <MdListAlt style={{ color:"var(--d-gold)", fontSize:22 }}/>
               </div>{tr("Mes commandes")}</h4>
                 <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>{tr("{{nb}} commande(s) au total", { nb: commandes.length })}</p>
 
@@ -1535,7 +1537,7 @@ const noterCoursier = async (id, note) => {
                           <span style={{ fontSize:20 }}>📦</span>
                         )}
                       </div>
-                      <span style={{ color:"#fff", fontWeight:700, fontSize:15 }}>{cmd.service}</span>
+                      <span style={{ color:"var(--d-text)", fontWeight:700, fontSize:15 }}>{cmd.service}</span>
                     </div>
                           <div style={{ display:"flex", flexWrap:"wrap", gap:12 }}>
                             <span style={{ color:"#888", fontSize:12 }}>
@@ -1548,7 +1550,7 @@ const noterCoursier = async (id, note) => {
                             <span style={{ color:"#888", fontSize:12 }}>🕐 {formatDateHeure(cmd.heure_debut)} → {formatDateHeure(cmd.heure_livraison)}</span>
                           </div>
                           {cmd.coursier && (
-                            <div style={{ color:"#aaa", fontSize:13, marginTop:8 }}>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"#FFD700", fontWeight:700 }} />
+                            <div style={{ color:"var(--d-c-aaa)", fontSize:13, marginTop:8 }}>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"var(--d-gold)", fontWeight:700 }} />
                             </div>
                           )}
                           <div style={{ color:"#666", fontSize:12, marginTop:6,
@@ -1568,7 +1570,7 @@ const noterCoursier = async (id, note) => {
                               <MdDelete style={{ fontSize:14 }}/>
                             </button>
                           </div>
-                          <div style={{ color:"#FFD700", fontWeight:800, marginTop:8, fontSize:16 }}>
+                          <div style={{ color:"var(--d-gold)", fontWeight:800, marginTop:8, fontSize:16 }}>
                             {cmd.tarif.toLocaleString()} Ar
                           </div>
                         </div>
@@ -1608,7 +1610,7 @@ const noterCoursier = async (id, note) => {
 {/* ═══ MESSAGES CLIENT ═══ */}
 {onglet === "messages" && (
   <div>
-    <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+    <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
       display:"flex", alignItems:"center", gap:12 }}>
       <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#3b82f618",
         border:"1px solid #3b82f633", display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -1627,20 +1629,20 @@ const noterCoursier = async (id, note) => {
         <div key={cmd.id}
           onClick={() => { setChatCommande(cmd); setChatMessages([]); }}
           style={{ ...card, marginBottom:14, cursor:"pointer",
-            borderLeft:`4px solid ${STATUT_CONFIG[cmd.statut]?.color||"#FFD700"}`,
+            borderLeft:`4px solid ${STATUT_CONFIG[cmd.statut]?.color||"var(--d-gold)"}`,
             transition:"all 0.2s" }}
           onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
           onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
               <div style={{ width:46, height:46, borderRadius:"50%",
-                background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                 display:"flex", alignItems:"center", justifyContent:"center",
                 fontWeight:800, color:"#000", fontSize:16, flexShrink:0 }}>
                 {cmd.coursier?.[0]}
               </div>
               <div>
-                <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
+                <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:15 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
                 <div style={{ color:"#888", fontSize:12 }}>{cmd.service} · {cmd.date}</div>
               </div>
             </div>
@@ -1673,7 +1675,7 @@ const noterCoursier = async (id, note) => {
     {/* Fenêtre chat fixe en bas — même style coursier */}
     {chatCommande && (
       <div className="chat-panel" style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
-        backgroundColor:"#131330", border:"1px solid #FFD70030",
+        backgroundColor:"var(--d-card)", border:"1px solid #FFD70030",
         borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
 
         {/* Header */}
@@ -1682,13 +1684,13 @@ const noterCoursier = async (id, note) => {
           background:"linear-gradient(135deg,#FFD70015,#ff950008)" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <div style={{ width:34, height:34, borderRadius:"50%",
-              background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+              background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
               display:"flex", alignItems:"center", justifyContent:"center",
               fontWeight:800, color:"#000", fontSize:14 }}>
               {chatCommande.coursier?.[0]}
             </div>
             <div>
-              <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>{chatCommande.coursier}</div>
+              <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:14 }}>{chatCommande.coursier}</div>
               <div style={{ color:"#10b981", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>
                 <div style={{ width:6, height:6, borderRadius:"50%", backgroundColor:"#10b981" }}/>
                 {chatCommande.service}
@@ -1697,14 +1699,14 @@ const noterCoursier = async (id, note) => {
           </div>
           <button onClick={() => { setChatCommande(null); setChatMessages([]); }}
             style={{ background:"transparent", border:"none", color:"#666", fontSize:20, cursor:"pointer" }}
-            onMouseEnter={e=>e.target.style.color="#fff"}
+            onMouseEnter={e=>e.target.style.color="var(--d-text)"}
             onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
         </div>
 
         {/* Accord client */}
-        <div style={{ padding:"10px 14px", backgroundColor:"#0a0a1e",
+        <div style={{ padding:"10px 14px", backgroundColor:"var(--d-bg2)",
           borderBottom:"1px solid #FFD70018" }}>
-          <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>{tr("Accord de service :")}</div>
+          <div style={{ color:"var(--d-c-aaa)", fontSize:11, marginBottom:6, fontWeight:600 }}>{tr("Accord de service :")}</div>
           <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
             <button
               onClick={async () => {
@@ -1725,7 +1727,7 @@ const noterCoursier = async (id, note) => {
               style={{ padding:"6px 14px", borderRadius:16, fontWeight:700, fontSize:12, border:"none",
                 cursor:chatCommande.accord_client?"not-allowed":"pointer",
                 backgroundColor:chatCommande.accord_client?"#10b981":"#10b98122",
-                color:chatCommande.accord_client?"#fff":"#10b981" }}>
+                color:chatCommande.accord_client?"var(--d-text)":"#10b981" }}>
               {chatCommande.accord_client ? tr("✅ Accepté") : tr("✅ Accepter")}
             </button>
             <button
@@ -1755,7 +1757,7 @@ const noterCoursier = async (id, note) => {
 
         {/* Messages */}
        {/* ✅ Barre d'outils */}
-        <div style={{ padding:"8px 14px", backgroundColor:"#0d0d22",
+        <div style={{ padding:"8px 14px", backgroundColor:"var(--d-bg3)",
           borderBottom:"1px solid #FFD70010", display:"flex",
           justifyContent:"space-between", alignItems:"center" }}>
           <span style={{ color:"#666", fontSize:11 }}>{chatMessages.length} message(s)</span>
@@ -1789,7 +1791,7 @@ const noterCoursier = async (id, note) => {
               onClick={() => { setModeSelection(!modeSelection); setSelectedMsgs(new Set()); }}
               style={{ background: modeSelection ? "#FFD70020" : "transparent",
                 border:`1px solid ${modeSelection ? "#FFD70044" : "#ffffff20"}`,
-                color: modeSelection ? "#FFD700" : "#666",
+                color: modeSelection ? "var(--d-gold)" : "#666",
                 borderRadius:8, padding:"4px 10px", cursor:"pointer", fontSize:11 }}>
               {modeSelection ? tr("✕ Annuler") : tr("☑ Sélectionner")}
             </button>
@@ -1825,8 +1827,8 @@ const noterCoursier = async (id, note) => {
                 }}>
                 {modeSelection && (
                   <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
-                    border:`2px solid ${isSelected ? "#FFD700" : "#444"}`,
-                    backgroundColor: isSelected ? "#FFD700" : "transparent",
+                    border:`2px solid ${isSelected ? "var(--d-gold)" : "#444"}`,
+                    backgroundColor: isSelected ? "var(--d-gold)" : "transparent",
                     display:"flex", alignItems:"center", justifyContent:"center",
                     marginRight:8, alignSelf:"center", fontSize:11, color:"#000" }}>
                     {isSelected && "✓"}
@@ -1834,7 +1836,7 @@ const noterCoursier = async (id, note) => {
                 )}
                 {!isClient && !modeSelection && (
                   <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
-                    background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                    background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                     display:"flex", alignItems:"center", justifyContent:"center",
                     fontWeight:800, color:"#000", fontSize:11, marginRight:6, alignSelf:"flex-end" }}>
                     {chatCommande.coursier?.[0]}
@@ -1842,13 +1844,13 @@ const noterCoursier = async (id, note) => {
                 )}
                 <div style={{
                   backgroundColor: isSelected ? "#FFD70033"
-                    : isClient ? "#FFD70022" : "#1a1a35",
-                  border:`1px solid ${isSelected ? "#FFD700" : isClient ? "#FFD70044" : "#ffffff15"}`,
+                    : isClient ? "#FFD70022" : "var(--d-card3)",
+                  border:`1px solid ${isSelected ? "var(--d-gold)" : isClient ? "#FFD70044" : "#ffffff15"}`,
                   borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                   padding:"9px 14px", maxWidth:"75%",
                   transition:"all 0.15s",
                 }}>
-                  <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                  <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
                   <div style={{ color:"#666", fontSize:10, marginTop:3, textAlign:"right",
                     display:"flex", gap:6, justifyContent:"flex-end", alignItems:"center" }}>
                     {m.modifie && <span style={{ color:"#888" }}>{tr("modifié ·")}</span>}
@@ -1868,15 +1870,15 @@ const noterCoursier = async (id, note) => {
           <input value={chatMsg} onChange={e=>setChatMsg(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&chatMsg.trim()&&envoyerChatMsg()}
             placeholder={tr("Écrire au coursier...")}
-            style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70030",
-              color:"#fff", borderRadius:12, padding:"9px 14px", fontSize:13, outline:"none" }}
-            onFocus={e=>e.target.style.borderColor="#FFD700"}
+            style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030",
+              color:"var(--d-text)", borderRadius:12, padding:"9px 14px", fontSize:13, outline:"none" }}
+            onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
             onBlur={e=>e.target.style.borderColor="#FFD70030"}
           />
           <button onClick={envoyerChatMsg}
             disabled={!chatMsg.trim() || chatLoading}
             style={{
-              background:"linear-gradient(135deg,#FFD700,#ff9500)",
+              background:"linear-gradient(135deg,var(--d-gold),#ff9500)",
               color:"#000", border:"none", borderRadius:12, padding:"9px 14px",
               cursor: chatMsg.trim() && !chatLoading ? "pointer" : "not-allowed",
               opacity: chatMsg.trim() ? 1 : 0.4,
@@ -1899,12 +1901,12 @@ const noterCoursier = async (id, note) => {
 {/* ═══ SUIVI ═══ */}
 {onglet === "suivi" && (
   <div>
-    <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+    <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
       display:"flex", alignItems:"center", gap:12 }}>
       <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
         border:"1px solid #FFD70033", display:"flex", alignItems:"center",
         justifyContent:"center", flexShrink:0 }}>
-        <MdLocationOn style={{ color:"#FFD700", fontSize:22 }}/>
+        <MdLocationOn style={{ color:"var(--d-gold)", fontSize:22 }}/>
       </div>{tr("Suivi en temps réel")}</h4>
     <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>{tr("Commandes actives en ce moment")}</p>
 
@@ -1926,7 +1928,7 @@ const noterCoursier = async (id, note) => {
             <div style={{ display:"flex", justifyContent:"space-between",
               flexWrap:"wrap", gap:10, marginBottom:20 }}>
               <div>
-                <div style={{ color:"#fff", fontWeight:700, fontSize:16 }}>{cmd.service}</div>
+                <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:16 }}>{cmd.service}</div>
                 <div style={{ color:"#888", fontSize:13, marginTop:4 }}>
                   {cmd.moyen} · 📢 {formatDateHeure(cmd.heure_publication)} · 🕐 {formatDateHeure(cmd.heure_debut)} → {formatDateHeure(cmd.heure_livraison)}
                 </div>
@@ -1952,7 +1954,7 @@ const noterCoursier = async (id, note) => {
                   <div key={s} style={{ display:"flex", alignItems:"center", flex:1 }}>
                     <div style={{
                       width:36, height:36, borderRadius:"50%", flexShrink:0,
-                      background: done ? "linear-gradient(135deg,#FFD700,#ff9500)" : "#1a1a35",
+                      background: done ? "linear-gradient(135deg,var(--d-gold),#ff9500)" : "var(--d-card3)",
                       border: done ? "none" : "2px solid #ffffff15",
                       display:"flex", alignItems:"center", justifyContent:"center",
                       fontSize:14, fontWeight:800, color:done?"#000":"#444",
@@ -1964,7 +1966,7 @@ const noterCoursier = async (id, note) => {
                     {i < 3 && (
                       <div style={{
                         flex:1, height:4, borderRadius:2,
-                        background: i < idx ? "linear-gradient(90deg,#FFD700,#ff9500)" : "#ffffff0f",
+                        background: i < idx ? "linear-gradient(90deg,var(--d-gold),#ff9500)" : "#ffffff0f",
                         transition:"all 0.4s",
                       }}/>
                     )}
@@ -1974,7 +1976,7 @@ const noterCoursier = async (id, note) => {
             </div>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:16 }}>
               {[tr("En attente"), tr("Négociation"), tr("Accepté"), tr("Terminé")].map((l, i) => (
-                <span key={l} style={{ fontSize:11, color:i<=idx?"#FFD700":"#444",
+                <span key={l} style={{ fontSize:11, color:i<=idx?"var(--d-gold)":"#444",
                   flex:1, textAlign:i===0?"left":i===3?"right":"center",
                   fontWeight:i<=idx?600:400 }}>{l}</span>
               ))}
@@ -1989,13 +1991,13 @@ const noterCoursier = async (id, note) => {
                     flexWrap:"wrap", gap:10 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <div style={{ width:36, height:36, borderRadius:"50%",
-                        background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                        background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                         display:"flex", alignItems:"center", justifyContent:"center",
                         fontWeight:800, color:"#000", fontSize:14 }}>
                         {cmd.coursier[0]}
                       </div>
                       <div>
-                        <div style={{ color:"#FFD700", fontWeight:700, fontSize:14 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
+                        <div style={{ color:"var(--d-gold)", fontWeight:700, fontSize:14 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
                         {/* ✅ Étoile du coursier directement visible */}
                         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                           <Etoiles value={cmd.coursier_note || 0}/>
@@ -2011,13 +2013,13 @@ const noterCoursier = async (id, note) => {
       const { isConfirmed } = await Swal.fire({
         title: tr("Terminer la mission ?"),
         html: tr("Confirmer la fin de la mission <b>\"{{service}}\"</b> ?<br/> Le coursier recevra 1 étoile automatiquement.", { service: cmd.service }),
-        background: "#131330",
-        color: "#fff",
+        background: "var(--d-card)",
+        color: "var(--d-text)",
         showCancelButton: true,
         confirmButtonText: tr("Oui, terminer"),
         cancelButtonText: tr("Annuler"),
         confirmButtonColor: "#10b981",
-        cancelButtonColor: "#333355",
+        cancelButtonColor: "var(--d-border)",
         reverseButtons: true,
         customClass: { popup: "swal-iraky" },
       });
@@ -2069,7 +2071,7 @@ const noterCoursier = async (id, note) => {
     }}
     style={{
       background: "linear-gradient(135deg,#10b981,#059669)",
-      color: "#fff", border: "none", borderRadius: 12,
+      color: "var(--d-text)", border: "none", borderRadius: 12,
       padding: "10px 20px", cursor: "pointer",
       fontWeight: 700, fontSize: 13,
       display: "flex", alignItems: "center", gap: 8,
@@ -2096,7 +2098,7 @@ const noterCoursier = async (id, note) => {
             {onglet==="profil" && (
               <div>
                
-                    <h4 style={{ color:"#FFD700", marginBottom:24, fontWeight:800, fontSize:20,
+                    <h4 style={{ color:"var(--d-gold)", marginBottom:24, fontWeight:800, fontSize:20,
                       display:"flex", alignItems:"center", gap:12 }}>
                       <div style={{
                         width:38, height:38, borderRadius:10,
@@ -2105,27 +2107,27 @@ const noterCoursier = async (id, note) => {
                         display:"flex", alignItems:"center", justifyContent:"center",
                         flexShrink:0,
                       }}>
-                        <MdPerson style={{ color:"#FFD700", fontSize:22 }}/>
+                        <MdPerson style={{ color:"var(--d-gold)", fontSize:22 }}/>
                       </div>{tr("Mon profil")}</h4>
                 <div style={card}>
                   <div style={{ textAlign:"center", marginBottom:28 }}>
                     <AvatarProfilEditable photo={profil.photo_profil} initiales={`${profil.prenom?.[0] || ""}${profil.nom?.[0] || ""}`} apiUrl="https://projet-iraky-delivery.onrender.com" onSaved={(url)=>setProfil(p=>({ ...p, photo_profil:url }))} />
-                    <div style={{ color:"#fff", fontWeight:800, fontSize:20 }}>
+                    <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:20 }}>
                       {profil.prenom} {profil.nom}
                     </div>
                     <div style={{ marginTop:6 }}>
-                      <span style={{ backgroundColor:"#FFD70018", color:"#FFD700",
+                      <span style={{ backgroundColor:"#FFD70018", color:"var(--d-gold)",
                         borderRadius:20, padding:"3px 14px", fontSize:12, border:"1px solid #FFD70033" }}>{tr("✦ Client IRAKY")}</span>
                     </div>
                   </div>
             {[
-              { Icon:MdPerson,     label:"Nom",       val:profil.nom,       color:"#FFD700" },
+              { Icon:MdPerson,     label:"Nom",       val:profil.nom,       color:"var(--d-gold)" },
               { Icon:FaUser,       label:"Prénom",    val:profil.prenom,    color:"#3b82f6" },
               { Icon:MdEmail,      label:"Email",     val:profil.email,     color:"#8b5cf6" },
               { Icon:MdPhone,      label:"Téléphone", val:profil.telephone, color:"#10b981" },
               { Icon:MdLocationOn, label:"Adresse",   val:profil.adresse,   color:"#f59e0b" },
             ].map(({Icon, label, val, color})=>(
-              <div key={label} style={{ backgroundColor:"#0a0a1e", borderRadius:12,
+              <div key={label} style={{ backgroundColor:"var(--d-bg2)", borderRadius:12,
                 padding:"14px 18px", border:"1px solid #FFD70018",
                 transition:"all 0.2s", display:"flex", alignItems:"center", gap:14 }}
                 onMouseEnter={e=>e.currentTarget.style.borderColor="#FFD70033"}
@@ -2143,7 +2145,7 @@ const noterCoursier = async (id, note) => {
 
                 <div>
                   <div style={{ color:"#666", fontSize:11, marginBottom:3 }}>{tr(label)}</div>
-                  <div style={{ color:"#fff", fontWeight:600, fontSize:14 }}>{val}</div>
+                  <div style={{ color:"var(--d-text)", fontWeight:600, fontSize:14 }}>{val}</div>
                 </div>
               </div>
             ))}
@@ -2159,9 +2161,9 @@ const noterCoursier = async (id, note) => {
                         display:"flex", alignItems:"center", justifyContent:"center",
                         flexShrink:0,
                       }}>
-                        <MdBarChart style={{ color:"#FFD700", fontSize:20 }}/>
+                        <MdBarChart style={{ color:"var(--d-gold)", fontSize:20 }}/>
                       </div>
-                      <span style={{ color:"#FFD700", fontWeight:700, fontSize:15 }}>{tr("Mes statistiques")}</span>
+                      <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:15 }}>{tr("Mes statistiques")}</span>
                     </div>
                         <div className="stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16 }}>
                           {[
@@ -2171,7 +2173,7 @@ const noterCoursier = async (id, note) => {
                             { label:"REFUSÉES",  val:commandes.filter(c=>c.statut==="refuse").length,                                             Icon:FaTimesCircle, color:"#ef4444" },
                           ].map(s=>(
                             <div key={s.label} style={{
-                              backgroundColor:"#131330",
+                              backgroundColor:"var(--d-card)",
                               borderRadius:12,
                               padding:"14px 20px",
                               border:`1px solid ${s.color}33`,
@@ -2190,7 +2192,7 @@ const noterCoursier = async (id, note) => {
                                 <s.Icon style={{ color:s.color, fontSize:22 }}/>
                               </div>
                               <div>
-                                <div style={{ color:"#fff", fontWeight:800, fontSize:26, lineHeight:1 }}>{s.val}</div>
+                                <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:26, lineHeight:1 }}>{s.val}</div>
                                 <div style={{ color:"#888", fontWeight:600, fontSize:11, letterSpacing:1.5, marginTop:4 }}>{tr(s.label)}</div>
                               </div>
                             </div>
@@ -2204,12 +2206,12 @@ const noterCoursier = async (id, note) => {
                   {/* ═══ AIDE ═══ */}
                   {onglet === "aide" && (
                     <div>
-                  <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+                  <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
                     display:"flex", alignItems:"center", gap:12 }}>
                     <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#FFD70018",
                       border:"1px solid #FFD70033", display:"flex", alignItems:"center",
                       justifyContent:"center", flexShrink:0 }}>
-                      <MdHelp style={{ color:"#FFD700", fontSize:22 }}/>
+                      <MdHelp style={{ color:"var(--d-gold)", fontSize:22 }}/>
                     </div>{tr("Aide & Support")}</h4>
                       <p style={{ color:"#666", marginBottom:28, fontSize:14 }}>{tr("Comment pouvons-nous vous aider ?")}</p>
 
@@ -2235,7 +2237,7 @@ const noterCoursier = async (id, note) => {
                             onClick={item.onClick}
                             className="aide-card-anim"
                             style={{
-                              backgroundColor:"#131330",
+                              backgroundColor:"var(--d-card)",
                               borderRadius:16,
                               padding:"28px 20px",
                               border:`1px solid ${item.color}30`,
@@ -2274,7 +2276,7 @@ const noterCoursier = async (id, note) => {
                               <item.Icon style={{ color:item.color, fontSize:26 }}/>
                             </div>
 
-                            <div style={{ color:"#fff", fontWeight:800, fontSize:15, marginBottom:6 }}>
+                            <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:15, marginBottom:6 }}>
                               {tr(item.title)}
                             </div>
                             <div style={{ color:"#888", fontSize:12, lineHeight:1.5, marginBottom:14 }}>
@@ -2296,7 +2298,7 @@ const noterCoursier = async (id, note) => {
                       {/* FAQ */}
                       <div style={{ ...card }}>
                         <div style={{
-                          color:"#FFD700", fontWeight:700, marginBottom:16, fontSize:15,
+                          color:"var(--d-gold)", fontWeight:700, marginBottom:16, fontSize:15,
                           display:"flex", alignItems:"center", gap:8,
                         }}>
                           <MdMenuBook style={{ fontSize:20 }}/>{" "}{tr("Questions fréquentes")}</div>
@@ -2307,16 +2309,16 @@ const noterCoursier = async (id, note) => {
                           ["Comment noter un coursier ?",          "Après qu'une commande soit 'Terminée', un bouton d'évaluation apparaît dans vos commandes."],
                         ].map(([q, a], i) => (
                           <details key={i} style={{
-                            marginBottom:10, backgroundColor:"#0a0a1e",
+                            marginBottom:10, backgroundColor:"var(--d-bg2)",
                             borderRadius:12, border:"1px solid #FFD70015", padding:"14px 18px",
                           }}>
                             <summary style={{
-                              color:"#fff", fontWeight:600, cursor:"pointer", fontSize:14,
+                              color:"var(--d-text)", fontWeight:600, cursor:"pointer", fontSize:14,
                               listStyle:"none", display:"flex",
                               justifyContent:"space-between", alignItems:"center",
                             }}>
                               {tr(q)}
-                              <MdKeyboardArrowDown className="faq-chevron" style={{ color:"#FFD700", fontSize:24, flexShrink:0 }}/>
+                              <MdKeyboardArrowDown className="faq-chevron" style={{ color:"var(--d-gold)", fontSize:24, flexShrink:0 }}/>
                             </summary>
                             <p style={{
                               color:"#888", fontSize:13, marginTop:10,
@@ -2330,7 +2332,7 @@ const noterCoursier = async (id, note) => {
                       {/* ══════════════ CHAT SUPPORT — réel, connecté à la BDD ══════════════ */}
                       {aideVue === "chat" && (
                         <div className="aide-fade-in" style={{
-                          backgroundColor:"#131330", borderRadius:18,
+                          backgroundColor:"var(--d-card)", borderRadius:18,
                           border:"1px solid #3b82f630", overflow:"hidden",
                           boxShadow:"0 16px 44px #3b82f620",
                           display:"flex", flexDirection:"column",
@@ -2345,17 +2347,17 @@ const noterCoursier = async (id, note) => {
                               style={{ background:"#ffffff10", border:"1px solid #ffffff20",
                                 borderRadius:10, width:34, height:34, cursor:"pointer",
                                 display:"flex", alignItems:"center", justifyContent:"center",
-                                color:"#fff", flexShrink:0 }}>
+                                color:"var(--d-text)", flexShrink:0 }}>
                               <MdArrowBack style={{ fontSize:18 }}/>
                             </button>
                             <div style={{ width:40, height:40, borderRadius:"50%",
                               background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                               display:"flex", alignItems:"center", justifyContent:"center",
                               flexShrink:0, boxShadow:"0 0 0 3px #3b82f620" }}>
-                              <MdSupportAgent style={{ color:"#fff", fontSize:20 }}/>
+                              <MdSupportAgent style={{ color:"var(--d-text)", fontSize:20 }}/>
                             </div>
                             <div style={{ flex:1 }}>
-                              <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>{tr("Support IRAKY Delivery")}</div>
+                              <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:15 }}>{tr("Support IRAKY Delivery")}</div>
                               <div style={{ color:"#3b82f6", fontSize:11, display:"flex", alignItems:"center", gap:5 }}>
                                 <span className="aide-dot-online"/>{" "}{tr("En ligne · répond sous 5 min")}</div>
                             </div>
@@ -2389,11 +2391,11 @@ const noterCoursier = async (id, note) => {
                                       background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                                       display:"flex", alignItems:"center", justifyContent:"center",
                                       marginRight:6, alignSelf:"flex-end" }}>
-                                      <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                                      <MdSupportAgent style={{ color:"var(--d-text)", fontSize:13 }}/>
                                     </div>
                                   )}
                                   <div style={{
-                                    backgroundColor: isClient ? "#3b82f622" : "#1a1a35",
+                                    backgroundColor: isClient ? "#3b82f622" : "var(--d-card3)",
                                     border:`1px solid ${m.echec ? "#ef4444" : isClient ? "#3b82f644" : "#ffffff15"}`,
                                     borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                                     padding:"9px 14px", maxWidth:"75%", opacity: m.envoi ? 0.6 : 1,
@@ -2402,7 +2404,7 @@ const noterCoursier = async (id, note) => {
                                       <div style={{ color:"#3b82f6", fontSize:10, fontWeight:700,
                                         marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>{tr("🤖 Assistant automatique")}</div>
                                     )}
-                                    <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                                    <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
                                     <div style={{ color: m.echec ? "#ef6666" : "#666", fontSize:10, marginTop:3,
                                       textAlign:"right" }}>
                                       {m.echec ? tr("Échec de l'envoi") : (m.time || (m.created_at
@@ -2419,9 +2421,9 @@ const noterCoursier = async (id, note) => {
                                   background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                                   display:"flex", alignItems:"center", justifyContent:"center",
                                   marginRight:6, alignSelf:"flex-end" }}>
-                                  <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                                  <MdSupportAgent style={{ color:"var(--d-text)", fontSize:13 }}/>
                                 </div>
-                                <div style={{ backgroundColor:"#1a1a35", border:"1px solid #ffffff15",
+                                <div style={{ backgroundColor:"var(--d-card3)", border:"1px solid #ffffff15",
                                   borderRadius:"16px 16px 16px 4px", padding:"12px 16px",
                                   display:"flex", gap:4, alignItems:"center" }}>
                                   <span className="aide-typing-dot"/>
@@ -2439,8 +2441,8 @@ const noterCoursier = async (id, note) => {
                             <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
                               onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
                               placeholder={tr("Écrivez votre message au support...")}
-                              style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #3b82f640",
-                                color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
+                              style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
+                                color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
                                 transition:"border-color 0.2s" }}
                               onFocus={e=>e.target.style.borderColor="#3b82f6"}
                               onBlur={e=>e.target.style.borderColor="#3b82f640"}
@@ -2449,7 +2451,7 @@ const noterCoursier = async (id, note) => {
                               disabled={!supportMsg.trim() || supportEnvoi}
                               style={{
                                 background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
-                                color:"#fff", border:"none", borderRadius:12, padding:"10px 16px",
+                                color:"var(--d-text)", border:"none", borderRadius:12, padding:"10px 16px",
                                 cursor: supportMsg.trim() && !supportEnvoi ? "pointer" : "not-allowed",
                                 opacity: supportMsg.trim() ? 1 : 0.4,
                                 display:"flex", alignItems:"center", justifyContent:"center",
@@ -2458,7 +2460,7 @@ const noterCoursier = async (id, note) => {
                               onMouseEnter={e=>{ if(supportMsg.trim()) e.currentTarget.style.transform="scale(1.06)"; }}
                               onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
                               {supportEnvoi
-                                ? <div style={{ width:16, height:16, border:"2px solid #fff",
+                                ? <div style={{ width:16, height:16, border:"2px solid var(--d-text)",
                                     borderTop:"2px solid transparent", borderRadius:"50%",
                                     animation:"spin 0.6s linear infinite" }}/>
                                 : <MdSend style={{ fontSize:18 }}/>
@@ -2474,14 +2476,14 @@ const noterCoursier = async (id, note) => {
                           <button onClick={()=>setAideVue("menu")}
                             style={{ background:"#ffffff10", border:"1px solid #ffffff20",
                               borderRadius:10, padding:"8px 16px", cursor:"pointer",
-                              color:"#fff", display:"flex", alignItems:"center", gap:8,
+                              color:"var(--d-text)", display:"flex", alignItems:"center", gap:8,
                               fontSize:12, marginBottom:18 }}>
                             <MdArrowBack style={{ fontSize:16 }}/>{" "}{tr("Retour")}</button>
 
-                          <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,#131330)",
+                          <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,var(--d-card))",
                             border:"1px solid #f59e0b30", display:"flex", alignItems:"center", gap:14 }}>
                             <MdInfo style={{ color:"#f59e0b", fontSize:28, flexShrink:0 }}/>
-                            <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>{tr("Ce guide couvre toutes les fonctionnalités de votre espace client IRAKY Delivery. Cliquez sur une section pour dérouler les explications.")}</div>
+                            <div style={{ color:"var(--d-c-ccc)", fontSize:13, lineHeight:1.6 }}>{tr("Ce guide couvre toutes les fonctionnalités de votre espace client IRAKY Delivery. Cliquez sur une section pour dérouler les explications.")}</div>
                           </div>
 
                           {GUIDE_SECTIONS.map((s, i) => {
@@ -2489,7 +2491,7 @@ const noterCoursier = async (id, note) => {
                             return (
                               <div key={i} className="aide-card-anim" style={{
                                 animationDelay:`${i*0.06}s`,
-                                backgroundColor:"#131330", borderRadius:14,
+                                backgroundColor:"var(--d-card)", borderRadius:14,
                                 border:`1px solid ${ouvert ? s.color+"55" : "#ffffff15"}`,
                                 marginBottom:12, overflow:"hidden",
                                 transition:"border-color 0.25s",
@@ -2502,7 +2504,7 @@ const noterCoursier = async (id, note) => {
                                     display:"flex", alignItems:"center", justifyContent:"center" }}>
                                     <s.Icon style={{ color:s.color, fontSize:20 }}/>
                                   </div>
-                                  <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
+                                  <div style={{ flex:1, color:"var(--d-text)", fontWeight:700, fontSize:14 }}>
                                     {tr(s.titre)}
                                   </div>
                                   {ouvert ? <MdKeyboardArrowUp style={{ color:s.color, fontSize:24 }}/> : <MdKeyboardArrowDown style={{ color:"#666", fontSize:24 }}/>}
@@ -2513,7 +2515,7 @@ const noterCoursier = async (id, note) => {
                                   transition:"max-height 0.35s ease, opacity 0.3s ease",
                                   overflow:"hidden",
                                 }}>
-                                  <div style={{ padding:"0 18px 18px 74px", color:"#999",
+                                  <div style={{ padding:"0 18px 18px 74px", color:"var(--d-c-999)",
                                     fontSize:13, lineHeight:1.7, display:"flex", gap:8 }}>
                                     <MdCheckCircle style={{ color:s.color, fontSize:15, flexShrink:0, marginTop:2 }}/>
                                     <span>{tr(s.texte)}</span>
@@ -2534,7 +2536,7 @@ const noterCoursier = async (id, note) => {
       {/* MODAL DÉTAIL */}
       {detailCmd && (
         <Modal onClose={()=>setDetailCmd(null)} size="lg">
-          <h5 style={{ color:"#FFD700", marginBottom:20, fontWeight:800, fontSize:17,
+          <h5 style={{ color:"var(--d-gold)", marginBottom:20, fontWeight:800, fontSize:17,
             display:"flex", alignItems:"center", gap:12 }}>
             {(() => {
               const svc = SERVICES.find(s => s.label === detailCmd.service);
@@ -2564,14 +2566,14 @@ const noterCoursier = async (id, note) => {
             ].map(([k,v])=>(
               <div key={k} style={{ padding:"10px 0", borderBottom:"1px solid #ffffff08" }}>
                 <div style={{ color:"#666", fontSize:11, marginBottom:3 }}>{k}</div>
-                <div style={{ color:"#fff", fontWeight:600, fontSize:13 }}>{v}</div>
+                <div style={{ color:"var(--d-text)", fontWeight:600, fontSize:13 }}>{v}</div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop:14, padding:"12px 16px", backgroundColor:"#0a0a1e",
+          <div style={{ marginTop:14, padding:"12px 16px", backgroundColor:"var(--d-bg2)",
             borderRadius:12, border:"1px solid #FFD70018" }}>
             <div style={{ color:"#666", fontSize:11, marginBottom:4 }}>{tr("Description")}</div>
-            <div style={{ color:"#fff", fontSize:13, lineHeight:1.6 }}>{detailCmd.detail}</div>
+            <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.6 }}>{detailCmd.detail}</div>
           </div>
           {detailCmd.note && (
             <div style={{ marginTop:14 }}>
@@ -2588,15 +2590,15 @@ const noterCoursier = async (id, note) => {
     <div style={{ textAlign: "center", padding: "8px 0" }}>
       <div style={{
         width: 64, height: 64, borderRadius: "50%",
-        background: "linear-gradient(135deg,#FFD700,#ff9500)",
+        background: "linear-gradient(135deg,var(--d-gold),#ff9500)",
         display: "flex", alignItems: "center", justifyContent: "center",
         margin: "0 auto 16px", boxShadow: "0 0 24px #FFD70055",
       }}>
         <MdStar style={{ fontSize: 32, color: "#000" }} />
       </div>
 
-      <h5 style={{ color: "#FFD700", fontWeight: 800, marginBottom: 6 }}>{tr("Mission terminée !")}</h5>
-      <p style={{ color: "#aaa", fontSize: 14, marginBottom: 4 }}>{tr("Coursier :")}{" "}<strong style={{ color: "#fff" }}>{noteCmd.coursier}</strong>
+      <h5 style={{ color: "var(--d-gold)", fontWeight: 800, marginBottom: 6 }}>{tr("Mission terminée !")}</h5>
+      <p style={{ color: "var(--d-c-aaa)", fontSize: 14, marginBottom: 4 }}>{tr("Coursier :")}{" "}<strong style={{ color: "var(--d-text)" }}>{noteCmd.coursier}</strong>
       </p>
       <p style={{ color: "#666", fontSize: 13, marginBottom: 24 }}>{tr("Merci de noter le service rendu — une note est obligatoire.")}</p>
 
@@ -2605,7 +2607,7 @@ const noterCoursier = async (id, note) => {
       </div>
 
       {noteTmp > 0 && (
-        <div style={{ color: "#FFD700", fontWeight: 700, fontSize: 14, marginBottom: 24 }}>
+        <div style={{ color: "var(--d-gold)", fontWeight: 700, fontSize: 14, marginBottom: 24 }}>
           {["", tr("Mauvais 😞"), tr("Passable 😐"), tr("Bien 🙂"), tr("Très bien 😊"), tr("Excellent 🤩")][noteTmp]}
         </div>
       )}
@@ -2629,11 +2631,11 @@ const noterCoursier = async (id, note) => {
       {confirmDel && (
         <Modal onClose={()=>setConfirmDel(null)}>
           <h5 style={{ color:"#ef4444", marginBottom:12, fontWeight:800 }}>{tr("🗑 Confirmer la suppression")}</h5>
-          <p style={{ color:"#aaa", fontSize:14, marginBottom:24, lineHeight:1.6 }}>{tr("Voulez-vous vraiment supprimer cette commande ? Cette action est irréversible.")}</p>
+          <p style={{ color:"var(--d-c-aaa)", fontSize:14, marginBottom:24, lineHeight:1.6 }}>{tr("Voulez-vous vraiment supprimer cette commande ? Cette action est irréversible.")}</p>
           <div style={{ display:"flex", gap:12 }}>
             <button onClick={()=>setConfirmDel(null)}
               style={{ flex:1, padding:"12px", borderRadius:12, border:"1px solid #ffffff20",
-                backgroundColor:"transparent", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
+                backgroundColor:"transparent", color:"var(--d-text)", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimer(confirmDel)}
               style={{ flex:1, padding:"12px", borderRadius:12, border:"none",
                 backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Supprimer")}</button>
@@ -2670,7 +2672,7 @@ const noterCoursier = async (id, note) => {
    { box-sizing:border-box; }
   body { overflow-x:hidden; }
   input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(1) brightness(0.6); }
-  textarea:focus, input:focus { border-color:#FFD700 !important; }
+  textarea:focus, input:focus { border-color:var(--d-gold) !important; }
   details summary::-webkit-details-marker { display:none; }
 
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }

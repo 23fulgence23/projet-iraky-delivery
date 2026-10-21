@@ -1,3 +1,4 @@
+import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect, useRef  } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
@@ -86,7 +87,7 @@ function Etoiles({ value: valeurBrute }) {
     <div style={{ display: "flex", gap: 3 }}>
       {[1,2,3,4,5].map(i => (
         i <= value
-          ? <MdStar     key={i} style={{ color: "#FFD700", fontSize: 18 }}/>
+          ? <MdStar     key={i} style={{ color: "var(--d-gold)", fontSize: 18 }}/>
           : <MdStarBorder key={i} style={{ color: "#444",   fontSize: 18 }}/>
       ))}
     </div>
@@ -126,7 +127,7 @@ function Modal({ children, onClose, size = "md" }) {
       display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        backgroundColor: "#131330", borderRadius: 20, padding: 28,
+        backgroundColor: "var(--d-card)", borderRadius: 20, padding: 28,
         width: "100%", maxWidth: size === "lg" ? 640 : 480,
         border: "1px solid #FFD70030", boxShadow: "0 24px 60px rgba(0,0,0,0.7)",
         animation: "modalIn 0.25s ease", maxHeight: "90vh", overflowY: "auto",
@@ -135,7 +136,7 @@ function Modal({ children, onClose, size = "md" }) {
           float: "right", background: "transparent", border: "none",
           color: "#666", fontSize: 22, cursor: "pointer",
         }}
-          onMouseEnter={e => e.target.style.color = "#fff"}
+          onMouseEnter={e => e.target.style.color = "var(--d-text)"}
           onMouseLeave={e => e.target.style.color = "#666"}>✕</button>
         {children}
       </div>
@@ -177,8 +178,8 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={46} fontSize={17} style={{ boxShadow: "0 0 14px #FFD70044" }} />
           <div>
-            <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{profil.prenom} {profil.nom}</div>
-            <div style={{ color: "#FFD700", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ color: "var(--d-text)", fontWeight: 700, fontSize: 13 }}>{profil.prenom} {profil.nom}</div>
+            <div style={{ color: "var(--d-gold)", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
               <MdDeliveryDining style={{ fontSize: 13 }}/>{" "}{tr("Coursier IRAKY")}</div>
           </div>
         </div>
@@ -191,11 +192,11 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "11px 20px", cursor: "pointer", fontSize: 13.5,
               backgroundColor: onglet === item.id ? "#FFD70012" : "transparent",
-              borderLeft: onglet === item.id ? "3px solid #FFD700" : "3px solid transparent",
-              color: onglet === item.id ? "#FFD700" : "#8888aa",
+              borderLeft: onglet === item.id ? "3px solid var(--d-gold)" : "3px solid transparent",
+              color: onglet === item.id ? "var(--d-gold)" : "#8888aa",
               transition: "all 0.18s", borderRadius: "0 10px 10px 0", marginRight: 8,
             }}
-            onMouseEnter={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "#ffffff08"; e.currentTarget.style.color = "#fff"; }}}
+            onMouseEnter={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "#ffffff08"; e.currentTarget.style.color = "var(--d-text)"; }}}
             onMouseLeave={e => { if (onglet !== item.id) { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#8888aa"; }}}>
             <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <item.Icon style={{ fontSize: 18 }}/> {tr(item.label)}
@@ -208,7 +209,8 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
         ))}
       </div>
 
-      <div style={{ padding: 16 }}>
+      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
+        <ThemeToggle size={40} />
         <button onClick={() => {
             const CLES_A_GARDER = ["coursier_missions_masques", "coursier_messages_masques"];
             const sauvegarde = {};
@@ -345,7 +347,7 @@ function DashboardCoursier() {
   // ══════ Guide interactif — contenu aligné sur les fonctionnalités réelles de l'espace coursier ══════
   const GUIDE_SECTIONS_COURSIER = [
     {
-      Icon: MdDeliveryDining, color:"#FFD700",
+      Icon: MdDeliveryDining, color:"var(--d-gold)",
       titre: "Trouver une mission disponible",
       texte: "L'onglet « Missions disponibles » liste toutes les commandes publiées par les clients, en attente d'un coursier. Consultez le détail (service, tarif, adresse, horaires) puis cliquez sur « Je prends cette mission » pour la réserver.",
     },
@@ -546,14 +548,14 @@ useEffect(() => {
       icon: "warning",
       title: tr("Retirer de mes missions"),
       html: tr("Voulez-vous vraiment retirer cette mission de votre liste ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
-      background: "#131330",
-      color: "#fff",
+      background: "var(--d-card)",
+      color: "var(--d-text)",
       iconColor: "#ef4444",
       showCancelButton: true,
       confirmButtonText: tr("Retirer définitivement"),
       cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#333355",
+      cancelButtonColor: "var(--d-border)",
       reverseButtons: true,
       customClass: { popup: "swal-iraky" },
     }).then((result) => {
@@ -581,14 +583,14 @@ useEffect(() => {
       icon: "warning",
       title: tr("Retirer cette conversation"),
       html: tr("Voulez-vous vraiment retirer cette conversation de votre liste de messages ?<br/><br/> <span style=\"color:#ef4444;font-weight:700;\">Cette action est définitive</span> : elle ne réapparaîtra plus jamais sur cet écran, même après une reconnexion.<br/> Elle restera toutefois visible et suivie normalement côté administration."),
-      background: "#131330",
-      color: "#fff",
+      background: "var(--d-card)",
+      color: "var(--d-text)",
       iconColor: "#ef4444",
       showCancelButton: true,
       confirmButtonText: tr("Retirer définitivement"),
       cancelButtonText: tr("Annuler"),
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#333355",
+      cancelButtonColor: "var(--d-border)",
       reverseButtons: true,
       customClass: { popup: "swal-iraky" },
     }).then((result) => {
@@ -742,16 +744,16 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
     showToast(tr("Erreur de connexion"), "error");
   }
 };
-  const card = { backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24, transition: "all 0.3s ease" };
-  const inp  = { backgroundColor: "#0a0a1e", border: "1px solid #FFD70030", color: "#fff", borderRadius: 12, padding: "11px 16px", width: "100%", fontSize: 14, outline: "none" };
-  const btnY = { background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", border: "none", borderRadius: 25, padding: "11px 28px", fontWeight: 800, cursor: "pointer", fontSize: 15, transition: "all 0.2s", boxShadow: "0 4px 20px #FFD70033" };
+  const card = { backgroundColor: "var(--d-card)", borderRadius: 18, border: "1px solid #FFD70018", padding: 24, transition: "all 0.3s ease" };
+  const inp  = { backgroundColor: "var(--d-bg2)", border: "1px solid #FFD70030", color: "var(--d-text)", borderRadius: 12, padding: "11px 16px", width: "100%", fontSize: 14, outline: "none" };
+  const btnY = { background: "linear-gradient(135deg,var(--d-gold),#ff9500)", color: "#000", border: "none", borderRadius: 25, padding: "11px 28px", fontWeight: 800, cursor: "pointer", fontSize: 15, transition: "all 0.2s", boxShadow: "0 4px 20px #FFD70033" };
 
   // ✅ Composant photo CIN réutilisable
   const PhotoCIN = ({ chemin, label, couleur }) => (
-    <div style={{ backgroundColor: "#0a0a1e", borderRadius: 14,
+    <div style={{ backgroundColor: "var(--d-bg2)", borderRadius: 14,
       border: `1px solid ${couleur}22`, overflow: "hidden" }}>
       <div style={{ padding: "10px 14px", borderBottom: `1px solid ${couleur}18`,
-        color: "#aaa", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+        color: "var(--d-c-aaa)", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
         <MdBadge style={{ color: couleur }}/> {tr(label)}
       </div>
       {chemin ? (
@@ -783,14 +785,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
   }
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#080820", fontFamily: "'Segoe UI', sans-serif", color: "#fff" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg)", fontFamily: "'Segoe UI', sans-serif", color: "var(--d-text)" }}>
 
       {/* TOAST */}
       {toast && (
         <div style={{
           position: "fixed", top: 20, right: 20, zIndex: 9999,
           backgroundColor: toast.type === "error" ? "#ef4444" : "#10b981",
-          color: "#fff", padding: "14px 22px", borderRadius: 14,
+          color: "var(--d-text)", padding: "14px 22px", borderRadius: 14,
           boxShadow: "0 8px 30px rgba(0,0,0,0.4)", fontWeight: 700, fontSize: 14,
           animation: "slideIn 0.3s ease", display: "flex", alignItems: "center", gap: 10, maxWidth: 340,
         }}>
@@ -801,20 +803,20 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       {/* NAVBAR */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        backgroundColor: "rgba(8,8,32,0.97)", backdropFilter: "blur(16px)",
+        backgroundColor: "var(--d-glass)", backdropFilter: "blur(16px)",
         borderBottom: "1px solid #FFD70020", padding: "0 24px", height: 66,
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <button className="d-lg-none" onClick={() => setSidebarOpen(!sidebarOpen)}
           style={{ background: "transparent", border: "1px solid #FFD70044", borderRadius: 10, padding: "7px 10px", cursor: "pointer" }}>
           {[0,1,2].map(i => (
-            <div key={i} style={{ width: 20, height: 2, backgroundColor: "#FFD700", margin: i < 2 ? "0 0 4px 0" : "0" }}/>
+            <div key={i} style={{ width: 20, height: 2, backgroundColor: "var(--d-gold)", margin: i < 2 ? "0 0 4px 0" : "0" }}/>
           ))}
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src={logo} alt={tr("IRAKY")} style={{ width: 60, height: 60, borderRadius: "50%" }}/>
-          <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
+          <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -822,7 +824,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             onClick={() => { setNotifOpen(!notifOpen); setNotifs(p => p.map(n => ({ ...n, lu: true }))); }}>
             <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: "#FFD70015",
               border: "1px solid #FFD70030", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <MdNotifications style={{ color: "#FFD700", fontSize: 20 }}/>
+              <MdNotifications style={{ color: "var(--d-gold)", fontSize: 20 }}/>
             </div>
             {nbNonLus > 0 && (
               <span style={{
@@ -830,7 +832,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                 backgroundColor: "#ef4444", color: "#fff", borderRadius: "50%",
                 width: 19, height: 19, fontSize: 10, fontWeight: 800,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                border: "2px solid #080820",
+                border: "2px solid var(--d-bg)",
               }}>{nbNonLus}</span>
             )}
           </div>
@@ -838,7 +840,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           <div onClick={() => setOnglet("profil")} style={{ cursor: "pointer" }}>
             <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={38} fontSize={15} style={{ boxShadow: "0 0 12px #FFD70044" }} />
           </div>
-          <span style={{ color: "#ccc", fontSize: 14 }} className="d-none d-md-inline">{profil.prenom}</span>
+          <span style={{ color: "var(--d-c-ccc)", fontSize: 14 }} className="d-none d-md-inline">{profil.prenom}</span>
         </div>
       </nav>
 
@@ -849,7 +851,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         style={{ position:"fixed", inset:0, zIndex:149 }}/>
                       <div style={{
                         position:"fixed", top:74, right:20, zIndex:150, maxWidth:"calc(100vw - 40px)",
-                        backgroundColor:"#131330", border:"1px solid #FFD70025",
+                        backgroundColor:"var(--d-card)", border:"1px solid #FFD70025",
                         borderRadius:16, width:360, maxHeight:"min(480px, calc(100vh - 100px))",
                         boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
                         display:"flex", flexDirection:"column", overflow:"hidden",
@@ -857,7 +859,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         {/* Header */}
                         <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
                           display:"flex", justifyContent:"space-between", alignItems:"center", flexShrink:0 }}>
-                          <span style={{ color:"#FFD700", fontWeight:700, fontSize:14,
+                          <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:14,
                             display:"flex", alignItems:"center", gap:6 }}>
                             <MdNotifications style={{ fontSize:18 }}/>{" "}{tr("Notifications")}</span>
                           <span style={{ color:"#666", fontSize:12 }}>{nbNonLus} non lues</span>
@@ -876,10 +878,10 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
                                 <div style={{ paddingTop:5, flexShrink:0 }}>
                                   <div style={{ width:8, height:8, borderRadius:"50%",
-                                    backgroundColor: n.lu ? "transparent" : "#FFD700" }}/>
+                                    backgroundColor: n.lu ? "transparent" : "var(--d-gold)" }}/>
                                 </div>
                                 <div style={{ flex:1 }}>
-                                  <p style={{ color:n.lu?"#888":"#fff", fontSize:13,
+                                  <p style={{ color:n.lu?"#888":"var(--d-text)", fontSize:13,
                                     margin:"0 0 4px 0", lineHeight:1.5 }}>{n.texte}</p>
                                   <small style={{ color:"#555", fontSize:11 }}>{n.time}</small>
                                 </div>
@@ -945,7 +947,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               });
                               setNotifs(p => p.map(n => ({...n, lu:true})));
                             }}
-                            style={{ color:"#FFD700", fontSize:12, cursor:"pointer",
+                            style={{ color:"var(--d-gold)", fontSize:12, cursor:"pointer",
                               display:"inline-flex", alignItems:"center", gap:6 }}>
                             <MdDoneAll style={{ fontSize:16 }}/>{" "}{tr("Tout marquer comme lu")}</span>
                         </div>
@@ -957,7 +959,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
         {/* SIDEBAR desktop */}
         <aside className="d-none d-lg-block" style={{
-          width: 248, minHeight: "calc(100vh - 66px)", backgroundColor: "#0d0d28",
+          width: 248, minHeight: "calc(100vh - 66px)", backgroundColor: "var(--d-bg3)",
           borderRight: "1px solid #FFD70015", padding: "28px 0",
           position: "fixed", top: 66, left: 0, zIndex: 50,
         }}>
@@ -969,7 +971,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           <>
             <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, backgroundColor: "#000a", zIndex: 49 }}/>
             <aside style={{ width: 248, position: "fixed", top: 66, left: 0, bottom: 0,
-              backgroundColor: "#0d0d28", borderRight: "1px solid #FFD70015",
+              backgroundColor: "var(--d-bg3)", borderRight: "1px solid #FFD70015",
               padding: "28px 0", zIndex: 50, overflowY: "auto" }}>
               <SidebarContent onglet={onglet} setOnglet={o => { setOnglet(o); setSidebarOpen(false); }}
                 profil={profil} missions={missions}/>
@@ -985,7 +987,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {onglet === "accueil" && (
               <div>
                 <div style={{ marginBottom: 28 }}>
-                  <h3 style={{ color: "#fff", fontWeight: 800, margin: 0, fontSize: 22 }}>{tr("Bonjour,")}{" "}<span style={{ color: "#FFD700" }}>{profil.prenom}</span> 👋
+                  <h3 style={{ color: "var(--d-text)", fontWeight: 800, margin: 0, fontSize: 22 }}>{tr("Bonjour,")}{" "}<span style={{ color: "var(--d-gold)" }}>{profil.prenom}</span> 👋
                   </h3>
                   <p style={{ color: "#666", marginTop: 4, fontSize: 14 }}>{tr("Bienvenue sur votre espace coursier IRAKY")}</p>
                 </div>
@@ -995,10 +997,10 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     { label: "MISSIONS",  val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
                     { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
                     { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
-                    { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+                    { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
                   ].map(s => (
                     <div key={s.label} style={{
-                      backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
+                      backgroundColor: "var(--d-card)", borderRadius: 12, padding: "14px 20px",
                       border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
                       transition: "transform 0.2s, box-shadow 0.2s",
                       display: "flex", alignItems: "center", gap: 16,
@@ -1010,7 +1012,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <s.Icon style={{ color: s.color, fontSize: 24 }}/>
                       </div>
                       <div>
-                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 24, lineHeight: 1 }}>{s.val}</div>
+                        <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 24, lineHeight: 1 }}>{s.val}</div>
                         <div style={{ color: "#888", fontWeight: 600, fontSize: 11, letterSpacing: 1.5, marginTop: 4 }}>{tr(s.label)}</div>
                       </div>
                     </div>
@@ -1021,34 +1023,34 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
                       border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
+                      <MdBarChart style={{ color: "var(--d-gold)", fontSize: 20 }}/>
                     </div>
-                    <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>{tr("Ma réputation")}</span>
+                    <span style={{ color: "var(--d-gold)", fontWeight: 700, fontSize: 15 }}>{tr("Ma réputation")}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                     <EtoilesAvecTrophees trophees={profil.trophees} etoilesActuelles={profil.etoiles_actuelles} />
-                    <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
+                    <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
                     <span style={{ color: "#888", fontSize: 13 }}>{tr("basé sur {{nb}} missions terminées", { nb: profil.nb_terminees })}</span>
                   </div>
                 </div>
 
                 <div style={card}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-                    <h5 style={{ color: "#FFD700", margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                    <h5 style={{ color: "var(--d-gold)", margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                       <MdCampaign style={{ fontSize: 20 }}/>{" "}{tr("Missions disponibles")}</h5>
                     <button onClick={() => setOnglet("missions")}
-                      style={{ background: "transparent", border: "1px solid #FFD70030", color: "#FFD700",
+                      style={{ background: "transparent", border: "1px solid #FFD70030", color: "var(--d-gold)",
                         borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 12 }}>{tr("Voir tout")}</button>
                   </div>
                   {publications.slice(0, 3).map(pub => (
                     <div key={pub.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "12px 0", borderBottom: "1px solid #ffffff08", flexWrap: "wrap", gap: 8 }}>
                       <div>
-                        <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{pub.service}</div>
+                        <div style={{ color: "var(--d-text)", fontWeight: 600, fontSize: 14 }}>{pub.service}</div>
                         <div style={{ color: "#666", fontSize: 12 }}>{pub.moyen} · {pub.client} · {formatDateHeure(pub.heure_debut)}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ color: "#FFD700", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
+                        <span style={{ color: "var(--d-gold)", fontWeight: 700 }}>{pub.tarif.toLocaleString()} Ar</span>
                         <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "6px 14px", fontSize: 12 }}>
                           <MdThumbUp style={{ fontSize: 14, marginRight: 4 }}/>{" "}{tr("Je prends")}</button>
                       </div>
@@ -1064,11 +1066,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {/* ═══ MISSIONS DISPONIBLES ═══ */}
             {onglet === "missions" && (
               <div>
-                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                <h4 style={{ color: "var(--d-gold)", marginBottom: 6, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
                     border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <MdCampaign style={{ color: "#FFD700", fontSize: 22 }}/>
+                    <MdCampaign style={{ color: "var(--d-gold)", fontSize: 22 }}/>
                   </div>{tr("Missions disponibles")}</h4>
                 <p style={{ color: "#666", marginBottom: 24, fontSize: 14 }}>
                   {tr("{{nb}} mission(s) en attente de coursier", { nb: publications.length })}
@@ -1087,17 +1089,17 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "none"; }}>
                     <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{pub.service}</div>
+                        <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{pub.service}</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdPerson style={{ color: pub.color }}/> {pub.client}</span>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdDirectionsBike style={{ color: pub.color }}/> {pub.moyen}</span>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdAccessTime style={{ color: pub.color }}/> {formatDateHeure(pub.heure_debut)} → {formatDateHeure(pub.heure_livraison)}</span>
                           <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}><MdLocationOn style={{ color: pub.color }}/> {pub.adresse_pickup}</span>
                         </div>
-                        <div style={{ color: "#aaa", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{pub.detail}</div>
+                        <div style={{ color: "var(--d-c-aaa)", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{pub.detail}</div>
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 20, marginBottom: 6 }}>{pub.tarif.toLocaleString()} Ar</div>
+                        <div style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 20, marginBottom: 6 }}>{pub.tarif.toLocaleString()} Ar</div>
                         <StatutBadge statut={pub.statut}/>
                       </div>
                     </div>
@@ -1105,7 +1107,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <button onClick={() => prendreMission(pub)} style={{ ...btnY, padding: "10px 22px", fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
                         <MdThumbUp style={{ fontSize: 18 }}/>{" "}{tr("Je prends cette mission")}</button>
                       <button onClick={() => setDetailModal(pub)}
-                        style={{ background: "transparent", border: "1px solid #FFD70033", color: "#FFD700",
+                        style={{ background: "transparent", border: "1px solid #FFD70033", color: "var(--d-gold)",
                           borderRadius: 25, padding: "10px 22px", cursor: "pointer", fontWeight: 700, fontSize: 14,
                           display: "flex", alignItems: "center", gap: 8 }}>
                         <MdListAlt style={{ fontSize: 18 }}/>{" "}{tr("Détails")}</button>
@@ -1118,7 +1120,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {/* ═══ MES MISSIONS ═══ */}
             {onglet === "mes_missions" && (
               <div>
-                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                <h4 style={{ color: "var(--d-gold)", marginBottom: 6, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#3b82f618",
                     border: "1px solid #3b82f633", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1141,10 +1143,10 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <div key={mission.id} style={{ ...card, marginBottom: 20 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
                         <div style={{ flex: 1 }}>
-                          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{mission.service}</div>
+                          <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{mission.service}</div>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                              <MdPerson style={{ color: "#FFD700" }}/>{" "}{tr("Client :")}{" "}<strong style={{ color: "#FFD700" }}>{mission.client}</strong>
+                              <MdPerson style={{ color: "var(--d-gold)" }}/>{" "}{tr("Client :")}{" "}<strong style={{ color: "var(--d-gold)" }}>{mission.client}</strong>
                             </span>
                             <span style={{ color: "#888", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
                               <MdAttachMoney style={{ color: "#10b981" }}/> {mission.tarif.toLocaleString()} Ar
@@ -1174,7 +1176,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <div key={s} style={{ display: "flex", alignItems: "center", flex: 1 }}>
                               <div style={{
                                 width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-                                background: done ? "linear-gradient(135deg,#FFD700,#ff9500)" : "#1a1a35",
+                                background: done ? "linear-gradient(135deg,var(--d-gold),#ff9500)" : "var(--d-card3)",
                                 border: done ? "none" : "2px solid #ffffff15",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 14, fontWeight: 800, color: done ? "#000" : "#444",
@@ -1184,7 +1186,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               </div>
                               {i < 3 && (
                                 <div style={{ flex: 1, height: 4, borderRadius: 2,
-                                  background: i < idx ? "linear-gradient(90deg,#FFD700,#ff9500)" : "#ffffff0f",
+                                  background: i < idx ? "linear-gradient(90deg,var(--d-gold),#ff9500)" : "#ffffff0f",
                                   transition: "all 0.4s" }}/>
                               )}
                             </div>
@@ -1193,7 +1195,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
                         {[tr("En attente"), tr("Négociation"), tr("Accepté"), tr("Terminé")].map((l, i) => (
-                          <span key={l} style={{ fontSize: 10, color: i <= idx ? "#FFD700" : "#444",
+                          <span key={l} style={{ fontSize: 10, color: i <= idx ? "var(--d-gold)" : "#444",
                             flex: 1, textAlign: i === 0 ? "left" : i === 3 ? "right" : "center",
                             fontWeight: i <= idx ? 600 : 400 }}>{l}</span>
                         ))}
@@ -1211,7 +1213,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       {mission.statut === "termine" && (
                         <div style={{ marginTop: 14, padding: 14, backgroundColor: "#FFD70011",
                           borderRadius: 12, border: "1px solid #FFD70025" }}>
-                          <div style={{ color: "#FFD700", fontWeight: 700, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ color: "var(--d-gold)", fontWeight: 700, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
                             <MdStar style={{ fontSize: 18 }}/>{" "}{tr("Évaluation reçue du client")}</div>
                           <Etoiles value={mission.note || 0}/>
                           {!mission.note && <small style={{ color: "#888", fontSize: 12 }}>{tr("En attente d'évaluation...")}</small>}
@@ -1225,7 +1227,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
               {/* ═══ MESSAGES COURSIER ═══ */}
               {onglet === "messages" && (
                 <div>
-                  <h4 style={{ color:"#FFD700", marginBottom:6, fontWeight:800, fontSize:20,
+                  <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
                     display:"flex", alignItems:"center", gap:12 }}>
                     <div style={{ width:38, height:38, borderRadius:10, backgroundColor:"#3b82f618",
                       border:"1px solid #3b82f633", display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -1243,7 +1245,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <div key={mission.id}
                         onClick={() => { ouvrirChat(mission); }}
                         style={{ ...card, marginBottom:14, cursor:"pointer",
-                          borderLeft:`4px solid ${STATUT_CONFIG[mission.statut]?.color||"#FFD700"}`,
+                          borderLeft:`4px solid ${STATUT_CONFIG[mission.statut]?.color||"var(--d-gold)"}`,
                           transition:"all 0.2s" }}
                         onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
                         onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
@@ -1252,11 +1254,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             <div style={{ width:46, height:46, borderRadius:"50%",
                               background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                               display:"flex", alignItems:"center", justifyContent:"center",
-                              fontWeight:800, color:"#fff", fontSize:16, flexShrink:0 }}>
+                              fontWeight:800, color:"var(--d-text)", fontSize:16, flexShrink:0 }}>
                               {mission.client?.[0]}
                             </div>
                             <div>
-                              <div style={{ color:"#fff", fontWeight:700, fontSize:15 }}>{mission.client}</div>
+                              <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:15 }}>{mission.client}</div>
                               <div style={{ color:"#888", fontSize:12 }}>{mission.service} · {mission.date}</div>
                             </div>
                           </div>
@@ -1283,7 +1285,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   {/* Fenêtre chat fixe en bas */}
                   {chatModal && (
                     <div className="chat-panel" style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
-                      backgroundColor:"#131330", border:"1px solid #FFD70030",
+                      backgroundColor:"var(--d-card)", border:"1px solid #FFD70030",
                       borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
 
                       {/* Header */}
@@ -1294,11 +1296,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           <div style={{ width:34, height:34, borderRadius:"50%",
                             background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                             display:"flex", alignItems:"center", justifyContent:"center",
-                            fontWeight:800, color:"#fff", fontSize:14 }}>
+                            fontWeight:800, color:"var(--d-text)", fontSize:14 }}>
                             {chatModal.client?.[0]}
                           </div>
                           <div>
-                            <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>{chatModal.client}</div>
+                            <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:14 }}>{chatModal.client}</div>
                             <div style={{ color:"#10b981", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>
                               <div style={{ width:6, height:6, borderRadius:"50%", backgroundColor:"#10b981" }}/>
                               {chatModal.service}
@@ -1308,14 +1310,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <button onClick={() => { setChatModal(null); setMessages([]); }}
                           style={{ background:"transparent", border:"none", color:"#666",
                             fontSize:20, cursor:"pointer" }}
-                          onMouseEnter={e=>e.target.style.color="#fff"}
+                          onMouseEnter={e=>e.target.style.color="var(--d-text)"}
                           onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
                       </div>
 
                       {/* Accord coursier */}
-                      <div style={{ padding:"10px 14px", backgroundColor:"#0a0a1e",
+                      <div style={{ padding:"10px 14px", backgroundColor:"var(--d-bg2)",
                         borderBottom:"1px solid #FFD70018" }}>
-                        <div style={{ color:"#aaa", fontSize:11, marginBottom:6, fontWeight:600 }}>{tr("Accord de service :")}</div>
+                        <div style={{ color:"var(--d-c-aaa)", fontSize:11, marginBottom:6, fontWeight:600 }}>{tr("Accord de service :")}</div>
                         <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                           <button
                             onClick={async () => {
@@ -1346,7 +1348,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               cursor: (!chatModal.accord_client || chatModal.accord_coursier) ? "not-allowed" : "pointer",
                               backgroundColor: chatModal.accord_coursier ? "#10b981"
                                 : !chatModal.accord_client ? "#ffffff11" : "#10b98122",
-                              color: chatModal.accord_coursier ? "#fff"
+                              color: chatModal.accord_coursier ? "var(--d-text)"
                                 : !chatModal.accord_client ? "#555" : "#10b981",
                             }}>
                             {chatModal.accord_coursier ? tr("✅ Accepté") : !chatModal.accord_client ? tr("🔒 Attendre client") : tr("✅ Accepter")}
@@ -1381,7 +1383,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                       {/* Messages */}
 {/* ✅ Barre d'outils messages */}
-                      <div style={{ padding:"8px 14px", backgroundColor:"#0d0d22",
+                      <div style={{ padding:"8px 14px", backgroundColor:"var(--d-bg3)",
                         borderBottom:"1px solid #FFD70010", display:"flex",
                         justifyContent:"space-between", alignItems:"center" }}>
                         <span style={{ color:"#666", fontSize:11 }}>
@@ -1416,7 +1418,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             }}
                             style={{ background: modeSelection ? "#FFD70020" : "transparent",
                               border:`1px solid ${modeSelection ? "#FFD70044" : "#ffffff20"}`,
-                              color: modeSelection ? "#FFD700" : "#666",
+                              color: modeSelection ? "var(--d-gold)" : "#666",
                               borderRadius:8, padding:"4px 10px",
                               cursor:"pointer", fontSize:11 }}>
                             {modeSelection ? tr("✕ Annuler") : tr("☑ Sélectionner")}
@@ -1456,8 +1458,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               {/* Checkbox sélection */}
                               {modeSelection && (
                                 <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
-                                  border:`2px solid ${isSelected ? "#FFD700" : "#444"}`,
-                                  backgroundColor: isSelected ? "#FFD700" : "transparent",
+                                  border:`2px solid ${isSelected ? "var(--d-gold)" : "#444"}`,
+                                  backgroundColor: isSelected ? "var(--d-gold)" : "transparent",
                                   display:"flex", alignItems:"center", justifyContent:"center",
                                   marginRight:8, alignSelf:"center", fontSize:11, color:"#000" }}>
                                   {isSelected && "✓"}
@@ -1468,7 +1470,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0,
                                   background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                                   display:"flex", alignItems:"center", justifyContent:"center",
-                                  fontWeight:800, color:"#fff", fontSize:11,
+                                  fontWeight:800, color:"var(--d-text)", fontSize:11,
                                   marginRight:6, alignSelf:"flex-end" }}>
                                   {chatModal.client?.[0]}
                                 </div>
@@ -1476,8 +1478,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                               <div style={{
                                 backgroundColor: isSelected ? "#FFD70033"
-                                  : isCoursier ? "#FFD70022" : "#1a1a35",
-                                border:`1px solid ${isSelected ? "#FFD700"
+                                  : isCoursier ? "#FFD70022" : "var(--d-card3)",
+                                border:`1px solid ${isSelected ? "var(--d-gold)"
                                   : isCoursier ? "#FFD70044" : "#ffffff15"}`,
                                 borderRadius: isCoursier
                                   ? "16px 16px 4px 16px"
@@ -1485,7 +1487,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 padding:"9px 14px", maxWidth:"75%",
                                 transition:"all 0.15s",
                               }}>
-                                <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>
+                                <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.5 }}>
                                   {m.texte}
                                 </div>
                                 <div style={{ color:"#666", fontSize:10, marginTop:3,
@@ -1509,16 +1511,16 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
                           onKeyDown={e => e.key==="Enter" && newMsg.trim() && envoyerMessage()}
                           placeholder={tr("Écrire au client...")}
-                          style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70030",
-                            color:"#fff", borderRadius:12, padding:"9px 14px",
+                          style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030",
+                            color:"var(--d-text)", borderRadius:12, padding:"9px 14px",
                             fontSize:13, outline:"none" }}
-                          onFocus={e=>e.target.style.borderColor="#FFD700"}
+                          onFocus={e=>e.target.style.borderColor="var(--d-gold)"}
                           onBlur={e=>e.target.style.borderColor="#FFD70030"}
                         />
                         <button onClick={envoyerMessage}
                           disabled={!newMsg.trim()}
                           style={{
-                            background:"linear-gradient(135deg,#FFD700,#ff9500)",
+                            background:"linear-gradient(135deg,var(--d-gold),#ff9500)",
                             color:"#000", border:"none", borderRadius:12, padding:"9px 14px",
                             cursor: newMsg.trim() ? "pointer" : "not-allowed",
                             opacity: newMsg.trim() ? 1 : 0.4,
@@ -1535,21 +1537,21 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {/* ═══ PROFIL ═══ */}
             {onglet === "profil" && (
               <div>
-                <h4 style={{ color: "#FFD700", marginBottom: 24, fontWeight: 800, fontSize: 20,
+                <h4 style={{ color: "var(--d-gold)", marginBottom: 24, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#FFD70018",
                     border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <MdPerson style={{ color: "#FFD700", fontSize: 22 }}/>
+                    <MdPerson style={{ color: "var(--d-gold)", fontSize: 22 }}/>
                   </div>{tr("Mon profil")}</h4>
 
-                <div style={{ backgroundColor: "#131330", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
+                <div style={{ backgroundColor: "var(--d-card)", borderRadius: 18, border: "1px solid #FFD70018", padding: 24 }}>
 
                   {/* Avatar */}
                   <div style={{ textAlign: "center", marginBottom: 28 }}>
                     <AvatarProfilEditable photo={profil.photo_profil} initiales={`${profil.prenom?.[0] || ""}${profil.nom?.[0] || ""}`} apiUrl={BASE_URL} onSaved={(url)=>setProfil(p=>({ ...p, photo_profil:url }))} />
-                    <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>{profil.prenom} {profil.nom}</div>
+                    <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 20 }}>{profil.prenom} {profil.nom}</div>
                     <div style={{ marginTop: 8, display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
-                      <span style={{ backgroundColor: "#FFD70018", color: "#FFD700", borderRadius: 20,
+                      <span style={{ backgroundColor: "#FFD70018", color: "var(--d-gold)", borderRadius: 20,
                         padding: "3px 14px", fontSize: 12, border: "1px solid #FFD70033",
                         display: "flex", alignItems: "center", gap: 5 }}>
                         <MdDeliveryDining style={{ fontSize: 14 }}/>{" "}{tr("Coursier IRAKY")}</span>
@@ -1573,14 +1575,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       {/* Infos personnelles */}
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14, marginBottom: 24 }}>
                         {[
-                          { Icon: MdPerson,     label: "Nom",       val: profil.nom,       color: "#FFD700" },
+                          { Icon: MdPerson,     label: "Nom",       val: profil.nom,       color: "var(--d-gold)" },
                           { Icon: MdPerson,     label: "Prénom",    val: profil.prenom,    color: "#3b82f6" },
                           { Icon: MdEmail,      label: "Email",     val: profil.email,     color: "#8b5cf6" },
                           { Icon: MdPhone,      label: "Téléphone", val: profil.telephone, color: "#10b981" },
                           { Icon: MdLocationOn, label: "Adresse",   val: profil.adresse,   color: "#f59e0b" },
                           { Icon: MdBadge,      label: "N° CIN",    val: profil.cin,       color: "#06b6d4" },
                         ].map(({ Icon, label, val, color }) => (
-                          <div key={label} style={{ backgroundColor: "#0a0a1e", borderRadius: 12,
+                          <div key={label} style={{ backgroundColor: "var(--d-bg2)", borderRadius: 12,
                             padding: "14px 18px", border: "1px solid #FFD70018",
                             transition: "all 0.2s", display: "flex", alignItems: "center", gap: 14 }}
                             onMouseEnter={e => e.currentTarget.style.borderColor = "#FFD70033"}
@@ -1592,7 +1594,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             </div>
                             <div>
                               <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{tr(label)}</div>
-                              <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
+                              <div style={{ color: "var(--d-text)", fontWeight: 600, fontSize: 14 }}>{val || "—"}</div>
                             </div>
                           </div>
                         ))}
@@ -1623,19 +1625,19 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                           <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#FFD70018",
                             border: "1px solid #FFD70033", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <MdBarChart style={{ color: "#FFD700", fontSize: 20 }}/>
+                            <MdBarChart style={{ color: "var(--d-gold)", fontSize: 20 }}/>
                           </div>
-                          <span style={{ color: "#FFD700", fontWeight: 700, fontSize: 15 }}>{tr("Mes statistiques")}</span>
+                          <span style={{ color: "var(--d-gold)", fontWeight: 700, fontSize: 15 }}>{tr("Mes statistiques")}</span>
                         </div>
                         <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
                           {[
                             { label: "TOTAL",     val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
                             { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
                             { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
-                            { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "#FFD700" },
+                            { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
                           ].map(s => (
                             <div key={s.label} style={{
-                              backgroundColor: "#131330", borderRadius: 12, padding: "14px 20px",
+                              backgroundColor: "var(--d-card)", borderRadius: 12, padding: "14px 20px",
                               border: `1px solid ${s.color}33`, boxShadow: `0 4px 16px ${s.color}15`,
                               transition: "transform 0.2s", display: "flex", alignItems: "center", gap: 14 }}
                               onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
@@ -1645,7 +1647,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 <s.Icon style={{ color: s.color, fontSize: 22 }}/>
                               </div>
                               <div>
-                                <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
+                                <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{s.val}</div>
                                 <div style={{ color: "#888", fontWeight: 600, fontSize: 10, letterSpacing: 1.5, marginTop: 4 }}>{tr(s.label)}</div>
                               </div>
                             </div>
@@ -1661,7 +1663,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             {/* ═══ AIDE ═══ */}
             {onglet === "aide" && (
               <div>
-                <h4 style={{ color: "#FFD700", marginBottom: 6, fontWeight: 800, fontSize: 20,
+                <h4 style={{ color: "var(--d-gold)", marginBottom: 6, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: "#10b98118",
                     border: "1px solid #10b98133", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1682,7 +1684,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       onClick: () => { setGuideOuvert(0); setAideVue("guide"); } },
                   ].map((item, i) => (
                     <div key={i} onClick={item.onClick} className="aide-card-anim"
-                      style={{ backgroundColor: "#131330", borderRadius: 16, padding: "28px 20px",
+                      style={{ backgroundColor: "var(--d-card)", borderRadius: 16, padding: "28px 20px",
                       border: `1px solid ${item.color}30`, cursor: "pointer",
                       transition: "all 0.3s ease", position: "relative", overflow: "hidden",
                       animationDelay: `${i*0.08}s` }}
@@ -1695,7 +1697,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         justifyContent: "center", marginBottom: 16 }}>
                         <item.Icon style={{ color: item.color, fontSize: 26 }}/>
                       </div>
-                      <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{tr(item.title)}</div>
+                      <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{tr(item.title)}</div>
                       <div style={{ color: "#888", fontSize: 12, lineHeight: 1.5, marginBottom: 14 }}>{tr(item.desc)}</div>
                       <div style={{ color: item.color, fontSize: 12, fontWeight: 700 }}>{item.action}</div>
                       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
@@ -1706,7 +1708,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                 {/* FAQ */}
                 <div style={{ ...card }}>
-                  <div style={{ color:"#FFD700", fontWeight:700, marginBottom:16, fontSize:15,
+                  <div style={{ color:"var(--d-gold)", fontWeight:700, marginBottom:16, fontSize:15,
                     display:"flex", alignItems:"center", gap:8 }}>
                     <MdMenuBook style={{ fontSize:20 }}/>{" "}{tr("Questions fréquentes")}</div>
                   {[
@@ -1715,12 +1717,12 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     ["Que se passe-t-il si je n'ai pas renouvelé mon abonnement ?", "Votre compte est automatiquement désactivé et vous ne pouvez plus recevoir de nouvelles offres tant que l'abonnement mensuel n'est pas réglé."],
                     ["Comment ma note est-elle calculée ?", "Chaque mission terminée est notée de 1 à 5 étoiles par le client. Votre note moyenne et vos trophées apparaissent dans « Mon profil »."],
                   ].map(([q, a], i) => (
-                    <details key={i} style={{ marginBottom:10, backgroundColor:"#0a0a1e",
+                    <details key={i} style={{ marginBottom:10, backgroundColor:"var(--d-bg2)",
                       borderRadius:12, border:"1px solid #FFD70015", padding:"14px 18px" }}>
-                      <summary style={{ color:"#fff", fontWeight:600, cursor:"pointer", fontSize:14,
+                      <summary style={{ color:"var(--d-text)", fontWeight:600, cursor:"pointer", fontSize:14,
                         listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                         {tr(q)}
-                        <MdKeyboardArrowDown className="faq-chevron" style={{ color:"#FFD700", fontSize:24, flexShrink:0 }}/>
+                        <MdKeyboardArrowDown className="faq-chevron" style={{ color:"var(--d-gold)", fontSize:24, flexShrink:0 }}/>
                       </summary>
                       <p style={{ color:"#888", fontSize:13, marginTop:10, lineHeight:1.6, marginBottom:0 }}>{tr(a)}</p>
                     </details>
@@ -1731,7 +1733,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                 {/* ══════════════ CHAT SUPPORT — réel, connecté à la BDD ══════════════ */}
                 {aideVue === "chat" && (
                   <div className="aide-fade-in" style={{
-                    backgroundColor:"#131330", borderRadius:18,
+                    backgroundColor:"var(--d-card)", borderRadius:18,
                     border:"1px solid #3b82f630", overflow:"hidden",
                     boxShadow:"0 16px 44px #3b82f620",
                     display:"flex", flexDirection:"column" }}>
@@ -1742,17 +1744,17 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         style={{ background:"#ffffff10", border:"1px solid #ffffff20",
                           borderRadius:10, width:34, height:34, cursor:"pointer",
                           display:"flex", alignItems:"center", justifyContent:"center",
-                          color:"#fff", flexShrink:0 }}>
+                          color:"var(--d-text)", flexShrink:0 }}>
                         <MdArrowBack style={{ fontSize:18 }}/>
                       </button>
                       <div style={{ width:40, height:40, borderRadius:"50%",
                         background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                         display:"flex", alignItems:"center", justifyContent:"center",
                         flexShrink:0, boxShadow:"0 0 0 3px #3b82f620" }}>
-                        <MdSupportAgent style={{ color:"#fff", fontSize:20 }}/>
+                        <MdSupportAgent style={{ color:"var(--d-text)", fontSize:20 }}/>
                       </div>
                       <div style={{ flex:1 }}>
-                        <div style={{ color:"#fff", fontWeight:800, fontSize:15 }}>{tr("Support IRAKY Delivery")}</div>
+                        <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:15 }}>{tr("Support IRAKY Delivery")}</div>
                         <div style={{ color:"#3b82f6", fontSize:11, display:"flex", alignItems:"center", gap:5 }}>
                           <span className="aide-dot-online"/>{" "}{tr("En ligne · répond sous 5 min")}</div>
                       </div>
@@ -1785,11 +1787,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                                 display:"flex", alignItems:"center", justifyContent:"center",
                                 marginRight:6, alignSelf:"flex-end" }}>
-                                <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                                <MdSupportAgent style={{ color:"var(--d-text)", fontSize:13 }}/>
                               </div>
                             )}
                             <div style={{
-                              backgroundColor: estMoi ? "#3b82f622" : "#1a1a35",
+                              backgroundColor: estMoi ? "#3b82f622" : "var(--d-card3)",
                               border:`1px solid ${m.echec ? "#ef4444" : estMoi ? "#3b82f644" : "#ffffff15"}`,
                               borderRadius: estMoi ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                               padding:"9px 14px", maxWidth:"75%", opacity: m.envoi ? 0.6 : 1 }}>
@@ -1797,7 +1799,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 <div style={{ color:"#3b82f6", fontSize:10, fontWeight:700,
                                   marginBottom:4, display:"flex", alignItems:"center", gap:4 }}>{tr("🤖 Assistant automatique")}</div>
                               )}
-                              <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                              <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
                               <div style={{ color: m.echec ? "#ef6666" : "#666", fontSize:10, marginTop:3,
                                 textAlign:"right" }}>
                                 {m.echec ? tr("Échec de l'envoi") : (m.time || (m.created_at
@@ -1814,9 +1816,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
                             display:"flex", alignItems:"center", justifyContent:"center",
                             marginRight:6, alignSelf:"flex-end" }}>
-                            <MdSupportAgent style={{ color:"#fff", fontSize:13 }}/>
+                            <MdSupportAgent style={{ color:"var(--d-text)", fontSize:13 }}/>
                           </div>
-                          <div style={{ backgroundColor:"#1a1a35", border:"1px solid #ffffff15",
+                          <div style={{ backgroundColor:"var(--d-card3)", border:"1px solid #ffffff15",
                             borderRadius:"16px 16px 16px 4px", padding:"12px 16px",
                             display:"flex", gap:4, alignItems:"center" }}>
                             <span className="aide-typing-dot"/>
@@ -1833,8 +1835,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
                         onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
                         placeholder={tr("Écrivez votre message au support...")}
-                        style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #3b82f640",
-                          color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
+                        style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
+                          color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",
                           transition:"border-color 0.2s" }}
                         onFocus={e=>e.target.style.borderColor="#3b82f6"}
                         onBlur={e=>e.target.style.borderColor="#3b82f640"}
@@ -1843,7 +1845,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         disabled={!supportMsg.trim() || supportEnvoi}
                         style={{
                           background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
-                          color:"#fff", border:"none", borderRadius:12, padding:"10px 16px",
+                          color:"var(--d-text)", border:"none", borderRadius:12, padding:"10px 16px",
                           cursor: supportMsg.trim() && !supportEnvoi ? "pointer" : "not-allowed",
                           opacity: supportMsg.trim() ? 1 : 0.4,
                           display:"flex", alignItems:"center", justifyContent:"center",
@@ -1851,7 +1853,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         onMouseEnter={e=>{ if(supportMsg.trim()) e.currentTarget.style.transform="scale(1.06)"; }}
                         onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
                         {supportEnvoi
-                          ? <div style={{ width:16, height:16, border:"2px solid #fff",
+                          ? <div style={{ width:16, height:16, border:"2px solid var(--d-text)",
                               borderTop:"2px solid transparent", borderRadius:"50%",
                               animation:"spin 0.6s linear infinite" }}/>
                           : <MdSend style={{ fontSize:18 }}/>
@@ -1867,14 +1869,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <button onClick={()=>setAideVue("menu")}
                       style={{ background:"#ffffff10", border:"1px solid #ffffff20",
                         borderRadius:10, padding:"8px 16px", cursor:"pointer",
-                        color:"#fff", display:"flex", alignItems:"center", gap:8,
+                        color:"var(--d-text)", display:"flex", alignItems:"center", gap:8,
                         fontSize:12, marginBottom:18 }}>
                       <MdArrowBack style={{ fontSize:16 }}/>{" "}{tr("Retour")}</button>
 
-                    <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,#131330)",
+                    <div style={{ ...card, marginBottom:18, background:"linear-gradient(135deg,#f59e0b18,var(--d-card))",
                       border:"1px solid #f59e0b30", display:"flex", alignItems:"center", gap:14 }}>
                       <MdInfo style={{ color:"#f59e0b", fontSize:28, flexShrink:0 }}/>
-                      <div style={{ color:"#ccc", fontSize:13, lineHeight:1.6 }}>{tr("Ce guide couvre toutes les fonctionnalités de votre espace coursier IRAKY Delivery. Cliquez sur une section pour dérouler les explications.")}</div>
+                      <div style={{ color:"var(--d-c-ccc)", fontSize:13, lineHeight:1.6 }}>{tr("Ce guide couvre toutes les fonctionnalités de votre espace coursier IRAKY Delivery. Cliquez sur une section pour dérouler les explications.")}</div>
                     </div>
 
                     {GUIDE_SECTIONS_COURSIER.map((s, i) => {
@@ -1882,7 +1884,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       return (
                         <div key={i} className="aide-card-anim" style={{
                           animationDelay:`${i*0.06}s`,
-                          backgroundColor:"#131330", borderRadius:14,
+                          backgroundColor:"var(--d-card)", borderRadius:14,
                           border:`1px solid ${ouvert ? s.color+"55" : "#ffffff15"}`,
                           marginBottom:12, overflow:"hidden",
                           transition:"border-color 0.25s" }}>
@@ -1894,7 +1896,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               display:"flex", alignItems:"center", justifyContent:"center" }}>
                               <s.Icon style={{ color:s.color, fontSize:20 }}/>
                             </div>
-                            <div style={{ flex:1, color:"#fff", fontWeight:700, fontSize:14 }}>
+                            <div style={{ flex:1, color:"var(--d-text)", fontWeight:700, fontSize:14 }}>
                               {tr(s.titre)}
                             </div>
                             {ouvert ? <MdKeyboardArrowUp style={{ color:s.color, fontSize:24 }}/> : <MdKeyboardArrowDown style={{ color:"#666", fontSize:24 }}/>}
@@ -1904,7 +1906,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             opacity: ouvert ? 1 : 0,
                             transition:"max-height 0.35s ease, opacity 0.3s ease",
                             overflow:"hidden" }}>
-                            <div style={{ padding:"0 18px 18px 74px", color:"#999",
+                            <div style={{ padding:"0 18px 18px 74px", color:"var(--d-c-999)",
                               fontSize:13, lineHeight:1.7, display:"flex", gap:8 }}>
                               <MdCheckCircle style={{ color:s.color, fontSize:15, flexShrink:0, marginTop:2 }}/>
                               <span>{tr(s.texte)}</span>
@@ -1925,7 +1927,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       {/* MODAL DÉTAIL */}
       {detailModal && (
         <Modal onClose={() => setDetailModal(null)} size="lg">
-          <h5 style={{ color: "#FFD700", marginBottom: 20, fontWeight: 800, fontSize: 17,
+          <h5 style={{ color: "var(--d-gold)", marginBottom: 20, fontWeight: 800, fontSize: 17,
             display: "flex", alignItems: "center", gap: 10 }}>
             <MdDeliveryDining style={{ fontSize: 22 }}/> {detailModal.service}
           </h5>
@@ -1942,14 +1944,14 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             ].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 0", borderBottom: "1px solid #ffffff08" }}>
                 <div style={{ color: "#666", fontSize: 11, marginBottom: 3 }}>{k}</div>
-                <div style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>{v}</div>
+                <div style={{ color: "var(--d-text)", fontWeight: 600, fontSize: 13 }}>{v}</div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 14, padding: "12px 16px", backgroundColor: "#0a0a1e",
+          <div style={{ marginTop: 14, padding: "12px 16px", backgroundColor: "var(--d-bg2)",
             borderRadius: 12, border: "1px solid #FFD70018" }}>
             <div style={{ color: "#666", fontSize: 11, marginBottom: 4 }}>{tr("Description")}</div>
-            <div style={{ color: "#fff", fontSize: 13, lineHeight: 1.6 }}>{detailModal.detail}</div>
+            <div style={{ color: "var(--d-text)", fontSize: 13, lineHeight: 1.6 }}>{detailModal.detail}</div>
           </div>
           <button onClick={() => { prendreMission(detailModal); setDetailModal(null); }}
             style={{ ...btnY, width: "100%", marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>

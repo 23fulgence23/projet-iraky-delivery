@@ -1,3 +1,4 @@
+import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect } from "react";
 import logo from "../../images/logo.png";
 import {
@@ -60,14 +61,14 @@ function Modal({ children, onClose, size="md" }) {
       display:"flex", alignItems:"center", justifyContent:"center", padding:16,
     }}>
       <div onClick={e=>e.stopPropagation()} style={{
-        backgroundColor:"#0f1128", borderRadius:20, padding:28,
+        backgroundColor:"var(--d-bg3)", borderRadius:20, padding:28,
         width:"100%", maxWidth:size==="lg"?700:size==="xl"?900:500,
         border:"1px solid #FFD70030", boxShadow:"0 32px 80px rgba(0,0,0,0.8)",
         animation:"modalIn 0.25s ease", maxHeight:"92vh", overflowY:"auto",
       }}>
         <button onClick={onClose} style={{ float:"right", background:"transparent",
           border:"none", color:"#555", fontSize:22, cursor:"pointer" }}
-          onMouseEnter={e=>e.target.style.color="#fff"}
+          onMouseEnter={e=>e.target.style.color="var(--d-text)"}
           onMouseLeave={e=>e.target.style.color="#555"}>✕</button>
         {children}
       </div>
@@ -78,7 +79,7 @@ function Modal({ children, onClose, size="md" }) {
 // ══════════════════════════════════════════════
 //  BARCHART — style original inchangé
 // ══════════════════════════════════════════════
-function BarChart({ data, color="#FFD700", height=80 }) {
+function BarChart({ data, color="var(--d-gold)", height=80 }) {
   const max = Math.max(...data.map(d=>d.val), 1);
   return (
     <div style={{ display:"flex", alignItems:"flex-end", gap:6, height }}>
@@ -111,7 +112,7 @@ function DonutChart({ segments, size=120 }) {
   const circumference = 2*Math.PI*r;
   return (
     <svg width={size} height={size} viewBox="0 0 120 120">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1a1a35" strokeWidth={stroke}/>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--d-card3)" strokeWidth={stroke}/>
       {segments.map((seg,i) => {
         const dash = (seg.val/total)*circumference;
         const offset = circumference - cumul*(circumference/total) - circumference*0.25;
@@ -125,7 +126,7 @@ function DonutChart({ segments, size=120 }) {
         );
       })}
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle"
-        fill="#FFD700" fontSize="14" fontWeight="800">{total}</text>
+        fill="var(--d-gold)" fontSize="14" fontWeight="800">{total}</text>
       <text x={cx} y={cy+14} textAnchor="middle" dominantBaseline="middle"
         fill="#666" fontSize="8">{tr("TOTAL")}</text>
     </svg>
@@ -151,14 +152,14 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
       <div style={{ padding:"0 20px 24px", borderBottom:"1px solid #FFD70018", marginBottom:8 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ width:46, height:46, borderRadius:12,
-            background:"linear-gradient(135deg,#FFD700,#ff4500)",
+            background:"linear-gradient(135deg,var(--d-gold),#ff4500)",
             display:"flex", alignItems:"center", justifyContent:"center",
             boxShadow:"0 0 16px #FFD70055" }}>
             <MdAdminPanelSettings style={{ color:"#000", fontSize:26 }}/>
           </div>
           <div>
-            <div style={{ color:"#fff", fontWeight:800, fontSize:14 }}>{tr("Administrateur")}</div>
-            <div style={{ color:"#FFD700", fontSize:11, fontWeight:600 }}>{tr("IRAKY Delivery")}</div>
+            <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:14 }}>{tr("Administrateur")}</div>
+            <div style={{ color:"var(--d-gold)", fontSize:11, fontWeight:600 }}>{tr("IRAKY Delivery")}</div>
           </div>
         </div>
       </div>
@@ -169,11 +170,11 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
               display:"flex", alignItems:"center", justifyContent:"space-between",
               padding:"12px 20px", cursor:"pointer", fontSize:13.5,
               backgroundColor:onglet===item.id?"#FFD70012":"transparent",
-              borderLeft:onglet===item.id?"3px solid #FFD700":"3px solid transparent",
-              color:onglet===item.id?"#FFD700":"#8888aa",
+              borderLeft:onglet===item.id?"3px solid var(--d-gold)":"3px solid transparent",
+              color:onglet===item.id?"var(--d-gold)":"#8888aa",
               transition:"all 0.18s", borderRadius:"0 10px 10px 0", marginRight:8,
             }}
-            onMouseEnter={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="#ffffff08"; e.currentTarget.style.color="#fff"; }}}
+            onMouseEnter={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="#ffffff08"; e.currentTarget.style.color="var(--d-text)"; }}}
             onMouseLeave={e=>{ if(onglet!==item.id){ e.currentTarget.style.backgroundColor="transparent"; e.currentTarget.style.color="#8888aa"; }}}>
             <span style={{ display:"flex", alignItems:"center", gap:10 }}>
               <item.Icon style={{ fontSize:18 }}/> {tr(item.label)}
@@ -185,7 +186,8 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
           </div>
         ))}
       </div>
-      <div style={{ padding:16 }}>
+      <div style={{ padding:16, display:"flex", alignItems:"center", gap:8 }}>
+        <ThemeToggle size={40} />
         <button onClick={()=>{ localStorage.clear(); window.location.href="/connexion"; }}
           style={{ width:"100%", padding:"10px", borderRadius:12,
             border:"1px solid #ef444430", backgroundColor:"#ef444410",
@@ -771,23 +773,23 @@ function DashboardAdmin() {
   };
 
   // Styles originaux inchangés
-  const card = { backgroundColor:"#0f1128", borderRadius:18, border:"1px solid #FFD70018", padding:24, transition:"all 0.3s ease" };
-  const inp  = { backgroundColor:"#080820", border:"1px solid #FFD70030", color:"#fff", borderRadius:12, padding:"10px 16px", fontSize:13, outline:"none", width:"100%" };
-  const btnY = { background:"linear-gradient(135deg,#FFD700,#ff9500)", color:"#000", border:"none", borderRadius:10, padding:"8px 20px", fontWeight:800, cursor:"pointer", fontSize:13, transition:"all 0.2s" };
+  const card = { backgroundColor:"var(--d-bg3)", borderRadius:18, border:"1px solid #FFD70018", padding:24, transition:"all 0.3s ease" };
+  const inp  = { backgroundColor:"var(--d-bg)", border:"1px solid #FFD70030", color:"var(--d-text)", borderRadius:12, padding:"10px 16px", fontSize:13, outline:"none", width:"100%" };
+  const btnY = { background:"linear-gradient(135deg,var(--d-gold),#ff9500)", color:"#000", border:"none", borderRadius:10, padding:"8px 20px", fontWeight:800, cursor:"pointer", fontSize:13, transition:"all 0.2s" };
 
   // Pagination abonnements
   const totalAbonnPages = Math.ceil(coursiers.length / ABONNES_PAR_PAGE);
   const coursiersPage   = coursiers.slice((abonnPage-1)*ABONNES_PAR_PAGE, abonnPage*ABONNES_PAR_PAGE);
 
   return (
-    <div style={{ minHeight:"100vh", backgroundColor:"#080820", fontFamily:"'Segoe UI', sans-serif", color:"#fff" }}>
+    <div style={{ minHeight:"100vh", backgroundColor:"var(--d-bg)", fontFamily:"'Segoe UI', sans-serif", color:"var(--d-text)" }}>
 
       {/* TOAST */}
       {toast && (
         <div style={{
           position:"fixed", top:20, right:20, zIndex:9999,
           backgroundColor:toast.type==="error"?"#ef4444":"#10b981",
-          color:"#fff", padding:"14px 22px", borderRadius:14,
+          color:"var(--d-text)", padding:"14px 22px", borderRadius:14,
           boxShadow:"0 8px 30px rgba(0,0,0,0.5)", fontWeight:700, fontSize:14,
           animation:"slideIn 0.3s ease", display:"flex", alignItems:"center", gap:10, maxWidth:360,
         }}>
@@ -798,18 +800,18 @@ function DashboardAdmin() {
       {/* NAVBAR */}
       <nav style={{
         position:"fixed", top:0, left:0, right:0, zIndex:100,
-        backgroundColor:"rgba(8,8,32,0.98)", backdropFilter:"blur(20px)",
+        backgroundColor:"var(--d-glass)", backdropFilter:"blur(20px)",
         borderBottom:"1px solid #FFD70025", padding:"0 24px", height:66,
         display:"flex", alignItems:"center", justifyContent:"space-between",
       }}>
         <button className="d-lg-none" onClick={()=>setSidebarOpen(!sidebarOpen)}
           style={{ background:"transparent", border:"1px solid #FFD70044", borderRadius:10, padding:"7px 10px", cursor:"pointer" }}>
-          {[0,1,2].map(i=><div key={i} style={{ width:20,height:2,backgroundColor:"#FFD700",margin:i<2?"0 0 4px 0":"0" }}/>)}
+          {[0,1,2].map(i=><div key={i} style={{ width:20,height:2,backgroundColor:"var(--d-gold)",margin:i<2?"0 0 4px 0":"0" }}/>)}
         </button>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <img src={logo} alt={tr("IRAKY")} style={{ width:50,height:50,borderRadius:"50%" }}/>
           <div className="d-none d-lg-block">
-            <div style={{ color:"#FFD700", fontWeight:800, fontSize:17 }}>{tr("IRAKY Admin")}</div>
+            <div style={{ color:"var(--d-gold)", fontWeight:800, fontSize:17 }}>{tr("IRAKY Admin")}</div>
             <div style={{ color:"#555", fontSize:11 }}>{tr("Panneau de contrôle")}</div>
           </div>
         </div>
@@ -820,12 +822,12 @@ function DashboardAdmin() {
             onClick={()=>setNotifOpen(!notifOpen)}>
             <div style={{ width:38,height:38,borderRadius:"50%",backgroundColor:"#FFD70015",
               border:"1px solid #FFD70030",display:"flex",alignItems:"center",justifyContent:"center" }}>
-              <MdNotifications style={{ color:"#FFD700", fontSize:20 }}/>
+              <MdNotifications style={{ color:"var(--d-gold)", fontSize:20 }}/>
             </div>
             {nbNonLus>0 && (
               <span style={{ position:"absolute",top:-2,right:-2,backgroundColor:"#ef4444",
-                color:"#fff",borderRadius:"50%",width:19,height:19,fontSize:10,fontWeight:800,
-                display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid #080820" }}>
+                color:"var(--d-text)",borderRadius:"50%",width:19,height:19,fontSize:10,fontWeight:800,
+                display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid var(--d-bg)" }}>
                 {nbNonLus}
               </span>
             )}
@@ -833,8 +835,8 @@ function DashboardAdmin() {
           <div style={{ display:"flex", alignItems:"center", gap:10,
             backgroundColor:"#FFD70015", border:"1px solid #FFD70033",
             borderRadius:12, padding:"6px 14px" }}>
-            <MdAdminPanelSettings style={{ color:"#FFD700", fontSize:20 }}/>
-            <span style={{ color:"#FFD700", fontWeight:700, fontSize:13 }}>{tr("Admin")}</span>
+            <MdAdminPanelSettings style={{ color:"var(--d-gold)", fontSize:20 }}/>
+            <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:13 }}>{tr("Admin")}</span>
           </div>
         </div>
       </nav>
@@ -845,20 +847,20 @@ function DashboardAdmin() {
           <div onClick={()=>setNotifOpen(false)} style={{ position:"fixed",inset:0,zIndex:149 }}/>
           <div style={{
             position:"fixed",top:74,right:20,zIndex:150,maxWidth:"calc(100vw - 40px)",
-            backgroundColor:"#0f1128",border:"1px solid #FFD70025",
+            backgroundColor:"var(--d-bg3)",border:"1px solid #FFD70025",
             borderRadius:16,width:380,maxHeight:"min(500px, calc(100vh - 100px))",
             boxShadow:"0 16px 48px rgba(0,0,0,0.7)",
             display:"flex",flexDirection:"column",overflow:"hidden",
           }}>
             <div style={{ padding:"14px 18px",borderBottom:"1px solid #FFD70018",
               display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0 }}>
-              <span style={{ color:"#FFD700",fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6 }}>
+              <span style={{ color:"var(--d-gold)",fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6 }}>
                 <MdNotifications style={{ fontSize:18 }}/> Notifications
                 {nbNonLus>0 && <span style={{ backgroundColor:"#ef4444",color:"#fff",borderRadius:10,
                   padding:"0 6px",fontSize:11,fontWeight:800 }}>{nbNonLus}</span>}
               </span>
               <button onClick={marquerTousLus}
-                style={{ background:"transparent",border:"none",color:"#FFD700",
+                style={{ background:"transparent",border:"none",color:"var(--d-gold)",
                   cursor:"pointer",fontSize:11,display:"flex",alignItems:"center",gap:4 }}>
                 <MdDoneAll style={{ fontSize:14 }}/>{" "}{tr("Tout lire")}</button>
             </div>
@@ -876,10 +878,10 @@ function DashboardAdmin() {
                   <div style={{ display:"flex",gap:8,alignItems:"flex-start" }}>
                     <div style={{ paddingTop:4,flexShrink:0 }}>
                       <div style={{ width:7,height:7,borderRadius:"50%",
-                        backgroundColor:n.lu?"transparent":"#FFD700" }}/>
+                        backgroundColor:n.lu?"transparent":"var(--d-gold)" }}/>
                     </div>
                     <div style={{ flex:1 }}>
-                      <p style={{ color:n.lu?"#888":"#fff",fontSize:12,margin:"0 0 3px 0",lineHeight:1.5 }}>{n.texte}</p>
+                      <p style={{ color:n.lu?"#888":"var(--d-text)",fontSize:12,margin:"0 0 3px 0",lineHeight:1.5 }}>{n.texte}</p>
                       <small style={{ color:"#555",fontSize:10 }}>{n.time}</small>
                     </div>
                     {/* Actions icônes uniquement */}
@@ -951,7 +953,7 @@ function DashboardAdmin() {
 
         {/* SIDEBAR desktop */}
         <aside className="d-none d-lg-block" style={{
-          width:252,minHeight:"calc(100vh - 66px)",backgroundColor:"#0a0a20",
+          width:252,minHeight:"calc(100vh - 66px)",backgroundColor:"var(--d-bg2)",
           borderRight:"1px solid #FFD70015",padding:"28px 0",
           position:"fixed",top:66,left:0,zIndex:50,
         }}>
@@ -963,7 +965,7 @@ function DashboardAdmin() {
           <>
             <div onClick={()=>setSidebarOpen(false)} style={{ position:"fixed",inset:0,backgroundColor:"#000a",zIndex:49 }}/>
             <aside style={{ width:252,position:"fixed",top:66,left:0,bottom:0,
-              backgroundColor:"#0a0a20",borderRight:"1px solid #FFD70015",
+              backgroundColor:"var(--d-bg2)",borderRight:"1px solid #FFD70015",
               padding:"28px 0",zIndex:50,overflowY:"auto" }}>
               <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}} stats={stats} supportNonLus={supportNonLus}/>
             </aside>
@@ -977,7 +979,7 @@ function DashboardAdmin() {
             {loading && (
               <div style={{ textAlign:"center",padding:80,color:"#555" }}>
                 <div style={{ width:40,height:40,border:"3px solid #FFD70033",
-                  borderTop:"3px solid #FFD700",borderRadius:"50%",
+                  borderTop:"3px solid var(--d-gold)",borderRadius:"50%",
                   animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>{tr("Chargement des données...")}</div>
             )}
 
@@ -985,7 +987,7 @@ function DashboardAdmin() {
             {onglet==="accueil" && !loading && (
               <div>
                 <div style={{ marginBottom:28 }}>
-                  <h3 style={{ color:"#fff",fontWeight:800,margin:0,fontSize:24 }}>{tr("Tableau de bord")}{" "}<span style={{ color:"#FFD700" }}>{tr("Admin")}</span>
+                  <h3 style={{ color:"var(--d-text)",fontWeight:800,margin:0,fontSize:24 }}>{tr("Tableau de bord")}{" "}<span style={{ color:"var(--d-gold)" }}>{tr("Admin")}</span>
                   </h3>
                   <p style={{ color:"#555",marginTop:4,fontSize:14 }}>{tr("Vue d'ensemble de la plateforme IRAKY Delivery")}</p>
                 </div>
@@ -1009,7 +1011,7 @@ function DashboardAdmin() {
                       val: stats.coursiers_actifs,        // ← clé exacte BDD
                       sub:"coursiers disponibles",
                       Icon:MdDeliveryDining,
-                      color:"#FFD700",
+                      color:"var(--d-gold)",
                     },
                     {
                       label:"TOTAL COMMANDES",
@@ -1039,7 +1041,7 @@ function DashboardAdmin() {
                         <s.Icon style={{ color:s.color,fontSize:26 }}/>
                       </div>
                       <div>
-                        <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
+                        <div style={{ color:"var(--d-text)",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
@@ -1083,7 +1085,7 @@ function DashboardAdmin() {
                     {
                       label:"RECETTES COURSIERS",
                       val:   `${((stats.revenus_total_abonnements||0)/1000).toLocaleString("fr-FR",{maximumFractionDigits:1})}k Ar`,
-                      color:"#FFD700",
+                      color:"var(--d-gold)",
                       Icon:MdAttachMoney,
                       action:()=>setOnglet("paiements"),
                       sub:"abonnements + inscriptions",
@@ -1101,7 +1103,7 @@ function DashboardAdmin() {
                         <s.Icon style={{ color:s.color,fontSize:24 }}/>
                       </div>
                       <div>
-                        <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
+                        <div style={{ color:"var(--d-text)",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
@@ -1118,13 +1120,13 @@ function DashboardAdmin() {
                       <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                         <div style={{ width:34,height:34,borderRadius:10,backgroundColor:"#FFD70018",
                           border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
-                          <MdBarChart style={{ color:"#FFD700",fontSize:18 }}/>
+                          <MdBarChart style={{ color:"var(--d-gold)",fontSize:18 }}/>
                         </div>
-                        <span style={{ color:"#FFD700",fontWeight:700,fontSize:14 }}>{tr("Commandes mensuelles 2026")}</span>
+                        <span style={{ color:"var(--d-gold)",fontWeight:700,fontSize:14 }}>{tr("Commandes mensuelles 2026")}</span>
                       </div>
                       <span style={{ color:"#555",fontSize:12 }}>{tr("12 derniers mois")}</span>
                     </div>
-                    <BarChart data={chartMensuel.length?chartMensuel:[{label:"—",val:0}]} color="#FFD700" height={120}/>
+                    <BarChart data={chartMensuel.length?chartMensuel:[{label:"—",val:0}]} color="var(--d-gold)" height={120}/>
                   </div>
 
                   {/* ────────────────────────────────────────────
@@ -1145,14 +1147,14 @@ function DashboardAdmin() {
                       <DonutChart segments={[
                         { val: stats.clients_actifs    || 0, color:"#3b82f6" },  // ← BDD exact
                         { val: stats.clients_inactifs  || 0, color:"#1e3a5f" },  // ← BDD exact
-                        { val: stats.coursiers_actifs  || 0, color:"#FFD700" },  // ← BDD exact
+                        { val: stats.coursiers_actifs  || 0, color:"var(--d-gold)" },  // ← BDD exact
                         { val: stats.coursiers_inactifs|| 0, color:"#ef4444" },  // ← BDD exact
                       ]} size={110}/>
                       <div style={{ display:"flex",flexDirection:"column",gap:6,width:"100%" }}>
                         {[
                           { label:"Clients actifs",     val: stats.clients_actifs    || 0, color:"#3b82f6" },
                           { label:"Clients inactifs",   val: stats.clients_inactifs  || 0, color:"#1e3a5f" },
-                          { label:"Coursiers actifs",   val: stats.coursiers_actifs  || 0, color:"#FFD700" },
+                          { label:"Coursiers actifs",   val: stats.coursiers_actifs  || 0, color:"var(--d-gold)" },
                           { label:"Coursiers inactifs", val: stats.coursiers_inactifs|| 0, color:"#ef4444" },
                         ].map(s=>(
                           <div key={s.label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
@@ -1160,7 +1162,7 @@ function DashboardAdmin() {
                               <div style={{ width:8,height:8,borderRadius:"50%",backgroundColor:s.color }}/>
                               <span style={{ color:"#888",fontSize:11 }}>{tr(s.label)}</span>
                             </div>
-                            <span style={{ color:"#fff",fontWeight:700,fontSize:12 }}>{s.val}</span>
+                            <span style={{ color:"var(--d-text)",fontWeight:700,fontSize:12 }}>{s.val}</span>
                           </div>
                         ))}
                       </div>
@@ -1188,10 +1190,10 @@ function DashboardAdmin() {
                 {/* Dernières commandes BDD */}
                 <div style={card}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18 }}>
-                    <h5 style={{ color:"#FFD700",margin:0,fontWeight:700,display:"flex",alignItems:"center",gap:8 }}>
+                    <h5 style={{ color:"var(--d-gold)",margin:0,fontWeight:700,display:"flex",alignItems:"center",gap:8 }}>
                       <MdListAlt style={{ fontSize:20 }}/>{" "}{tr("Dernières commandes")}</h5>
                     <button onClick={()=>setOnglet("commandes")}
-                      style={{ background:"transparent",border:"1px solid #FFD70030",color:"#FFD700",
+                      style={{ background:"transparent",border:"1px solid #FFD70030",color:"var(--d-gold)",
                         borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:12 }}>{tr("Voir tout")}</button>
                   </div>
                   <div style={{ overflowX:"auto" }}>
@@ -1209,10 +1211,10 @@ function DashboardAdmin() {
                           <tr key={cmd.id} style={{ borderBottom:"1px solid #ffffff06" }}
                             onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                             onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
-                            <td data-label={tr("Service")} style={{ padding:"10px 12px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                            <td data-label={tr("Client")} style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.client}</td>
-                            <td data-label={tr("Coursier")} style={{ padding:"10px 12px",color:"#aaa" }}>{cmd.coursier||"—"}</td>
-                            <td data-label={tr("Tarif")} style={{ padding:"10px 12px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                            <td data-label={tr("Service")} style={{ padding:"10px 12px",color:"var(--d-text)",fontWeight:600 }}>{cmd.service}</td>
+                            <td data-label={tr("Client")} style={{ padding:"10px 12px",color:"var(--d-c-aaa)" }}>{cmd.client}</td>
+                            <td data-label={tr("Coursier")} style={{ padding:"10px 12px",color:"var(--d-c-aaa)" }}>{cmd.coursier||"—"}</td>
+                            <td data-label={tr("Tarif")} style={{ padding:"10px 12px",color:"var(--d-gold)",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
                             <td data-label={tr("Statut")} style={{ padding:"10px 12px" }}><StatutBadge statut={cmd.statut}/></td>
                             <td data-label={tr("Date")} style={{ padding:"10px 12px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           </tr>
@@ -1230,7 +1232,7 @@ function DashboardAdmin() {
             {/* ═══ CLIENTS — données BDD ═══ */}
             {onglet==="clients" && !loading && (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#3b82f618",
                     border:"1px solid #3b82f633",display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -1288,18 +1290,18 @@ function DashboardAdmin() {
                               <div style={{ width:34,height:34,borderRadius:"50%",
                                 background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                                 display:"flex",alignItems:"center",justifyContent:"center",
-                                fontWeight:800,color:"#fff",fontSize:13,flexShrink:0 }}>
+                                fontWeight:800,color:"var(--d-text)",fontSize:13,flexShrink:0 }}>
                                 {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
                               </div>
                               <div>
-                                <div style={{ color:"#fff",fontWeight:600 }}>{c.prenom} {c.nom}</div>
+                                <div style={{ color:"var(--d-text)",fontWeight:600 }}>{c.prenom} {c.nom}</div>
                                 <div style={{ color:"#555",fontSize:11 }}>{c.adresse}</div>
                               </div>
                             </div>
                           </td>
-                          <td data-label={tr("Email")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.email}</td>
-                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td data-label={tr("Commandes")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.commandes}</td>
+                          <td data-label={tr("Email")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.email}</td>
+                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.telephone}</td>
+                          <td data-label={tr("Commandes")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.commandes}</td>
                           <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}><StatutBadge statut={c.statut}/></td>
                           <td data-label={tr("Inscrit le")} style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{c.created_at}</td>
                           <td style={{ padding:"12px 14px" }}>
@@ -1349,20 +1351,20 @@ function DashboardAdmin() {
                   {totalPagesClient > 1 && (
                     <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
                       <button onClick={()=>setPageClient(p=>Math.max(1,p-1))} disabled={pageClient===1}
-                        style={{ background:pageClient===1?"#1a1a35":"#FFD70022",color:pageClient===1?"#444":"#FFD700",
+                        style={{ background:pageClient===1?"var(--d-card3)":"#FFD70022",color:pageClient===1?"#444":"var(--d-gold)",
                           border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageClient===1?"not-allowed":"pointer",fontWeight:700 }}>
                         ‹
                       </button>
                       {Array.from({length:totalPagesClient},(_,i)=>i+1).map(p=>(
                         <button key={p} onClick={()=>setPageClient(p)}
-                          style={{ background:p===pageClient?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
-                            color:p===pageClient?"#000":"#aaa",border:"1px solid #FFD70033",
+                          style={{ background:p===pageClient?"linear-gradient(135deg,var(--d-gold),#ff9500)":"var(--d-card3)",
+                            color:p===pageClient?"#000":"var(--d-c-aaa)",border:"1px solid #FFD70033",
                             borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
                           {p}
                         </button>
                       ))}
                       <button onClick={()=>setPageClient(p=>Math.min(totalPagesClient,p+1))} disabled={pageClient===totalPagesClient}
-                        style={{ background:pageClient===totalPagesClient?"#1a1a35":"#FFD70022",color:pageClient===totalPagesClient?"#444":"#FFD700",
+                        style={{ background:pageClient===totalPagesClient?"var(--d-card3)":"#FFD70022",color:pageClient===totalPagesClient?"#444":"var(--d-gold)",
                           border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageClient===totalPagesClient?"not-allowed":"pointer",fontWeight:700 }}>
                         ›
                       </button>
@@ -1387,11 +1389,11 @@ function DashboardAdmin() {
               );
               return (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
                     border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
-                    <MdDeliveryDining style={{ color:"#FFD700",fontSize:22 }}/>
+                    <MdDeliveryDining style={{ color:"var(--d-gold)",fontSize:22 }}/>
                   </div>
                   {tr("Gestion des coursiers")}
                   {/* ✅ Bouton Ajouter */}
@@ -1438,22 +1440,22 @@ function DashboardAdmin() {
                           <td data-label={tr("Nom")} className="td-nom" style={{ padding:"12px 14px" }}>
                             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
                               <div style={{ width:34,height:34,borderRadius:"50%",
-                                background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                                background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                                 display:"flex",alignItems:"center",justifyContent:"center",
                                 fontWeight:800,color:"#000",fontSize:13,flexShrink:0 }}>
                                 {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
                               </div>
                               <div>
-                                <div style={{ color:"#fff",fontWeight:600 }}>{c.prenom} {c.nom}</div>
+                                <div style={{ color:"var(--d-text)",fontWeight:600 }}>{c.prenom} {c.nom}</div>
                                 <div style={{ color:"#555",fontSize:11 }}>{c.email}</div>
                               </div>
                             </div>
                           </td>
-                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"#aaa" }}>{c.telephone}</td>
-                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.telephone}</td>
+                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}</td>
                           <td data-label={tr("Note")} style={{ padding:"12px 14px" }}>
                             {c.note > 0 ? (
-                              <span style={{ display:"flex",alignItems:"center",gap:4,color:"#FFD700",fontWeight:700 }}>
+                              <span style={{ display:"flex",alignItems:"center",gap:4,color:"var(--d-gold)",fontWeight:700 }}>
                                 <MdStar style={{ fontSize:14 }}/> {c.note}/5
                               </span>
                             ) : <span style={{ color:"#555" }}>—</span>}
@@ -1506,20 +1508,20 @@ function DashboardAdmin() {
                   {totalPagesCoursier > 1 && (
                     <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
                       <button onClick={()=>setPageCoursier(p=>Math.max(1,p-1))} disabled={pageCoursier===1}
-                        style={{ background:pageCoursier===1?"#1a1a35":"#FFD70022",color:pageCoursier===1?"#444":"#FFD700",
+                        style={{ background:pageCoursier===1?"var(--d-card3)":"#FFD70022",color:pageCoursier===1?"#444":"var(--d-gold)",
                           border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCoursier===1?"not-allowed":"pointer",fontWeight:700 }}>
                         ‹
                       </button>
                       {Array.from({length:totalPagesCoursier},(_,i)=>i+1).map(p=>(
                         <button key={p} onClick={()=>setPageCoursier(p)}
-                          style={{ background:p===pageCoursier?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
-                            color:p===pageCoursier?"#000":"#aaa",border:"1px solid #FFD70033",
+                          style={{ background:p===pageCoursier?"linear-gradient(135deg,var(--d-gold),#ff9500)":"var(--d-card3)",
+                            color:p===pageCoursier?"#000":"var(--d-c-aaa)",border:"1px solid #FFD70033",
                             borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
                           {p}
                         </button>
                       ))}
                       <button onClick={()=>setPageCoursier(p=>Math.min(totalPagesCoursier,p+1))} disabled={pageCoursier===totalPagesCoursier}
-                        style={{ background:pageCoursier===totalPagesCoursier?"#1a1a35":"#FFD70022",color:pageCoursier===totalPagesCoursier?"#444":"#FFD700",
+                        style={{ background:pageCoursier===totalPagesCoursier?"var(--d-card3)":"#FFD70022",color:pageCoursier===totalPagesCoursier?"#444":"var(--d-gold)",
                           border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCoursier===totalPagesCoursier?"not-allowed":"pointer",fontWeight:700 }}>
                         ›
                       </button>
@@ -1537,7 +1539,7 @@ function DashboardAdmin() {
               const cmdPage = commandes.slice((pageCommande-1)*CMD_PAR_PAGE, pageCommande*CMD_PAR_PAGE);
               return (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#10b98118",
                     border:"1px solid #10b98133",display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -1574,7 +1576,7 @@ function DashboardAdmin() {
                         <s.Icon style={{ color:s.color,fontSize:26 }}/>
                       </div>
                       <div>
-                        <div style={{ color:"#fff",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
+                        <div style={{ color:"var(--d-text)",fontWeight:800,fontSize:26,lineHeight:1 }}>{s.val}</div>
                         <div style={{ color:"#888",fontWeight:600,fontSize:10,letterSpacing:1.5,marginTop:3 }}>{tr(s.label)}</div>
                         <div style={{ color:s.color,fontSize:11,marginTop:2 }}>{tr(s.sub)}</div>
                       </div>
@@ -1599,10 +1601,10 @@ function DashboardAdmin() {
                           onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
                           onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
                           <td data-label="#" style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>#{cmd.id}</td>
-                          <td data-label={tr("Service")} style={{ padding:"12px 14px",color:"#fff",fontWeight:600 }}>{cmd.service}</td>
-                          <td data-label={tr("Client")} style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.client}</td>
-                          <td data-label={tr("Coursier")} style={{ padding:"12px 14px",color:"#aaa" }}>{cmd.coursier||tr("Non assigné")}</td>
-                          <td data-label={tr("Tarif")} style={{ padding:"12px 14px",color:"#FFD700",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
+                          <td data-label={tr("Service")} style={{ padding:"12px 14px",color:"var(--d-text)",fontWeight:600 }}>{cmd.service}</td>
+                          <td data-label={tr("Client")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{cmd.client}</td>
+                          <td data-label={tr("Coursier")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{cmd.coursier||tr("Non assigné")}</td>
+                          <td data-label={tr("Tarif")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{(cmd.tarif||0).toLocaleString()} Ar</td>
                           <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}><StatutBadge statut={cmd.statut}/></td>
                           <td data-label={tr("Date")} style={{ padding:"12px 14px",color:"#555",fontSize:12 }}>{cmd.date}</td>
                           <td style={{ padding:"12px 14px" }}>
@@ -1643,20 +1645,20 @@ function DashboardAdmin() {
                 {totalPagesCmd > 1 && (
                   <div style={{ display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginTop:20 }}>
                     <button onClick={()=>setPageCommande(p=>Math.max(1,p-1))} disabled={pageCommande===1}
-                      style={{ background:pageCommande===1?"#1a1a35":"#FFD70022",color:pageCommande===1?"#444":"#FFD700",
+                      style={{ background:pageCommande===1?"var(--d-card3)":"#FFD70022",color:pageCommande===1?"#444":"var(--d-gold)",
                         border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCommande===1?"not-allowed":"pointer",fontWeight:700 }}>
                       ‹
                     </button>
                     {Array.from({length:totalPagesCmd},(_,i)=>i+1).map(p=>(
                       <button key={p} onClick={()=>setPageCommande(p)}
-                        style={{ background:p===pageCommande?"linear-gradient(135deg,#FFD700,#ff9500)":"#1a1a35",
-                          color:p===pageCommande?"#000":"#aaa",border:"1px solid #FFD70033",
+                        style={{ background:p===pageCommande?"linear-gradient(135deg,var(--d-gold),#ff9500)":"var(--d-card3)",
+                          color:p===pageCommande?"#000":"var(--d-c-aaa)",border:"1px solid #FFD70033",
                           borderRadius:8,padding:"6px 12px",cursor:"pointer",fontWeight:700,minWidth:34 }}>
                         {p}
                       </button>
                     ))}
                     <button onClick={()=>setPageCommande(p=>Math.min(totalPagesCmd,p+1))} disabled={pageCommande===totalPagesCmd}
-                      style={{ background:pageCommande===totalPagesCmd?"#1a1a35":"#FFD70022",color:pageCommande===totalPagesCmd?"#444":"#FFD700",
+                      style={{ background:pageCommande===totalPagesCmd?"var(--d-card3)":"#FFD70022",color:pageCommande===totalPagesCmd?"#444":"var(--d-gold)",
                         border:"1px solid #FFD70033",borderRadius:8,padding:"6px 12px",cursor:pageCommande===totalPagesCmd?"not-allowed":"pointer",fontWeight:700 }}>
                       ›
                     </button>
@@ -1670,7 +1672,7 @@ function DashboardAdmin() {
             {/* ═══ ABONNEMENTS — données BDD + pagination ═══ */}
             {onglet==="paiements" && !loading && (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#8b5cf618",
                     border:"1px solid #8b5cf633",display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -1683,7 +1685,7 @@ function DashboardAdmin() {
                     { label:"Abonnements actifs",    val:stats.abonnes_payes,                                color:"#10b981",Icon:MdCheckCircle },
                     { label:"Abonnements impayés",   val:stats.abonnes_impayes,                              color:"#ef4444",Icon:MdCancel      },
                     { label:"En attente validation", val:coursiers.filter(c=>c.statut==="inactif").length,   color:"#f59e0b",Icon:MdSchedule    },
-                    { label:"Revenus mensuels",      val:`${((stats.revenus_abonnements||0)/1000).toLocaleString("fr-FR",{maximumFractionDigits:1})}k Ar`,color:"#FFD700",Icon:MdAttachMoney },
+                    { label:"Revenus mensuels",      val:`${((stats.revenus_abonnements||0)/1000).toLocaleString("fr-FR",{maximumFractionDigits:1})}k Ar`,color:"var(--d-gold)",Icon:MdAttachMoney },
                   ].map(s=>(
                     <div key={s.label} style={{ ...card,display:"flex",alignItems:"center",gap:14,
                       border:`1px solid ${s.color}33` }}>
@@ -1692,7 +1694,7 @@ function DashboardAdmin() {
                         <s.Icon style={{ color:s.color,fontSize:22 }}/>
                       </div>
                       <div>
-                        <div style={{ color:"#fff",fontWeight:800,fontSize:20 }}>{s.val}</div>
+                        <div style={{ color:"var(--d-text)",fontWeight:800,fontSize:20 }}>{s.val}</div>
                         <div style={{ color:"#888",fontSize:11,marginTop:2 }}>{tr(s.label)}</div>
                       </div>
                     </div>
@@ -1707,13 +1709,13 @@ function DashboardAdmin() {
                     <div style={{ display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:12,alignItems:"center" }}>
                       <div style={{ display:"flex",alignItems:"center",gap:14 }}>
                         <div style={{ width:44,height:44,borderRadius:"50%",
-                          background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                          background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                           display:"flex",alignItems:"center",justifyContent:"center",
                           fontWeight:800,color:"#000",fontSize:16 }}>
                           {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
                         </div>
                         <div>
-                          <div style={{ color:"#fff",fontWeight:700,fontSize:15 }}>{c.prenom} {c.nom}</div>
+                          <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:15 }}>{c.prenom} {c.nom}</div>
                           <div style={{ color:"#888",fontSize:12 }}>{c.email}</div>
                           <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{c.missions} missions</div>
                         </div>
@@ -1750,14 +1752,14 @@ function DashboardAdmin() {
                     <button onClick={()=>setAbonnPage(p=>Math.max(1,p-1))}
                       disabled={abonnPage===1}
                       style={{ backgroundColor:"#FFD70018",border:"1px solid #FFD70033",
-                        color:"#FFD700",borderRadius:8,padding:"7px 16px",
+                        color:"var(--d-gold)",borderRadius:8,padding:"7px 16px",
                         cursor:abonnPage===1?"not-allowed":"pointer",fontWeight:700,fontSize:13,
                         opacity:abonnPage===1?0.4:1 }}>{tr("← Précédent")}</button>
                     {Array.from({length:totalAbonnPages},(_,i)=>i+1).map(p=>(
                       <button key={p} onClick={()=>setAbonnPage(p)}
-                        style={{ backgroundColor:p===abonnPage?"#FFD700":"#FFD70018",
+                        style={{ backgroundColor:p===abonnPage?"var(--d-gold)":"#FFD70018",
                           border:"1px solid #FFD70033",
-                          color:p===abonnPage?"#000":"#FFD700",
+                          color:p===abonnPage?"#000":"var(--d-gold)",
                           borderRadius:8,padding:"7px 14px",cursor:"pointer",fontWeight:700,fontSize:13 }}>
                         {p}
                       </button>
@@ -1765,7 +1767,7 @@ function DashboardAdmin() {
                     <button onClick={()=>setAbonnPage(p=>Math.min(totalAbonnPages,p+1))}
                       disabled={abonnPage===totalAbonnPages}
                       style={{ backgroundColor:"#FFD70018",border:"1px solid #FFD70033",
-                        color:"#FFD700",borderRadius:8,padding:"7px 16px",
+                        color:"var(--d-gold)",borderRadius:8,padding:"7px 16px",
                         cursor:abonnPage===totalAbonnPages?"not-allowed":"pointer",fontWeight:700,fontSize:13,
                         opacity:abonnPage===totalAbonnPages?0.4:1 }}>{tr("Suivant →")}</button>
                   </div>
@@ -1776,17 +1778,17 @@ function DashboardAdmin() {
             {/* ═══ HISTORIQUE & CLASSEMENTS ═══ */}
             {onglet==="historique" && (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:6,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:6,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
                     border:"1px solid #FFD70033",display:"flex",alignItems:"center",justifyContent:"center" }}>
-                    <MdHistory style={{ color:"#FFD700",fontSize:22 }}/>
+                    <MdHistory style={{ color:"var(--d-gold)",fontSize:22 }}/>
                   </div>{tr("Historique & Classements")}</h4>
                 <p style={{ color:"#555",marginBottom:20,fontSize:14 }}>{tr("Palmarès des coursiers et clients de la plateforme")}</p>
 
                 {/* Filtre période, partagé Top Coursiers + Top Clients */}
                 <div style={{ ...card,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:20 }}>
-                  <span style={{ color:"#FFD700",fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
+                  <span style={{ color:"var(--d-gold)",fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
                     <MdFilterList style={{ fontSize:18 }}/>{" "}{tr("Période :")}</span>
                   <select value={histMois} onChange={e=>setHistMois(e.target.value)}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
@@ -1804,7 +1806,7 @@ function DashboardAdmin() {
                 {/* ── TOP COURSIERS ── */}
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
                       <MdEmojiEvents style={{ fontSize:20 }}/>{" "}{tr("Top coursiers — missions terminées")}</div>
                     <select value={limMissions} onChange={e=>setLimMissions(Number(e.target.value))}
                       style={{ ...inp,width:"auto",cursor:"pointer" }}>
@@ -1819,9 +1821,9 @@ function DashboardAdmin() {
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {topCoursiers.map((c,i)=>{
-                        const medaille = i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":null;
+                        const medaille = i===0?"var(--d-gold)":i===1?"#C0C0C0":i===2?"#CD7F32":null;
                         return (
-                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                          <div key={c.id} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,
                             border:`1px solid ${medaille?medaille+"55":"#FFD70018"}`,padding:"14px 18px",
                             display:"flex",alignItems:"center",gap:14,flexWrap:"wrap" }}>
                             <div style={{ width:36,height:36,borderRadius:"50%",flexShrink:0,
@@ -1832,15 +1834,15 @@ function DashboardAdmin() {
                               {i<3 ? <MdMilitaryTech style={{ fontSize:18,color:medaille }}/> : `#${i+1}`}
                             </div>
                             <div style={{ width:38,height:38,borderRadius:"50%",flexShrink:0,
-                              background:"linear-gradient(135deg,#FFD700,#ff8c00)",
+                              background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                               display:"flex",alignItems:"center",justifyContent:"center",
                               fontWeight:800,color:"#000",fontSize:14 }}>
                               {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
                             </div>
                             <div style={{ flex:1,minWidth:160 }}>
-                              <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
                               <div style={{ display:"flex",alignItems:"center",gap:10,marginTop:4,flexWrap:"wrap" }}>
-                                <span style={{ color:"#FFD700",fontSize:12,display:"flex",alignItems:"center",gap:3 }}>
+                                <span style={{ color:"var(--d-gold)",fontSize:12,display:"flex",alignItems:"center",gap:3 }}>
                                   <MdStar style={{ fontSize:14 }}/> {c.note || 0}/5
                                 </span>
                                 <span style={{ color:"#10b981",fontSize:12,fontWeight:700 }}>
@@ -1864,7 +1866,7 @@ function DashboardAdmin() {
                 {/* ── TOP CLIENTS FIDÈLES ── */}
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10 }}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
                       <MdEmojiEvents style={{ fontSize:20 }}/>{" "}{tr("Top clients — les plus fidèles")}</div>
                     <select value={limClientsTop} onChange={e=>setLimClientsTop(Number(e.target.value))}
                       style={{ ...inp,width:"auto",cursor:"pointer" }}>
@@ -1879,9 +1881,9 @@ function DashboardAdmin() {
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {topClients.map((c,i)=>{
-                        const medaille = i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":null;
+                        const medaille = i===0?"var(--d-gold)":i===1?"#C0C0C0":i===2?"#CD7F32":null;
                         return (
-                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                          <div key={c.id} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,
                             border:`1px solid ${medaille?medaille+"55":"#FFD70018"}`,padding:"14px 18px",
                             display:"flex",alignItems:"center",gap:14,flexWrap:"wrap" }}>
                             <div style={{ width:36,height:36,borderRadius:"50%",flexShrink:0,
@@ -1894,11 +1896,11 @@ function DashboardAdmin() {
                             <div style={{ width:38,height:38,borderRadius:"50%",flexShrink:0,
                               background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                               display:"flex",alignItems:"center",justifyContent:"center",
-                              fontWeight:800,color:"#fff",fontSize:14 }}>
+                              fontWeight:800,color:"var(--d-text)",fontSize:14 }}>
                               {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
                             </div>
                             <div style={{ flex:1,minWidth:160 }}>
-                              <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:14 }}>{c.prenom} {c.nom}</div>
                               <div style={{ color:"#10b981",fontSize:12,fontWeight:700,marginTop:4 }}>
                                 {c.nb_commandes} commande{c.nb_commandes>1?"s":""}
                               </div>
@@ -1918,7 +1920,7 @@ function DashboardAdmin() {
 
                 {/* ── ANCIENNETÉ : COURSIERS + CLIENTS côte à côte ── */}
                 <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10 }}>
-                  <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                  <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
                     <MdWorkHistory style={{ fontSize:20 }}/>{" "}{tr("Ancienneté sur la plateforme")}</div>
                   <select value={limAnciens} onChange={e=>setLimAnciens(Number(e.target.value))}
                     style={{ ...inp,width:"auto",cursor:"pointer" }}>
@@ -1931,7 +1933,7 @@ function DashboardAdmin() {
                 <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:20 }} className="stats-grid">
                   {/* Coursiers anciens */}
                   <div style={card}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:14,marginBottom:14,
                       display:"flex",alignItems:"center",gap:8 }}>
                       <MdDeliveryDining style={{ fontSize:18 }}/>{" "}{tr("Coursiers les plus anciens")}</div>
                     {anciensCoursiers.length===0 ? (
@@ -1939,12 +1941,12 @@ function DashboardAdmin() {
                     ) : (
                       <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
                         {anciensCoursiers.map((c,i)=>(
-                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:10,
+                          <div key={c.id} style={{ backgroundColor:"var(--d-bg)",borderRadius:10,
                             border:"1px solid #FFD70018",padding:"10px 14px",
                             display:"flex",alignItems:"center",gap:12 }}>
                             <span style={{ color:"#666",fontWeight:700,fontSize:12,width:24 }}>#{i+1}</span>
                             <div style={{ flex:1 }}>
-                              <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"var(--d-text)",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
                               <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
                                 {tr("Depuis le")} {new Date(c.created_at).toLocaleDateString(localeDate())}
                               </div>
@@ -1957,7 +1959,7 @@ function DashboardAdmin() {
 
                   {/* Clients anciens */}
                   <div style={card}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:14,marginBottom:14,
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:14,marginBottom:14,
                       display:"flex",alignItems:"center",gap:8 }}>
                       <MdPeople style={{ fontSize:18 }}/>{" "}{tr("Clients les plus anciens")}</div>
                     {anciensClients.length===0 ? (
@@ -1965,12 +1967,12 @@ function DashboardAdmin() {
                     ) : (
                       <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
                         {anciensClients.map((c,i)=>(
-                          <div key={c.id} style={{ backgroundColor:"#080820",borderRadius:10,
+                          <div key={c.id} style={{ backgroundColor:"var(--d-bg)",borderRadius:10,
                             border:"1px solid #FFD70018",padding:"10px 14px",
                             display:"flex",alignItems:"center",gap:12 }}>
                             <span style={{ color:"#666",fontWeight:700,fontSize:12,width:24 }}>#{i+1}</span>
                             <div style={{ flex:1 }}>
-                              <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
+                              <div style={{ color:"var(--d-text)",fontWeight:600,fontSize:13 }}>{c.prenom} {c.nom}</div>
                               <div style={{ color:"#555",fontSize:11,marginTop:2 }}>
                                 {tr("Depuis le")} {new Date(c.created_at).toLocaleDateString(localeDate())}
                               </div>
@@ -1989,12 +1991,12 @@ function DashboardAdmin() {
               <div>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
                   flexWrap:"wrap", gap:12, marginBottom:20 }}>
-                  <h4 style={{ color:"#FFD700",fontWeight:800,fontSize:20,
+                  <h4 style={{ color:"var(--d-gold)",fontWeight:800,fontSize:20,
                     display:"flex",alignItems:"center",gap:12, margin:0 }}>
                     <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#FFD70018",
                       border:"1px solid #FFD70033",display:"flex",alignItems:"center",
                       justifyContent:"center",flexShrink:0 }}>
-                      <MdForum style={{ color:"#FFD700",fontSize:22 }}/>
+                      <MdForum style={{ color:"var(--d-gold)",fontSize:22 }}/>
                     </div>
                     Support Chat
                     {supportNonLus > 0 && (
@@ -2032,13 +2034,13 @@ function DashboardAdmin() {
                             padding:"14px 16px", cursor:"pointer",
                             borderBottom:"1px solid #ffffff0a",
                             backgroundColor: supportSelected === conv.client_id ? "#FFD70012" : "transparent",
-                            borderLeft: supportSelected === conv.client_id ? "3px solid #FFD700" : "3px solid transparent",
+                            borderLeft: supportSelected === conv.client_id ? "3px solid var(--d-gold)" : "3px solid transparent",
                             transition:"all 0.15s",
                           }}
                           onMouseEnter={e=>{ if(supportSelected!==conv.client_id) e.currentTarget.style.backgroundColor="#ffffff08"; }}
                           onMouseLeave={e=>{ if(supportSelected!==conv.client_id) e.currentTarget.style.backgroundColor="transparent"; }}>
                           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8 }}>
-                            <div style={{ color:"#fff", fontWeight:700, fontSize:13.5 }}>
+                            <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:13.5 }}>
                               {conv.client?.prenom} {conv.client?.nom}
                             </div>
                             {conv.non_lus > 0 && (
@@ -2077,7 +2079,7 @@ function DashboardAdmin() {
                             <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
                               display:"flex", alignItems:"center", justifyContent:"space-between", gap:10 }}>
                               <div>
-                                <div style={{ color:"#fff", fontWeight:800, fontSize:14 }}>
+                                <div style={{ color:"var(--d-text)", fontWeight:800, fontSize:14 }}>
                                   {conv?.client?.prenom} {conv?.client?.nom}
                                 </div>
                                 <div style={{ color:"#777", fontSize:11.5 }}>
@@ -2108,18 +2110,18 @@ function DashboardAdmin() {
                                 <div key={m.id || i} style={{ display:"flex",
                                   justifyContent: estClient ? "flex-start" : "flex-end" }}>
                                   <div style={{
-                                    backgroundColor: estClient ? "#1a1a35" : (estBot ? "#8b5cf618" : "#FFD70018"),
+                                    backgroundColor: estClient ? "var(--d-card3)" : (estBot ? "#8b5cf618" : "#FFD70018"),
                                     border:`1px solid ${estClient ? "#ffffff15" : (estBot ? "#8b5cf644" : "#FFD70044")}`,
                                     borderRadius: estClient ? "16px 16px 16px 4px" : "16px 16px 4px 16px",
                                     padding:"9px 14px", maxWidth:"75%",
                                   }}>
                                     {!estClient && (
-                                      <div style={{ color: estBot ? "#8b5cf6" : "#FFD700", fontSize:10,
+                                      <div style={{ color: estBot ? "#8b5cf6" : "var(--d-gold)", fontSize:10,
                                         fontWeight:700, marginBottom:4 }}>
                                         {estBot ? tr("🤖 Assistant automatique") : tr("🧑‍💼 Vous (admin)")}
                                       </div>
                                     )}
-                                    <div style={{ color:"#fff", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
+                                    <div style={{ color:"var(--d-text)", fontSize:13, lineHeight:1.5 }}>{m.texte}</div>
                                     <div style={{ color:"#666", fontSize:10, marginTop:3, textAlign:"right" }}>
                                       {new Date(m.created_at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
                                     </div>
@@ -2136,11 +2138,11 @@ function DashboardAdmin() {
                           <input value={supportReply} onChange={e=>setSupportReply(e.target.value)}
                             onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportReply.trim()&&envoyerReponseSupport()}
                             placeholder={tr("Répondre au client...")}
-                            style={{ flex:1, backgroundColor:"#0a0a1e", border:"1px solid #FFD70033",
-                              color:"#fff", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>
+                            style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70033",
+                              color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>
                           <button onClick={envoyerReponseSupport}
                             disabled={!supportReply.trim() || supportEnvoi}
-                            style={{ backgroundColor:"#FFD700", color:"#000", border:"none",
+                            style={{ backgroundColor:"var(--d-gold)", color:"#000", border:"none",
                               borderRadius:12, padding:"10px 18px", fontWeight:800, fontSize:13,
                               cursor: supportReply.trim() ? "pointer" : "not-allowed",
                               opacity: supportReply.trim() ? 1 : 0.5 }}>
@@ -2157,7 +2159,7 @@ function DashboardAdmin() {
             {/* ═══ PARAMÈTRES ═══ */}
             {onglet==="settings" && (
               <div>
-                <h4 style={{ color:"#FFD700",marginBottom:24,fontWeight:800,fontSize:20,
+                <h4 style={{ color:"var(--d-gold)",marginBottom:24,fontWeight:800,fontSize:20,
                   display:"flex",alignItems:"center",gap:12 }}>
                   <div style={{ width:38,height:38,borderRadius:10,backgroundColor:"#6b728018",
                     border:"1px solid #6b728033",display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -2167,7 +2169,7 @@ function DashboardAdmin() {
                 {/* ═══ GESTION DES TARIFS PAR MOYEN DE DÉPLACEMENT — dynamique BDD ═══ */}
                 <div style={{ ...card,marginBottom:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
                       <MdAttachMoney style={{ fontSize:20 }}/>{" "}{tr("Tarifs par moyen de déplacement")}</div>
                     <button onClick={ouvrirAjoutMoyen} title={tr("Ajouter un moyen de transport")}
                       style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
@@ -2187,8 +2189,8 @@ function DashboardAdmin() {
                           <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                             {m.icone && <span style={{ fontSize:26 }}>{m.icone}</span>}
                             <div>
-                              <div style={{ color:"#aaa",fontSize:13 }}>{m.nom}</div>
-                              <div style={{ color:"#FFD700",fontWeight:800,fontSize:17,marginTop:2 }}>
+                              <div style={{ color:"var(--d-c-aaa)",fontSize:13 }}>{m.nom}</div>
+                              <div style={{ color:"var(--d-gold)",fontWeight:800,fontSize:17,marginTop:2 }}>
                                 {Number(m.prix).toLocaleString()} Ar
                               </div>
                               {m.duree_estimee ? (
@@ -2219,13 +2221,13 @@ function DashboardAdmin() {
                 </div>
 
                 <div style={{ ...card,marginTop:20 }}>
-                  <div style={{ color:"#FFD700",fontWeight:700,marginBottom:16,fontSize:15 }}>{tr("Compte administrateur")}</div>
+                  <div style={{ color:"var(--d-gold)",fontWeight:700,marginBottom:16,fontSize:15 }}>{tr("Compte administrateur")}</div>
                   <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14 }}>
                     {[["Email admin","admin@iraky.mg"],["Rôle",tr("Super Administrateur")],
                       ["Accès",tr("Compte unique sécurisé")],["Plateforme",tr("IRAKY Delivery Toliara")]].map(([k,v])=>(
-                      <div key={k} style={{ backgroundColor:"#080820",borderRadius:12,padding:"14px 18px",border:"1px solid #FFD70018" }}>
+                      <div key={k} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,padding:"14px 18px",border:"1px solid #FFD70018" }}>
                         <div style={{ color:"#555",fontSize:11,marginBottom:4 }}>{tr(k)}</div>
-                        <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{v}</div>
+                        <div style={{ color:"var(--d-text)",fontWeight:600,fontSize:13 }}>{v}</div>
                       </div>
                     ))}
                   </div>
@@ -2234,7 +2236,7 @@ function DashboardAdmin() {
                 {/* ═══ GESTION DES ADMINS ═══ */}
                 <div style={{ ...card,marginTop:20 }}>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
-                    <div style={{ color:"#FFD700",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
+                    <div style={{ color:"var(--d-gold)",fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:10 }}>
                       <MdAdminPanelSettings style={{ fontSize:20 }}/>{" "}{tr("Gestion des admins")}</div>
                     <button onClick={ouvrirAjoutAdmin} title={tr("Ajouter un admin")}
                       style={{ ...btnY,padding:"8px 16px",display:"flex",alignItems:"center",gap:6 }}>
@@ -2246,11 +2248,11 @@ function DashboardAdmin() {
                   ) : (
                     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                       {admins.map(a=>(
-                        <div key={a.id} style={{ backgroundColor:"#080820",borderRadius:12,
+                        <div key={a.id} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,
                           border:"1px solid #FFD70018",padding:"14px 18px",display:"flex",
                           alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10 }}>
                           <div>
-                            <div style={{ color:"#fff",fontWeight:700,fontSize:14 }}>
+                            <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:14 }}>
                               {a.prenom} {a.nom}
                               {a.est_moi && <span style={{ color:"#10b981",fontSize:11,marginLeft:8 }}>{tr("(vous)")}</span>}
                             </div>
@@ -2288,12 +2290,12 @@ function DashboardAdmin() {
       {/* MODAL DÉTAIL UTILISATEUR */}
       {detailUser && (
         <Modal onClose={()=>setDetailUser(null)} size="lg">
-          <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
+          <h5 style={{ color:"var(--d-gold)",marginBottom:20,fontWeight:800,fontSize:18,
             display:"flex",alignItems:"center",gap:12 }}>
             <div style={{ width:48,height:48,borderRadius:"50%",
-              background:detailUser.type==="coursier"?"linear-gradient(135deg,#FFD700,#ff8c00)":"linear-gradient(135deg,#3b82f6,#1d4ed8)",
+              background:detailUser.type==="coursier"?"linear-gradient(135deg,var(--d-gold),#ff8c00)":"linear-gradient(135deg,#3b82f6,#1d4ed8)",
               display:"flex",alignItems:"center",justifyContent:"center",
-              fontWeight:800,color:detailUser.type==="coursier"?"#000":"#fff",fontSize:18 }}>
+              fontWeight:800,color:detailUser.type==="coursier"?"#000":"var(--d-text)",fontSize:18 }}>
               {(detailUser.prenom||"?")[0]}{(detailUser.nom||"?")[0]}
             </div>
             {detailUser.prenom} {detailUser.nom}
@@ -2312,7 +2314,7 @@ function DashboardAdmin() {
             ].map(([k,v])=>(
               <div key={k} style={{ padding:"10px 0",borderBottom:"1px solid #ffffff08" }}>
                 <div style={{ color:"#555",fontSize:11,marginBottom:3 }}>{k}</div>
-                <div style={{ color:"#fff",fontWeight:600,fontSize:13 }}>{v}</div>
+                <div style={{ color:"var(--d-text)",fontWeight:600,fontSize:13 }}>{v}</div>
               </div>
             ))}
           </div>
@@ -2324,10 +2326,10 @@ function DashboardAdmin() {
               <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
                 {[{label:"CIN Recto",chemin:detailUser.photo_recto,color:"#06b6d4"},
                   {label:"CIN Verso",chemin:detailUser.photo_verso,color:"#8b5cf6"}].map(p=>(
-                  <div key={p.label} style={{ backgroundColor:"#080820",borderRadius:12,
+                  <div key={p.label} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,
                     border:`1px solid ${p.color}22`,overflow:"hidden" }}>
                     <div style={{ padding:"8px 12px",borderBottom:`1px solid ${p.color}18`,
-                      color:"#aaa",fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
+                      color:"var(--d-c-aaa)",fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
                       <MdBadge style={{ color:p.color }}/> {tr(p.label)}
                     </div>
                     {p.chemin?(
@@ -2369,12 +2371,12 @@ function DashboardAdmin() {
         <Modal onClose={()=>setConfirmDelete(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
             <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer")}{" "}<strong style={{ color:"#fff" }}>{confirmDelete.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
+          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDelete.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDelete(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
+                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>deleteUser(confirmDelete.id,confirmDelete.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
@@ -2387,7 +2389,7 @@ function DashboardAdmin() {
       {/* MODAL AJOUTER / MODIFIER ADMIN */}
       {adminModal && (
         <Modal onClose={()=>setAdminModal(null)}>
-          <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
+          <h5 style={{ color:"var(--d-gold)",marginBottom:20,fontWeight:800,fontSize:18,
             display:"flex",alignItems:"center",gap:10 }}>
             <MdAdminPanelSettings style={{ fontSize:22 }}/>
             {adminModal==="ajouter" ? tr("Ajouter un admin") : tr("Modifier l'admin")}
@@ -2429,12 +2431,12 @@ function DashboardAdmin() {
         <Modal onClose={()=>setConfirmDeleteAdmin(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
             <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer l'admin")}{" "}<strong style={{ color:"#fff" }}>{confirmDeleteAdmin.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
+          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer l'admin")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDeleteAdmin.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDeleteAdmin(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
+                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerAdmin(confirmDeleteAdmin.id,confirmDeleteAdmin.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
@@ -2447,7 +2449,7 @@ function DashboardAdmin() {
       {/* MODAL AJOUTER / MODIFIER MOYEN DE TRANSPORT */}
       {moyenModal && (
         <Modal onClose={()=>setMoyenModal(null)}>
-          <h5 style={{ color:"#FFD700",marginBottom:20,fontWeight:800,fontSize:18,
+          <h5 style={{ color:"var(--d-gold)",marginBottom:20,fontWeight:800,fontSize:18,
             display:"flex",alignItems:"center",gap:10 }}>
             <MdAttachMoney style={{ fontSize:22 }}/>
             {moyenModal==="ajouter" ? tr("Ajouter un moyen de transport") : tr("Modifier le moyen de transport")}
@@ -2486,12 +2488,12 @@ function DashboardAdmin() {
         <Modal onClose={()=>setConfirmDeleteMoyen(null)}>
           <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
             <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"#aaa",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer le moyen de transport")}{" "}<strong style={{ color:"#fff" }}>{confirmDeleteMoyen.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
+          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer le moyen de transport")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDeleteMoyen.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
           </p>
           <div style={{ display:"flex",gap:12 }}>
             <button onClick={()=>setConfirmDeleteMoyen(null)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"#fff",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
+                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerMoyen(confirmDeleteMoyen.id,confirmDeleteMoyen.nom)}
               style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
                 backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
@@ -2508,7 +2510,7 @@ function DashboardAdmin() {
           <div style={{ display:"flex", gap:12, marginTop:20 }}>
             <button onClick={() => setConfirmNotifDel(null)}
               style={{ flex:1, padding:"11px", borderRadius:10, border:"1px solid #ffffff20",
-                backgroundColor:"transparent", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
+                backgroundColor:"transparent", color:"var(--d-text)", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
             <button onClick={() => deleteNotif(confirmNotifDel)}
               style={{ flex:1, padding:"11px", borderRadius:10, border:"none",
                 backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Supprimer")}</button>
@@ -2519,10 +2521,10 @@ function DashboardAdmin() {
       {/* ✅ MODAL VÉRIFICATION COURSIER — AU BON NIVEAU, pas imbriqué */}
       {coursierVerif && (
         <Modal onClose={() => { setCoursierVerif(null); setMsgRejet(""); }} size="lg">
-          <h5 style={{ color: "#FFD700", marginBottom: 20, fontWeight: 800, fontSize: 18,
+          <h5 style={{ color: "var(--d-gold)", marginBottom: 20, fontWeight: 800, fontSize: 18,
             display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 48, height: 48, borderRadius: "50%",
-              background: "linear-gradient(135deg,#FFD700,#ff8c00)",
+              background: "linear-gradient(135deg,var(--d-gold),#ff8c00)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontWeight: 800, color: "#000", fontSize: 18 }}>
               {coursierVerif.prenom?.[0]}{coursierVerif.nom?.[0]}
@@ -2544,7 +2546,7 @@ function DashboardAdmin() {
             ].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 0", borderBottom: "1px solid #ffffff08" }}>
                 <div style={{ color: "#555", fontSize: 11, marginBottom: 3 }}>{tr(k)}</div>
-                <div style={{ color: k === "Réf. MVola" ? "#FFD700" : "#fff",
+                <div style={{ color: k === "Réf. MVola" ? "var(--d-gold)" : "var(--d-text)",
                   fontWeight: k === "Réf. MVola" ? 700 : 600, fontSize: 13 }}>{v}</div>
               </div>
             ))}
@@ -2556,10 +2558,10 @@ function DashboardAdmin() {
               {label: "CIN Recto", chemin: coursierVerif.photo_recto, color: "#06b6d4"},
               {label: "CIN Verso", chemin: coursierVerif.photo_verso, color: "#8b5cf6"},
             ].map(p => (
-              <div key={p.label} style={{ backgroundColor: "#080820", borderRadius: 12,
+              <div key={p.label} style={{ backgroundColor: "var(--d-bg)", borderRadius: 12,
                 border: `1px solid ${p.color}22`, overflow: "hidden" }}>
                 <div style={{ padding: "8px 12px", borderBottom: `1px solid ${p.color}18`,
-                  color: "#aaa", fontSize: 12 }}>{tr(p.label)}</div>
+                  color: "var(--d-c-aaa)", fontSize: 12 }}>{tr(p.label)}</div>
                 {p.chemin ? (
                   <img src={`${BASE_URL}/storage/${p.chemin}`} alt={tr(p.label)}
                     style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}/>
@@ -2574,14 +2576,14 @@ function DashboardAdmin() {
           {/* Zone message rejet — visible seulement si msgRejet n'est pas vide */}
           {msgRejet !== "" && (
             <div style={{ marginBottom: 16 }}>
-              <label style={{ color: "#aaa", fontSize: 13, marginBottom: 6, display: "block" }}>{tr("✏️ Message de rejet à envoyer au coursier :")}</label>
+              <label style={{ color: "var(--d-c-aaa)", fontSize: 13, marginBottom: 6, display: "block" }}>{tr("✏️ Message de rejet à envoyer au coursier :")}</label>
               <textarea
                 value={msgRejet}
                 onChange={e => setMsgRejet(e.target.value)}
                 placeholder={tr("Expliquez pourquoi le dossier est rejeté (CIN illisible, paiement non confirmé, etc.)")}
                 rows={3}
-                style={{ width: "100%", backgroundColor: "#080820", border: "1px solid #ef444430",
-                  color: "#fff", borderRadius: 10, padding: "10px 14px",
+                style={{ width: "100%", backgroundColor: "var(--d-bg)", border: "1px solid #ef444430",
+                  color: "var(--d-text)", borderRadius: 10, padding: "10px 14px",
                   fontSize: 13, resize: "vertical", outline: "none" }}
               />
             </div>
@@ -2606,7 +2608,7 @@ function DashboardAdmin() {
               }}
               style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none",
                 background: "linear-gradient(135deg,#10b981,#059669)",
-                color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14,
+                color: "var(--d-text)", cursor: "pointer", fontWeight: 700, fontSize: 14,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <MdCheckCircle style={{ fontSize: 18 }}/>{" "}{tr("Valider le dossier")}</button>
 
@@ -2640,7 +2642,7 @@ function DashboardAdmin() {
                 }}
                 style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none",
                   backgroundColor: msgRejet.trim() ? "#ef4444" : "#ef444440",
-                  color: "#fff", cursor: msgRejet.trim() ? "pointer" : "not-allowed",
+                  color: "var(--d-text)", cursor: msgRejet.trim() ? "pointer" : "not-allowed",
                   fontWeight: 700, fontSize: 14, opacity: msgRejet.trim() ? 1 : 0.5,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <MdClose style={{ fontSize: 18 }}/>{" "}{tr("Envoyer le rejet")}</button>
@@ -2657,9 +2659,9 @@ function DashboardAdmin() {
             {cmdErreur && <div style={{ color:"#ef4444",fontSize:13,padding:"8px 12px",background:"#ef444410",borderRadius:8 }}>{cmdErreur}</div>}
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Client *")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Client *")}</label>
               <select value={cmdForm.client_id} onChange={e=>setCmdForm(f=>({...f,client_id:e.target.value}))}
-                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
                 <option value="">{tr("— Sélectionner un client —")}</option>
                 {clients.map(c=>(
                   <option key={c.id} value={c.id}>{c.prenom} {c.nom} ({c.email})</option>
@@ -2668,16 +2670,16 @@ function DashboardAdmin() {
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Service *")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Service *")}</label>
               <input value={cmdForm.service} onChange={e=>setCmdForm(f=>({...f,service:e.target.value}))}
-                placeholder={tr("Ex: Livraison de colis")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Ex: Livraison de colis")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Moyen *")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Moyen *")}</label>
                 <select value={cmdForm.moyen} onChange={e=>setCmdForm(f=>({...f,moyen:e.target.value}))}
-                  style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                  style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
                   <option value="">{tr("— Moyen —")}</option>
                   <option value="pieton">{tr("🚶 Piéton")}</option>
                   <option value="bicyclette">{tr("🚲 Bicyclette")}</option>
@@ -2686,29 +2688,29 @@ function DashboardAdmin() {
                 </select>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>Tarif (Ar) *</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>Tarif (Ar) *</label>
                 <input type="number" value={cmdForm.tarif} onChange={e=>setCmdForm(f=>({...f,tarif:e.target.value}))}
-                  placeholder="5000" style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder="5000" style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse de pickup")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse de pickup")}</label>
               <input value={cmdForm.adresse_pickup} onChange={e=>setCmdForm(f=>({...f,adresse_pickup:e.target.value}))}
-                placeholder={tr("Adresse de prise en charge")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Adresse de prise en charge")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Détail")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Détail")}</label>
               <textarea value={cmdForm.detail} onChange={e=>setCmdForm(f=>({...f,detail:e.target.value}))}
                 placeholder={tr("Description de la commande...")} rows={3}
-                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none",resize:"vertical" }}/>
+                style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none",resize:"vertical" }}/>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Statut")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Statut")}</label>
               <select value={cmdForm.statut} onChange={e=>setCmdForm(f=>({...f,statut:e.target.value}))}
-                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
+                style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}>
                 <option value="en_attente">{tr("En attente")}</option>
                 <option value="negociable">{tr("Négociable")}</option>
                 <option value="accepte">{tr("Accepté")}</option>
@@ -2718,7 +2720,7 @@ function DashboardAdmin() {
             </div>
 
             <button onClick={sauvegarderCommande} disabled={cmdEnvoi}
-              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+              style={{ background:"linear-gradient(135deg,var(--d-gold),#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:cmdEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
               {cmdEnvoi ? tr("Enregistrement...") : (cmdModal==="ajouter" ? tr("Créer la commande") : tr("Enregistrer"))}
             </button>
@@ -2734,47 +2736,47 @@ function DashboardAdmin() {
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
                 <input value={clientForm.prenom} onChange={e=>setClientForm(f=>({...f,prenom:e.target.value}))}
-                  placeholder={tr("Prénom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Prénom")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
                 <input value={clientForm.nom} onChange={e=>setClientForm(f=>({...f,nom:e.target.value}))}
-                  placeholder={tr("Nom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Nom")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
               <input type="email" value={clientForm.email} onChange={e=>setClientForm(f=>({...f,email:e.target.value}))}
-                placeholder={tr("client@email.com")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("client@email.com")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
                 <input value={clientForm.telephone} onChange={e=>setClientForm(f=>({...f,telephone:e.target.value}))}
-                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
                 <input value={clientForm.adresse} onChange={e=>setClientForm(f=>({...f,adresse:e.target.value}))}
-                  placeholder={tr("Adresse")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Adresse")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>
                 {clientModal==="ajouter" ? tr("Mot de passe *") : tr("Nouveau mot de passe (optionnel)")}
               </label>
               <input type="password" value={clientForm.password} onChange={e=>setClientForm(f=>({...f,password:e.target.value}))}
                 placeholder={clientModal==="ajouter" ? tr("Mot de passe") : tr("Laisser vide pour ne pas changer")}
-                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <button onClick={sauvegarderClient} disabled={clientEnvoi}
-              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+              style={{ background:"linear-gradient(135deg,var(--d-gold),#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:clientEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
               {clientEnvoi ? tr("Enregistrement...") : (clientModal==="ajouter" ? tr("Créer le client") : tr("Enregistrer"))}
             </button>
@@ -2790,53 +2792,53 @@ function DashboardAdmin() {
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Prénom *")}</label>
                 <input value={coursierForm.prenom} onChange={e=>setCoursierForm(f=>({...f,prenom:e.target.value}))}
-                  placeholder={tr("Prénom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Prénom")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Nom *")}</label>
                 <input value={coursierForm.nom} onChange={e=>setCoursierForm(f=>({...f,nom:e.target.value}))}
-                  placeholder={tr("Nom")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Nom")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Email *")}</label>
               <input type="email" value={coursierForm.email} onChange={e=>setCoursierForm(f=>({...f,email:e.target.value}))}
-                placeholder={tr("coursier@email.com")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("coursier@email.com")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Téléphone")}</label>
                 <input value={coursierForm.telephone} onChange={e=>setCoursierForm(f=>({...f,telephone:e.target.value}))}
-                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("03X XX XXX XX")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
               <div>
-                <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("CIN")}</label>
+                <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("CIN")}</label>
                 <input value={coursierForm.cin} onChange={e=>setCoursierForm(f=>({...f,cin:e.target.value}))}
-                  placeholder={tr("Numéro CIN")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                  placeholder={tr("Numéro CIN")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
               </div>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>{tr("Adresse")}</label>
               <input value={coursierForm.adresse} onChange={e=>setCoursierForm(f=>({...f,adresse:e.target.value}))}
-                placeholder={tr("Adresse")} style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                placeholder={tr("Adresse")} style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <div>
-              <label style={{ color:"#aaa",fontSize:12,display:"block",marginBottom:4 }}>
+              <label style={{ color:"var(--d-c-aaa)",fontSize:12,display:"block",marginBottom:4 }}>
                 {coursierModal==="ajouter" ? tr("Mot de passe *") : tr("Nouveau mot de passe (optionnel)")}
               </label>
               <input type="password" value={coursierForm.password} onChange={e=>setCoursierForm(f=>({...f,password:e.target.value}))}
                 placeholder={coursierModal==="ajouter" ? tr("Mot de passe") : tr("Laisser vide pour ne pas changer")}
-                style={{ backgroundColor:"#080820",border:"1px solid #FFD70030",color:"#fff",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
+                style={{ backgroundColor:"var(--d-bg)",border:"1px solid #FFD70030",color:"var(--d-text)",borderRadius:10,padding:"9px 14px",fontSize:13,width:"100%",outline:"none" }}/>
             </div>
 
             <button onClick={sauvegarderCoursier} disabled={coursierEnvoi}
-              style={{ background:"linear-gradient(135deg,#FFD700,#ff9500)",color:"#000",border:"none",
+              style={{ background:"linear-gradient(135deg,var(--d-gold),#ff9500)",color:"#000",border:"none",
                 borderRadius:10,padding:"11px",fontWeight:800,cursor:coursierEnvoi?"not-allowed":"pointer",fontSize:14,marginTop:4 }}>
               {coursierEnvoi ? tr("Enregistrement...") : (coursierModal==="ajouter" ? tr("Créer le coursier") : tr("Enregistrer"))}
             </button>
@@ -2847,10 +2849,10 @@ function DashboardAdmin() {
       {/* ═══ CONFIRMATION SUPPRESSION COMMANDE ═══ */}
       {confirmDeleteCmd && (
         <Modal titre={tr("Confirmer la suppression")} onClose={()=>setConfirmDeleteCmd(null)}>
-          <p style={{ color:"#ccc",marginBottom:20 }}>{tr("Supprimer la commande")}{" "}<strong style={{ color:"#fff" }}>#{confirmDeleteCmd}</strong>{" "}{tr("? Cette action est irréversible.")}</p>
+          <p style={{ color:"var(--d-c-ccc)",marginBottom:20 }}>{tr("Supprimer la commande")}{" "}<strong style={{ color:"var(--d-text)" }}>#{confirmDeleteCmd}</strong>{" "}{tr("? Cette action est irréversible.")}</p>
           <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
             <button onClick={()=>setConfirmDeleteCmd(null)}
-              style={{ background:"#1a1a35",color:"#aaa",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>{tr("Annuler")}</button>
+              style={{ background:"var(--d-card3)",color:"var(--d-c-aaa)",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>{tr("Annuler")}</button>
             <button onClick={()=>supprimerCommande(confirmDeleteCmd)}
               style={{ background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",fontWeight:700,cursor:"pointer" }}>{tr("Supprimer")}</button>
           </div>
@@ -2873,8 +2875,8 @@ function DashboardAdmin() {
         *{ box-sizing:border-box; }
         body{ overflow-x:hidden; }
         table th, table td{ white-space:nowrap; }
-        select{ background-color:#080820; }
-        select option{ background-color:#0f1128; }
+        select{ background-color:var(--d-bg); }
+        select option{ background-color:var(--d-bg3); }
       `}</style>
     </div>
   );

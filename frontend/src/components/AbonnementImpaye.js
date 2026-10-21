@@ -1,3 +1,4 @@
+import ThemeToggle from "./ThemeToggle";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MdWarning, MdLogout, MdCheckCircle, MdAccessTime, MdCancel, MdPayment, MdArrowBack } from "react-icons/md";
@@ -8,11 +9,11 @@ import { formatDateHeure } from "../utils/formatDateHeure";
 const MONTANT_MIN = 10000;
 
 const champ = {
-  width: "100%", backgroundColor: "#0a0a1e", border: "1px solid #FFD70033",
-  color: "#fff", borderRadius: 10, padding: "10px 12px", fontSize: 14, margin: "4px 0 12px",
+  width: "100%", backgroundColor: "var(--d-bg2)", border: "1px solid #FFD70033",
+  color: "var(--d-text)", borderRadius: 10, padding: "10px 12px", fontSize: 14, margin: "4px 0 12px",
 };
-const champLecture = { ...champ, backgroundColor: "#15153a", color: "#bbb", border: "1px solid #ffffff14" };
-const etiquette = { color: "#aaa", fontSize: 13 };
+const champLecture = { ...champ, backgroundColor: "var(--d-card2)", color: "var(--d-c-bbb)", border: "1px solid #ffffff14" };
+const etiquette = { color: "var(--d-c-aaa)", fontSize: 13 };
 
 export default function AbonnementImpaye({ profil, apiUrl }) {
   const { t } = useTranslation();
@@ -99,17 +100,18 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
   );
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#080820", color: "#fff",
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg)", color: "var(--d-text)",
       fontFamily: "'Segoe UI', sans-serif", padding: "20px 16px 40px" }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
           flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src={logo} alt="" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-            <span style={{ color: "#FFD700", fontWeight: 800 }}>IRAKY Delivery</span>
+            <span style={{ color: "var(--d-gold)", fontWeight: 800 }}>IRAKY Delivery</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <LanguageSwitcher />
+            <ThemeToggle size={34} />
             <button type="button" onClick={deconnexion}
               style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent",
                 border: "1px solid #ef444455", color: "#ef4444", borderRadius: 10,
@@ -126,7 +128,7 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
             <h4 style={{ margin: 0, color: "#ef4444", fontWeight: 800, fontSize: 18 }}>{t("Abonnement impayé")}</h4>
           </div>
           <p style={{ margin: "0 0 6px", fontWeight: 700 }}>{t("Vous n'avez pas encore payé votre abonnement.")}</p>
-          <p style={{ margin: 0, color: "#bbb", fontSize: 14, lineHeight: 1.6 }}>
+          <p style={{ margin: 0, color: "var(--d-c-bbb)", fontSize: 14, lineHeight: 1.6 }}>
             {t("Votre compte est suspendu. Pour le réactiver, envoyez votre abonnement mensuel puis renseignez les informations de votre paiement ci-dessous.")}
           </p>
           {etat && etat.abonnement_expire && (
@@ -142,15 +144,15 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
           <span style={{ color: "#10b981", fontWeight: 700 }}>{t("Paiement validé. L'administrateur va réactiver votre compte.")}</span>)}
         {rejete && bandeau("#ef4444", MdCancel, <>
           <div style={{ color: "#ef4444", fontWeight: 700 }}>{t("Votre dernier paiement a été rejeté :")}</div>
-          <div style={{ color: "#fff", margin: "4px 0" }}>{dernier.motif_rejet}</div>
-          <div style={{ color: "#999", fontSize: 12 }}>{t("Vous pouvez envoyer un nouveau paiement.")}</div>
+          <div style={{ color: "var(--d-text)", margin: "4px 0" }}>{dernier.motif_rejet}</div>
+          <div style={{ color: "var(--d-c-999)", fontSize: 12 }}>{t("Vous pouvez envoyer un nouveau paiement.")}</div>
         </>)}
 
         {peutPayer && (
           <button type="button" onClick={() => setOuvert(true)}
             style={{ width: "100%", padding: 14, borderRadius: 14, border: "none", fontWeight: 800, fontSize: 15,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", cursor: "pointer" }}>
+              background: "linear-gradient(135deg,var(--d-gold),#ff9500)", color: "#000", cursor: "pointer" }}>
             <MdPayment size={20} /> {t("Payer un abonnement")}
           </button>
         )}
@@ -159,14 +161,14 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
           <div onClick={() => setOuvert(false)} style={{ position: "fixed", inset: 0, zIndex: 1000,
             backgroundColor: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center",
             justifyContent: "center", padding: 16 }}>
-            <form onClick={(e) => e.stopPropagation()} onSubmit={soumettre} style={{ backgroundColor: "#131330",
+            <form onClick={(e) => e.stopPropagation()} onSubmit={soumettre} style={{ backgroundColor: "var(--d-card)",
               borderRadius: 16, border: "1px solid #FFD70025", padding: 22, width: "100%", maxWidth: 780,
               maxHeight: "92vh", overflowY: "auto", colorScheme: "dark",
               boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 16 }}>{t("Payer un abonnement")}</div>
+                <div style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 16 }}>{t("Payer un abonnement")}</div>
                 <button type="button" onClick={() => setOuvert(false)}
-                  style={{ background: "transparent", border: "none", color: "#aaa", cursor: "pointer",
+                  style={{ background: "transparent", border: "none", color: "var(--d-c-aaa)", cursor: "pointer",
                     display: "flex", alignItems: "center", gap: 4, fontSize: 13 }}>
                   <MdArrowBack /> {t("Retour")}
                 </button>
@@ -216,7 +218,7 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
                 <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 12 }}>
                   <button type="submit" disabled={envoi}
                     style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 15,
-                      background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000",
+                      background: "linear-gradient(135deg,var(--d-gold),#ff9500)", color: "#000",
                       cursor: envoi ? "not-allowed" : "pointer", opacity: envoi ? 0.7 : 1 }}>
                     {envoi ? t("Envoi en cours...") : t("Envoyer mon paiement")}
                   </button>

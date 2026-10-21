@@ -6,7 +6,10 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import "./responsive.css";
-
+import "./DashboardTheme.css";
+try {
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("iraky-theme") === "light" ? "light" : "dark");
+} catch {}
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

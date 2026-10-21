@@ -64,11 +64,11 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
     borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" });
 
   return (
-    <div style={{ backgroundColor: "#0f1128", border: "1px solid #FFD70025", borderRadius: 16,
+    <div style={{ backgroundColor: "var(--d-bg3)", border: "1px solid #FFD70025", borderRadius: 16,
       padding: 18, marginBottom: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
         flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-        <div style={{ color: "#FFD700", fontWeight: 800, fontSize: 15 }}>{t("Paiements d'abonnement")}</div>
+        <div style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 15 }}>{t("Paiements d'abonnement")}</div>
         <div style={{ color: enAttente.length ? "#f59e0b" : "#666", fontSize: 12, fontWeight: 700 }}>
           {t("{{nb}} en attente de validation", { nb: enAttente.length })}
         </div>
@@ -93,19 +93,19 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
         const couleur = COULEURS[p.statut] || "#888";
         const peutReactiver = p.statut === "valide" && c.statut === "suspendu" && dernierParCoursier[p.user_id] === p.id;
         return (
-          <div key={p.id} style={{ backgroundColor: "#080820", borderRadius: 12, padding: 14,
+          <div key={p.id} style={{ backgroundColor: "var(--d-bg)", borderRadius: 12, padding: 14,
             border: `1px solid ${couleur}33`, marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
-              <div style={{ color: "#fff", fontWeight: 700 }}>{c.prenom} {c.nom}</div>
+              <div style={{ color: "var(--d-text)", fontWeight: 700 }}>{c.prenom} {c.nom}</div>
               <span style={{ color: couleur, fontSize: 11, fontWeight: 800, border: `1px solid ${couleur}55`,
                 borderRadius: 20, padding: "2px 10px" }}>{libelle[p.statut] || p.statut}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 8,
               marginTop: 10, fontSize: 12 }}>
-              <div><div style={{ color: "#666" }}>{t("Référence")}</div><div style={{ color: "#FFD700", fontWeight: 700 }}>{p.reference}</div></div>
-              <div><div style={{ color: "#666" }}>{t("Numéro d'envoi")}</div><div style={{ color: "#ddd" }}>{p.numero_envoi}</div></div>
-              <div><div style={{ color: "#666" }}>{t("Date du paiement")}</div><div style={{ color: "#ddd" }}>{formatDateHeure(p.paye_le)}</div></div>
-              <div><div style={{ color: "#666" }}>{t("Montant")}</div><div style={{ color: "#ddd" }}>{Number(p.montant).toLocaleString("fr-FR")} Ar</div></div>
+              <div><div style={{ color: "#666" }}>{t("Référence")}</div><div style={{ color: "var(--d-gold)", fontWeight: 700 }}>{p.reference}</div></div>
+              <div><div style={{ color: "#666" }}>{t("Numéro d'envoi")}</div><div style={{ color: "var(--d-c-ddd)" }}>{p.numero_envoi}</div></div>
+              <div><div style={{ color: "#666" }}>{t("Date du paiement")}</div><div style={{ color: "var(--d-c-ddd)" }}>{formatDateHeure(p.paye_le)}</div></div>
+              <div><div style={{ color: "#666" }}>{t("Montant")}</div><div style={{ color: "var(--d-c-ddd)" }}>{Number(p.montant).toLocaleString("fr-FR")} Ar</div></div>
             </div>
             {p.statut === "rejete" && p.motif_rejet && (
               <div style={{ marginTop: 8, color: "#ef4444", fontSize: 12 }}>{p.motif_rejet}</div>
@@ -125,7 +125,7 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
             {p.statut === "en_attente" && rejetId === p.id && (
               <div style={{ marginTop: 12 }}>
                 <input type="text" value={motif} placeholder={t("Motif du rejet")} onChange={(e) => setMotif(e.target.value)}
-                  style={{ width: "100%", backgroundColor: "#0a0a1e", border: "1px solid #ef444440", color: "#fff",
+                  style={{ width: "100%", backgroundColor: "var(--d-bg2)", border: "1px solid #ef444440", color: "var(--d-text)",
                     borderRadius: 8, padding: "8px 10px", fontSize: 13, marginBottom: 8 }} />
                 <div style={{ display: "flex", gap: 8 }}>
                   <button type="button" disabled={occupe !== null || !motif.trim()} style={bouton("#ef4444")}
@@ -136,7 +136,7 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
             )}
             {peutReactiver && (
               <div style={{ marginTop: 12 }}>
-                <button type="button" disabled={occupe !== null} style={bouton("#FFD700")}
+                <button type="button" disabled={occupe !== null} style={bouton("var(--d-gold)")}
                   onClick={() => action("a" + p.id, `/api/admin/abonnements/coursiers/${p.user_id}/reactiver`)}>{t("Réactiver le compte")}</button>
               </div>
             )}
@@ -147,11 +147,11 @@ export default function PaiementsAbonnementAdmin({ apiUrl, onChange }) {
       {nbPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 6, flexWrap: "wrap" }}>
           <button type="button" disabled={pageCourante === 1}
-            style={{ ...bouton("#FFD700"), opacity: pageCourante === 1 ? 0.4 : 1 }}
+            style={{ ...bouton("var(--d-gold)"), opacity: pageCourante === 1 ? 0.4 : 1 }}
             onClick={() => setPage(pageCourante - 1)}>{t("Précédent")}</button>
-          <span style={{ color: "#aaa", fontSize: 12 }}>{t("Page {{page}} / {{total}}", { page: pageCourante, total: nbPages })}</span>
+          <span style={{ color: "var(--d-c-aaa)", fontSize: 12 }}>{t("Page {{page}} / {{total}}", { page: pageCourante, total: nbPages })}</span>
           <button type="button" disabled={pageCourante === nbPages}
-            style={{ ...bouton("#FFD700"), opacity: pageCourante === nbPages ? 0.4 : 1 }}
+            style={{ ...bouton("var(--d-gold)"), opacity: pageCourante === nbPages ? 0.4 : 1 }}
             onClick={() => setPage(pageCourante + 1)}>{t("Suivant")}</button>
         </div>
       )}

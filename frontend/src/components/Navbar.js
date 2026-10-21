@@ -4,6 +4,8 @@ import logo from "../logo.png";
 import FloatingInstallButton from "./FloatingInstallButton";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { FiSun } from "react-icons/fi";
+import useTheme from "../hooks/useTheme";
 import "../Theme.css";
 import "../App.css";
 
@@ -13,18 +15,8 @@ function Navbar() {
   const [activeSection, setActiveSection] = useState("accueil");
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "dark";
-    return localStorage.getItem("iraky-theme") || "dark";
-  });
+  const { theme, toggleTheme } = useTheme();
 
-  // ✅ Applique et persiste le thème (clair/sombre) dès le chargement et à chaque changement
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("iraky-theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(t => (t === "dark" ? "light" : "dark"));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,7 +89,7 @@ function Navbar() {
               display: "flex", alignItems: "center", justifyContent: "center",
               color: "var(--iraky-gold)", cursor: "pointer",
             }}>
-            <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} style={{ fontSize: "13px" }}></i>
+            {theme === "dark" ? <FiSun size={15} /> : <i className="fas fa-moon" style={{ fontSize: "13px" }}></i>}
           </button>
           <button
             className="btn"
@@ -158,7 +150,7 @@ function Navbar() {
               display: "flex", alignItems: "center", justifyContent: "center",
               color: "var(--iraky-gold)", cursor: "pointer", transition: "all 0.2s ease",
             }}>
-            <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} style={{ fontSize: "14px" }}></i>
+            {theme === "dark" ? <FiSun size={16} /> : <i className="fas fa-moon" style={{ fontSize: "14px" }}></i>}
           </button>
           <button onClick={() => navigate("/connexion")} className="iraky-btn-ghost"
             style={{ padding: "9px 20px", fontSize: "14px" }}>{t("Se connecter")}</button>

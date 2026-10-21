@@ -1,0 +1,38 @@
+/* Variables des espaces admin / coursier / client
+   Sombre = couleurs d'origine. Clair = palette alignée sur App.css */
+:root {
+  --d-bg: #080820;
+  --d-bg2: #0a0a1e;
+  --d-bg2-a: rgba(10, 10, 30, 0.25);
+  --d-bg3: #0d0d28;
+  --d-card: #131330;
+  --d-card2: #15153a;
+  --d-card3: #1a1a35;
+  --d-border: #333355;
+  --d-glass: rgba(8, 8, 32, 0.97);
+  --d-text: #fff;
+  --d-gold: #FFD700;
+  --d-c-aaa: #aaa;
+  --d-c-bbb: #bbb;
+  --d-c-ccc: #ccc;
+  --d-c-ddd: #ddd;
+  --d-c-999: #999;
+}
+:root[data-theme="light"] {
+  --d-bg: #F4F2EA;
+  --d-bg2: #F1EFE6;
+  --d-bg2-a: rgba(23, 23, 31, 0.05);
+  --d-bg3: #EEEBE0;
+  --d-card: #FFFFFF;
+  --d-card2: #FBFAF4;
+  --d-card3: #E9E6DA;
+  --d-border: #D6D3C6;
+  --d-glass: rgba(250, 249, 244, 0.97);
+  --d-text: #17171F;
+  --d-gold: #C99A00;
+  --d-c-aaa: #6B6B80;
+  --d-c-bbb: #62627A;
+  --d-c-ccc: #5C5C72;
+  --d-c-ddd: #5C5C72;
+  --d-c-999: #707085;
+}
