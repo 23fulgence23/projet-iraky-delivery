@@ -172,7 +172,7 @@ public function commandesMensuelles()
     {
         $this->checkAdmin();
         $user = User::findOrFail($id);
-        $nouveau = $user->statut === 'actif' ? 'inactif' : 'actif';
+        $nouveau = $user->statut === 'actif' ? ($user->role === 'coursier' ? 'suspendu' : 'inactif') : 'actif';
         if ($nouveau === 'actif' && $user->role === 'coursier' && $user->abonnement_expire
             && \Illuminate\Support\Carbon::parse($user->abonnement_expire)->isPast()) {
             return response()->json(['message' => "Abonnement échu : validez d'abord un paiement d'abonnement."], 422);
