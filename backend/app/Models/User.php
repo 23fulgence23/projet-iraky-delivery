@@ -46,6 +46,9 @@ class User extends Authenticatable implements JWTSubject
     // ── Abonnement coursier : suspension automatique a l'echeance ──
     public static function suspendreAbonnementsExpires(): int
     {
+        // coursiers desactives apres validation (echeance connue) : suspendus, pas en attente
+        static::where('role', 'coursier')->where('statut', 'inactif')->whereNotNull('abonnement_expire')->update(['statut' => 'suspendu']);
+
         $expires = static::where('role', 'coursier')
             ->where('statut', 'actif')
             ->whereNotNull('abonnement_expire')
