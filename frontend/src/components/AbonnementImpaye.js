@@ -146,7 +146,7 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
           <div style={{ color: "#999", fontSize: 12 }}>{t("Vous pouvez envoyer un nouveau paiement.")}</div>
         </>)}
 
-        {peutPayer && !ouvert && (
+        {peutPayer && (
           <button type="button" onClick={() => setOuvert(true)}
             style={{ width: "100%", padding: 14, borderRadius: 14, border: "none", fontWeight: 800, fontSize: 15,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -156,8 +156,12 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
         )}
 
         {peutPayer && ouvert && (
-          <form onSubmit={soumettre} style={{ backgroundColor: "#131330", borderRadius: 16,
-            border: "1px solid #FFD70025", padding: 20 }}>
+          <div onClick={() => setOuvert(false)} style={{ position: "fixed", inset: 0, zIndex: 1000,
+            backgroundColor: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center",
+            justifyContent: "center", padding: 16 }}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={soumettre} style={{ backgroundColor: "#131330",
+            borderRadius: 16, border: "1px solid #FFD70025", padding: 20, width: "100%", maxWidth: 460,
+            maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <div style={{ color: "#FFD700", fontWeight: 800 }}>{t("Payer un abonnement")}</div>
               <button type="button" onClick={() => setOuvert(false)}
@@ -207,6 +211,7 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
               {envoi ? t("Envoi en cours...") : t("Envoyer mon paiement")}
             </button>
           </form>
+          </div>
         )}
       </div>
     </div>
