@@ -716,5 +716,7 @@
   "Abonnement échu : validez d'abord un paiement d'abonnement.": "Subscription expired: validate a subscription payment first.",
   "Précédent": "Previous",
   "Suivant": "Next",
-  "Page {{page}} / {{total}}": "Page {{page}} / {{total}}"
+  "Page {{page}} / {{total}}": "Page {{page}} / {{total}}",
+  "RECETTES COURSIERS": "COURIER INCOME",
+  "abonnements + inscriptions": "subscriptions + registrations"
 }

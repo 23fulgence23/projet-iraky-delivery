@@ -1054,7 +1054,7 @@ function DashboardAdmin() {
                     • "COURSIERS EN ATTENTE" → stats.coursiers_en_attente  (nouveau champ)
                     • "ABONNEMENTS IMPAYÉS"  → stats.abonnes_impayes
                 ──────────────────────────────────────────── */}
-                <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,marginBottom:24 }}>
+                <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24 }}>
                   {[
                     {
                       label:"CLIENTS INACTIFS",
@@ -1079,6 +1079,14 @@ function DashboardAdmin() {
                       Icon:MdAttachMoney,
                       action:()=>setOnglet("paiements"),
                       sub:"à recouvrer →",
+                    },
+                    {
+                      label:"RECETTES COURSIERS",
+                      val:   `${((stats.revenus_total_abonnements||0)/1000).toLocaleString("fr-FR",{maximumFractionDigits:1})}k Ar`,
+                      color:"#FFD700",
+                      Icon:MdAttachMoney,
+                      action:()=>setOnglet("paiements"),
+                      sub:"abonnements + inscriptions",
                     },
                   ].map(s=>(
                     <div key={s.label} onClick={s.action} style={{

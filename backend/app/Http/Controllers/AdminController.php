@@ -60,6 +60,8 @@ public function stats()
         'revenus'              => (float) $revenus,
         'abonnes_payes'        => (int) $abonnesPayes,
         'abonnes_impayes' => (int) $abonnesImpayes,
+        'revenus_total_abonnements' => ((int) \App\Models\AbonnementPaiement::where('statut', 'valide')->sum('montant'))
+            + (10000 * \App\Models\User::where('role', 'coursier')->whereNotNull('abonnement_expire')->count()),
         'revenus_abonnements' => (int) \App\Models\AbonnementPaiement::where('statut', 'valide')
             ->whereBetween('traite_le', [now()->startOfMonth(), now()->endOfMonth()])->sum('montant'),
     ]);
