@@ -1675,7 +1675,7 @@ function DashboardAdmin() {
                     { label:"Abonnements actifs",    val:stats.abonnes_payes,                                color:"#10b981",Icon:MdCheckCircle },
                     { label:"Abonnements impayés",   val:stats.abonnes_impayes,                              color:"#ef4444",Icon:MdCancel      },
                     { label:"En attente validation", val:coursiers.filter(c=>c.statut==="inactif").length,   color:"#f59e0b",Icon:MdSchedule    },
-                    { label:"Revenus mensuels",      val:`${(stats.abonnes_payes*10000/1000).toFixed(0)}k Ar`,color:"#FFD700",Icon:MdAttachMoney },
+                    { label:"Revenus mensuels",      val:`${((stats.revenus_abonnements||0)/1000).toLocaleString("fr-FR",{maximumFractionDigits:1})}k Ar`,color:"#FFD700",Icon:MdAttachMoney },
                   ].map(s=>(
                     <div key={s.label} style={{ ...card,display:"flex",alignItems:"center",gap:14,
                       border:`1px solid ${s.color}33` }}>

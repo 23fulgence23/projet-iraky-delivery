@@ -59,7 +59,9 @@ public function stats()
         'total_commandes'      => (int) $totalCommandes,
         'revenus'              => (float) $revenus,
         'abonnes_payes'        => (int) $abonnesPayes,
-        'abonnes_impayes'      => (int) $abonnesImpayes,
+        'abonnes_impayes' => (int) $abonnesImpayes,
+        'revenus_abonnements' => (int) \App\Models\AbonnementPaiement::where('statut', 'valide')
+            ->whereBetween('traite_le', [now()->startOfMonth(), now()->endOfMonth()])->sum('montant'),
     ]);
 }
 
