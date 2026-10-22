@@ -731,5 +731,18 @@
   "Terminées": "Completed",
   "Étoiles": "Stars",
   "{{nb}} mission terminée": "{{nb}} completed mission",
-  "{{nb}} missions terminées": "{{nb}} completed missions"
+  "{{nb}} missions terminées": "{{nb}} completed missions",
+  "Confidentialité": "Privacy",
+  "Conditions d'utilisation": "Terms of use",
+  "RÉALISÉ PAR": "BUILT BY",
+  "LA COMMUNAUTÉ IRAKY": "THE IRAKY COMMUNITY",
+  "abonnés": "subscribers",
+  "ce mois-ci": "this month",
+  "clients et coursiers": "clients and couriers",
+  "visiteurs abonnés": "subscribed visitors",
+  "S'abonner": "Subscribe",
+  "Un instant…": "One moment…",
+  "Vous êtes abonné, merci !": "You are subscribed, thank you!",
+  "Merci, vous êtes abonné !": "Thank you, you are subscribed!",
+  "Impossible pour le moment, réessayez dans un instant.": "Not possible right now, please try again in a moment."
 }
