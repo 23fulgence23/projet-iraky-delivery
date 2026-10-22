@@ -149,7 +149,6 @@ function Footer() {
             <small style={{ display: "block", fontFamily: "var(--f-body)", color: "var(--iraky-muted-dim)", fontSize: "12.5px" }}>
               © 2026 IRAKY Delivery — Toliara, Madagascar
             </small>
-            <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("FAIT AVEC 🛵 À TOLIARA")}</small>
           </div>
 
           <div className="d-flex flex-wrap gap-3">
@@ -167,14 +166,14 @@ function Footer() {
             ))}
           </div>
 
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center gap-3" style={{ flexWrap: "nowrap" }}>
             <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("RÉALISÉ PAR")}</small>
             <a href="https://raiky.mg/" target="_blank" rel="noopener noreferrer" title="RAIKY" style={{ display: "flex", alignItems: "center" }}>
-              <img src={raikyLogo} alt="RAIKY" style={{ height: "30px", width: "auto", objectFit: "contain" }} />
+              <img src={raikyLogo} alt="RAIKY" style={{ height: "48px", width: "auto", objectFit: "contain", flexShrink: 0 }} />
             </a>
             <a href="https://fulgence-damivelo.vercel.app/" target="_blank" rel="noopener noreferrer" title="Fulgence Damivelo" style={{ display: "flex", alignItems: "center" }}>
               <img src={fulgenceImg} alt="Fulgence Damivelo" style={{
-                width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover",
+                width: "48px", height: "48px", flexShrink: 0, borderRadius: "50%", objectFit: "cover",
                 border: "1.5px solid var(--iraky-gold-line)",
               }} />
             </a>
