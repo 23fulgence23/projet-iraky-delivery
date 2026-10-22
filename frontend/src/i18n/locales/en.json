@@ -726,5 +726,6 @@
   "Payez avant le {{date}} pour éviter la suspension de votre compte.": "Pay before {{date}} to avoid your account being suspended.",
   "Payer maintenant": "Pay now",
   "Fermer": "Close",
-  "terminées": "completed"
+  "terminées": "completed",
+  "missions": "missions"
 }

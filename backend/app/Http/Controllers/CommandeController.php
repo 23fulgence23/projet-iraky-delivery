@@ -68,6 +68,8 @@ class CommandeController extends Controller
                     // ✅ Expose la note et les trophées du coursier directement
                     'coursier_note'     => $c->coursier->note ?? null,
                     'coursier_trophees' => $c->coursier->trophees ?? null,
+                    'coursier_nb_missions'  => $c->coursier_id ? \App\Models\Commande::where('coursier_id', $c->coursier_id)->count() : null,
+                    'coursier_nb_terminees' => $c->coursier_id ? \App\Models\Commande::where('coursier_id', $c->coursier_id)->where('statut', 'termine')->count() : null,
                 ]);
             return response()->json($commandes);
         }

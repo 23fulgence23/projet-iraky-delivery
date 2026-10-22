@@ -2002,6 +2002,7 @@ const noterCoursier = async (id, note) => {
                         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                           <Etoiles value={cmd.coursier_note || 0}/>
                           <span style={{ color:"#888", fontSize:11 }}>({cmd.coursier_note || 0}/5)</span>
+                          <span style={{ color:"#888", fontSize:11 }}>· {cmd.coursier_nb_missions ?? 0} {tr("missions")} · {cmd.coursier_nb_terminees ?? 0} {tr("terminées")} · {cmd.coursier_nb_terminees ?? 0} ⭐</span>
                         </div>
                       </div>
                     </div>
