@@ -36,7 +36,7 @@ try {
   const viderOriginal = Storage.prototype.clear;
   Storage.prototype.clear = function () {
     const garde = this === window.localStorage
-      ? ["langue", "iraky-theme"].map((k) => [k, this.getItem(k)]).filter(([, v]) => v !== null)
+      ? ["langue", "iraky-theme", "iraky-abonne-id"].map((k) => [k, this.getItem(k)]).filter(([, v]) => v !== null)
       : [];
     viderOriginal.call(this);
     garde.forEach(([k, v]) => this.setItem(k, v));

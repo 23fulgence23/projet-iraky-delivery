@@ -5,6 +5,8 @@ import APropos from "./components/APropos";
 import NosServices from "./components/NosServices";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import AbonnesStats from "./components/AbonnesStats";
+import FloatingSubscribe from "./components/FloatingSubscribe";
 import Connexion from "./pages/auth/Connexion";
 import Inscription from "./pages/auth/Inscription";
 import OubliMotDePasse from "./pages/auth/OubliMotDePasse";
@@ -22,7 +24,9 @@ function Portail() {
       <APropos />
       <NosServices />
       <Contact />
+      <AbonnesStats />
       <Footer />
+      <FloatingSubscribe />
     </>
   );
 }

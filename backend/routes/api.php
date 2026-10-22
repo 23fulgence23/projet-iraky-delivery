@@ -14,6 +14,8 @@ Route::post('/login',           [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::get ('/verifier-statut-coursier/{id}', [AuthController::class, 'verifierStatutCoursier']);
 Route::get ('/moyens-transport', [AdminController::class, 'moyensTransportPublic']);
+Route::get ('/stats-abonnes', [\App\Http\Controllers\AbonneController::class, 'stats']);
+Route::post('/abonnes', [\App\Http\Controllers\AbonneController::class, 'store'])->middleware('throttle:20,1');
 
 // ── Authentifiées (JWT requis) ───────────────────
 Route::middleware('auth:api')->group(function () {
