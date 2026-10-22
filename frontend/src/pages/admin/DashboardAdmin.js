@@ -1721,7 +1721,10 @@ function DashboardAdmin() {
                         </div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                        <StatutBadge statut={c.statut==="actif"?"paye":"impaye"}/>
+                        {c.statut==="suspendu"
+                          ? <span style={{ padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:700,
+                              backgroundColor:"#f59e0b18",color:"#f59e0b",border:"1px solid #f59e0b44" }}>{tr("Suspendu")}</span>
+                          : <StatutBadge statut={c.statut==="actif"?"paye":"impaye"}/>}
                         {c.statut==="inactif" && (
                           <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
                             style={{ ...btnY,padding:"8px 16px",fontSize:12,

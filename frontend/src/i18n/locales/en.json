@@ -718,5 +718,12 @@
   "Suivant": "Next",
   "Page {{page}} / {{total}}": "Page {{page}} / {{total}}",
   "RECETTES COURSIERS": "COURIER INCOME",
-  "abonnements + inscriptions": "subscriptions + registrations"
+  "abonnements + inscriptions": "subscriptions + registrations",
+  "Suspendu": "Suspended",
+  "Votre abonnement expire aujourd'hui.": "Your subscription expires today.",
+  "Votre abonnement expire demain.": "Your subscription expires tomorrow.",
+  "Votre abonnement expire dans {{n}} jours.": "Your subscription expires in {{n}} days.",
+  "Payez avant le {{date}} pour éviter la suspension de votre compte.": "Pay before {{date}} to avoid your account being suspended.",
+  "Payer maintenant": "Pay now",
+  "Fermer": "Close"
 }
