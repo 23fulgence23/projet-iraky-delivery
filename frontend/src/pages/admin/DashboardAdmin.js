@@ -372,7 +372,12 @@ function DashboardAdmin() {
       fetch(`${BASE_URL}/api/admin/stats`, {headers:h})
         .then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
     }, 2000);
-    return () => clearInterval(iv);
+    // Liste des coursiers (missions, terminees, etoiles) rafraichie toutes les 5 s
+    const iv2 = setInterval(() => {
+      fetch(`${BASE_URL}/api/admin/coursiers`, {headers:getHeaders()})
+        .then(r=>r.ok?r.json():null).then(d=>{ if(Array.isArray(d)) setCoursiers(d); }).catch(()=>{});
+    }, 5000);
+    return () => { clearInterval(iv); clearInterval(iv2); };
   }, []);
 
   // ── Recharger l'historique à l'ouverture de l'onglet ou changement de filtre ──
@@ -1452,7 +1457,7 @@ function DashboardAdmin() {
                             </div>
                           </td>
                           <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.telephone}</td>
-                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}<div style={{ fontSize:10,color:"#888",fontWeight:500 }}>{c.nb_terminees||0} {tr("terminées")} · {c.nb_terminees||0} ⭐</div></td>
                           <td data-label={tr("Note")} style={{ padding:"12px 14px" }}>
                             {c.note > 0 ? (
                               <span style={{ display:"flex",alignItems:"center",gap:4,color:"var(--d-gold)",fontWeight:700 }}>
@@ -1717,7 +1722,7 @@ function DashboardAdmin() {
                         <div>
                           <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:15 }}>{c.prenom} {c.nom}</div>
                           <div style={{ color:"#888",fontSize:12 }}>{c.email}</div>
-                          <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{c.missions} missions</div>
+                          <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{c.missions} missions · {c.nb_terminees||0} ⭐</div>
                         </div>
                       </div>
                       <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>

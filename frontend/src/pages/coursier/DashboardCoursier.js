@@ -505,7 +505,7 @@ useEffect(() => {
       })
       .catch(() => {});
   };
-  const interval = setInterval(rafraichir, 15000);
+  const interval = setInterval(rafraichir, 5000);
   return () => clearInterval(interval);
 }, []);
 

@@ -79,4 +79,31 @@ class User extends Authenticatable implements JWTSubject
         }
         return $nb;
     }
+
+    // ── Stats coursier : source unique = les missions reelles ──
+    // 1 mission terminee = 1 etoile ; 5 etoiles = 1 trophee
+    public static function statsCoursier(int $id): array
+    {
+        $base      = Commande::where('coursier_id', $id);
+        $total     = (clone $base)->count();
+        $terminees = (clone $base)->where('statut', 'termine')->count();
+        $moyenne   = $terminees > 0
+            ? round((float) (clone $base)->where('statut', 'termine')->whereNotNull('note')->avg('note'), 1)
+            : 0;
+
+        return [
+            'nb_missions'       => $total,
+            'nb_terminees'      => $terminees,
+            'note'              => $moyenne,
+            'trophees'          => intdiv($terminees, 5),
+            'etoiles_actuelles' => $terminees % 5,
+        ];
+    }
+
+    public static function synchroniserStatsCoursier(int $id): array
+    {
+        $stats = static::statsCoursier($id);
+        static::where('id', $id)->update($stats);
+        return $stats;
+    }
 }

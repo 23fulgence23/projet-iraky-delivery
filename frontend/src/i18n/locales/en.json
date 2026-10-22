@@ -725,5 +725,6 @@
   "Votre abonnement expire dans {{n}} jours.": "Your subscription expires in {{n}} days.",
   "Payez avant le {{date}} pour éviter la suspension de votre compte.": "Pay before {{date}} to avoid your account being suspended.",
   "Payer maintenant": "Pay now",
-  "Fermer": "Close"
+  "Fermer": "Close",
+  "terminées": "completed"
 }

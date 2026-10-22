@@ -163,6 +163,7 @@ public function commandesMensuelles()
                 'statut'      => $u->statut,
                 'note'        => round((float)$u->note, 1),
                 'nb_missions' => $u->nb_missions ?? 0,
+                'nb_terminees' => Commande::where('coursier_id',$u->id)->where('statut','termine')->count(),
                 'photo_recto' => $u->photo_recto,
                 'photo_verso' => $u->photo_verso,
                 'created_at'  => $u->created_at->format('Y-m-d'),

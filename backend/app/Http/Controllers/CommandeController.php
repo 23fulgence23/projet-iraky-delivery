@@ -296,28 +296,10 @@ public function terminer(Request $request, $id)
         $coursier = User::find($commande->coursier_id);
 
         if ($coursier) {
-            // ✅ Moyenne des notes sur toutes les missions terminées
-            $missionsTerm = Commande::where('coursier_id', $coursier->id)
-                ->where('statut', 'termine')
-                ->whereNotNull('note')
-                ->get();
-
-            $nbTerminees = $missionsTerm->count();
-            $moyNote     = $nbTerminees > 0 ? round($missionsTerm->avg('note'), 1) : 0;
-
-            // ✅ Système trophées : chaque note ajoutée incrémente etoiles_actuelles
-            // À 5 étoiles accumulées → +1 trophée, etoiles_actuelles repart à 0
-            $etoilesActuelles = $coursier->etoiles_actuelles + $note;
-            $nouveauxTrophees = intdiv($etoilesActuelles, 5);
-            $etoilesRestantes = $etoilesActuelles % 5;
-
-            $coursier->update([
-                'nb_terminees'      => $nbTerminees,
-                'nb_missions'       => Commande::where('coursier_id', $coursier->id)->count(),
-                'note'              => $moyNote,
-                'trophees'          => $coursier->trophees + $nouveauxTrophees,
-                'etoiles_actuelles' => $etoilesRestantes,
-            ]);
+            // ✅ Stats recalculées depuis les missions réelles : 1 mission terminée = 1 étoile
+            $statsCoursier = User::synchroniserStatsCoursier((int) $coursier->id);
+            $nbTerminees   = $statsCoursier['nb_terminees'];
+            $moyNote       = $statsCoursier['note'];
         }
 
         Notification::create([

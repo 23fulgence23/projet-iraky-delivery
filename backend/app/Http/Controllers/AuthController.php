@@ -185,6 +185,11 @@ public function login(Request $request)
                 return response()->json(['message' => 'Utilisateur non trouvé'], 404);
             }
 
+            if ($user->role === 'coursier') {
+                \App\Models\User::synchroniserStatsCoursier((int) $user->id);
+                $user->refresh();
+            }
+
             return response()->json($user);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Token invalide'], 401);
