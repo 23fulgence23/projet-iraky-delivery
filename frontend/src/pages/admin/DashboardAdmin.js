@@ -1431,7 +1431,7 @@ function DashboardAdmin() {
                   <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
                     <thead>
                       <tr style={{ borderBottom:"1px solid #FFD70018" }}>
-                        {[tr("Nom"),tr("Téléphone"),tr("Missions"),tr("Note"),tr("Statut"),tr("Actions")].map(h=>(
+                        {[tr("Nom"),tr("Téléphone"),tr("Missions"),tr("Terminées"),tr("Étoiles"),tr("Note"),tr("Statut"),tr("Actions")].map(h=>(
                           <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
                             textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
                         ))}
@@ -1457,11 +1457,17 @@ function DashboardAdmin() {
                             </div>
                           </td>
                           <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.telephone}</td>
-                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}<div style={{ fontSize:10,color:"#888",fontWeight:500 }}>{c.nb_terminees||0} {tr("terminées")} · {c.nb_terminees||0} ⭐</div></td>
+                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label={tr("Terminées")} style={{ padding:"12px 14px",color:"#10b981",fontWeight:700 }}>{c.nb_terminees||0}</td>
+                          <td data-label={tr("Étoiles")} style={{ padding:"12px 14px" }}>
+                            <span style={{ display:"flex",alignItems:"center",gap:4,color:"var(--d-gold)",fontWeight:700 }}>
+                              <MdStar style={{ fontSize:14 }}/> {c.nb_terminees||0}
+                            </span>
+                          </td>
                           <td data-label={tr("Note")} style={{ padding:"12px 14px" }}>
                             {c.note > 0 ? (
                               <span style={{ display:"flex",alignItems:"center",gap:4,color:"var(--d-gold)",fontWeight:700 }}>
-                                <MdStar style={{ fontSize:14 }}/> {c.note}/5
+                                <MdStar style={{ fontSize:14 }}/> {Number(c.note).toFixed(1)}/5
                               </span>
                             ) : <span style={{ color:"#555" }}>—</span>}
                           </td>

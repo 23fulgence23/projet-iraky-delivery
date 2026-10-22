@@ -727,5 +727,9 @@
   "Payer maintenant": "Pay now",
   "Fermer": "Close",
   "terminées": "completed",
-  "missions": "missions"
+  "missions": "missions",
+  "Terminées": "Completed",
+  "Étoiles": "Stars",
+  "{{nb}} mission terminée": "{{nb}} completed mission",
+  "{{nb}} missions terminées": "{{nb}} completed missions"
 }

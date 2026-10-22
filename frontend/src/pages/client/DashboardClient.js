@@ -4,6 +4,7 @@ import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
 import scoreImg from "../../images/score.png";
@@ -1550,7 +1551,9 @@ const noterCoursier = async (id, note) => {
                             <span style={{ color:"#888", fontSize:12 }}>🕐 {formatDateHeure(cmd.heure_debut)} → {formatDateHeure(cmd.heure_livraison)}</span>
                           </div>
                           {cmd.coursier && (
-                            <div style={{ color:"var(--d-c-aaa)", fontSize:13, marginTop:8 }}>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"var(--d-gold)", fontWeight:700 }} />
+                            <div style={{ color:"var(--d-c-aaa)", fontSize:13, marginTop:8 }}>{["negociable","accepte"].includes(cmd.statut)
+                              ? <CoursierInfoCard cmd={cmd} onOpen={setApercuCoursierId} />
+                              : <>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"var(--d-gold)", fontWeight:700 }} /></>}
                             </div>
                           )}
                           <div style={{ color:"#666", fontSize:12, marginTop:6,

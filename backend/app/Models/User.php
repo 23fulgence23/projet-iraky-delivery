@@ -87,9 +87,8 @@ class User extends Authenticatable implements JWTSubject
         $base      = Commande::where('coursier_id', $id);
         $total     = (clone $base)->count();
         $terminees = (clone $base)->where('statut', 'termine')->count();
-        $moyenne   = $terminees > 0
-            ? round((float) (clone $base)->where('statut', 'termine')->whereNotNull('note')->avg('note'), 1)
-            : 0;
+        // Note affichee = etoiles du cycle en cours (1 mission terminee = 1 etoile, 5 etoiles = 1 trophee)
+        $moyenne   = $terminees % 5;
 
         return [
             'nb_missions'       => $total,

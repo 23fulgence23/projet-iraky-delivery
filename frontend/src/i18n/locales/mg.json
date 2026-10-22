@@ -727,5 +727,9 @@
   "Payer maintenant": "Mandoa izao",
   "Fermer": "Akatona",
   "terminées": "vita",
-  "missions": "iraka"
+  "missions": "iraka",
+  "Terminées": "Vita",
+  "Étoiles": "Kintana",
+  "{{nb}} mission terminée": "{{nb}} iraka vita",
+  "{{nb}} missions terminées": "{{nb}} iraka vita"
 }

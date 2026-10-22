@@ -424,7 +424,7 @@ function DashboardCoursier() {
           photo_profil: data.photo_profil || null,
           statut: data.statut || "actif",
           abonnement_expire: data.abonnement_expire || null,
-          note:         data.note         || 0,
+          note: Number(data.note || 0).toFixed(1),
           nb_missions:  data.nb_missions  || 0,
           nb_terminees: data.nb_terminees || 0,
           trophees:          data.trophees          || 0,
@@ -493,7 +493,7 @@ useEffect(() => {
         if (!d) return;
         setProfil(p => ({
           ...p,
-          note: d.note || 0,
+          note: Number(d.note || 0).toFixed(1),
           nb_missions: d.nb_missions || 0,
           nb_terminees: d.nb_terminees || 0,
           trophees: d.trophees || 0,
