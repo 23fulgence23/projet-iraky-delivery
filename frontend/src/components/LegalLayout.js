@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import logo from "../logo.png";
@@ -8,6 +9,7 @@ import "../App.css";
 import "../Legal.css";
 
 export default function LegalLayout({ eyebrow, titre, intro, maj, sections, autre }) {
+  const { t } = useTranslation();
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const aller = (e, id) => {
@@ -33,7 +35,7 @@ export default function LegalLayout({ eyebrow, titre, intro, maj, sections, autr
           <div className="d-flex align-items-center gap-2">
             <Link to="/" className="iraky-btn-ghost"
               style={{ padding: "8px 16px", fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <FiArrowLeft /> Retour au portail
+              <FiArrowLeft /> {t("Retour au portail")}
             </Link>
             <ThemeToggle size={38} />
           </div>
@@ -47,7 +49,7 @@ export default function LegalLayout({ eyebrow, titre, intro, maj, sections, autr
           <h1 className="iraky-h2" style={{ fontSize: "clamp(28px, 5vw, 44px)", marginBottom: 14 }}>{titre}</h1>
           <p className="iraky-body" style={{ maxWidth: 680, fontSize: 15.5, lineHeight: 1.7 }}>{intro}</p>
           <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: 12 }}>
-            Dernière mise à jour : {maj}
+            {t("Dernière mise à jour :")} {maj}
           </small>
         </div>
       </div>
@@ -57,9 +59,7 @@ export default function LegalLayout({ eyebrow, titre, intro, maj, sections, autr
         <div className="row g-4">
           <div className="col-lg-3 d-none d-lg-block">
             <nav className="legal-toc" style={{ position: "sticky", top: 90 }}>
-              <div style={{ fontFamily: "var(--f-mono)", fontSize: 11.5, letterSpacing: 1.5, color: "var(--iraky-muted-dim)", marginBottom: 10 }}>
-                SOMMAIRE
-              </div>
+              <div style={{ fontFamily: "var(--f-mono)", fontSize: 11.5, letterSpacing: 1.5, color: "var(--iraky-muted-dim)", marginBottom: 10 }}>{t("SOMMAIRE")}</div>
               {sections.map((s, i) => (
                 <a key={s.id} href={"#" + s.id} onClick={(e) => aller(e, s.id)}>{i + 1}. {s.titre}</a>
               ))}

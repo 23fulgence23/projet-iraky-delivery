@@ -169,13 +169,12 @@ function Footer() {
           <div className="d-flex align-items-center gap-3" style={{ flexWrap: "nowrap" }}>
             <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("RÉALISÉ PAR")}</small>
             <a href="https://raiky.mg/" target="_blank" rel="noopener noreferrer" title="RAIKY" style={{ display: "flex", alignItems: "center" }}>
-              <img src={raikyLogo} alt="RAIKY" style={{ height: "48px", width: "auto", objectFit: "contain", flexShrink: 0 }} />
+              <img src={raikyLogo} alt="RAIKY" style={{ height: "64px", width: "auto", maxWidth: "150px", objectFit: "contain", flexShrink: 0 }} />
             </a>
             <a href="https://fulgence-damivelo.vercel.app/" target="_blank" rel="noopener noreferrer" title="Fulgence Damivelo" style={{ display: "flex", alignItems: "center" }}>
-              <img src={fulgenceImg} alt="Fulgence Damivelo" style={{
-                width: "48px", height: "48px", flexShrink: 0, borderRadius: "50%", objectFit: "cover",
-                border: "1.5px solid var(--iraky-gold-line)",
-              }} />
+              <span style={{ width: "64px", height: "64px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, display: "block", border: "2px solid var(--iraky-gold-line)" }}>
+                <img src={fulgenceImg} alt="Fulgence Damivelo" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", transform: "scale(1.35)", transformOrigin: "center 20%", display: "block" }} />
+              </span>
             </a>
           </div>
         </div>
