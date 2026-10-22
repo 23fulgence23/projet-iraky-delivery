@@ -2,7 +2,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import logo from "../logo.png";
 import raikyLogo from "../images/raiky.png";
-import fulgenceImg from "../images/fulgence.png";
 import "../Theme.css";
 import "../App.css";
 
@@ -166,16 +165,21 @@ function Footer() {
             ))}
           </div>
 
-          <div className="d-flex align-items-center gap-3" style={{ flexWrap: "nowrap" }}>
+          <div className="d-flex align-items-center gap-3" style={{ flexWrap: "wrap" }}>
             <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("RÉALISÉ PAR")}</small>
             <a href="https://raiky.mg/" target="_blank" rel="noopener noreferrer" title="RAIKY" style={{ display: "flex", alignItems: "center" }}>
               <img src={raikyLogo} alt="RAIKY" style={{ height: "64px", width: "auto", maxWidth: "150px", objectFit: "contain", flexShrink: 0 }} />
             </a>
-            <a href="https://fulgence-damivelo.vercel.app/" target="_blank" rel="noopener noreferrer" title="Fulgence Damivelo" style={{ display: "flex", alignItems: "center" }}>
-              <span style={{ width: "64px", height: "64px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, display: "block", border: "2px solid var(--iraky-gold-line)" }}>
-                <img src={fulgenceImg} alt="Fulgence Damivelo" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", transform: "scale(1.35)", transformOrigin: "center 20%", display: "block" }} />
-              </span>
-            </a>
+            <span style={{ fontFamily: "var(--f-body)", fontSize: "13.5px", color: "var(--iraky-muted)", display: "inline-flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              {t("Développeur web")}
+              <span aria-hidden="true" style={{ color: "var(--iraky-muted-dim)", fontSize: "22px", fontWeight: 300, lineHeight: 1 }}>|</span>
+              <a href="https://fulgence-damivelo.vercel.app/" target="_blank" rel="noopener noreferrer" title="Portfolio — Fulgence Damivelo"
+                style={{ color: "var(--iraky-gold)", fontWeight: 700, textDecoration: "none" }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = "underline"}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = "none"}>
+                FULGENCE Damivelo
+              </a>
+            </span>
           </div>
         </div>
       </div>
