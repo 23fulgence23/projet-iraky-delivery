@@ -1,6 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import logo from "../logo.png";
+import raikyLogo from "../images/raiky.png";
+import fulgenceImg from "../images/fulgence.png";
 import "../Theme.css";
 import "../App.css";
 
@@ -141,12 +143,42 @@ function Footer() {
       </div>
 
       {/* Barre du bas */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <small style={{ fontFamily: "var(--f-body)", color: "var(--iraky-muted-dim)", fontSize: "12.5px" }}>
-            © 2026 IRAKY Delivery — Toliara, Madagascar
-          </small>
-          <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("FAIT AVEC 🛵 À TOLIARA")}</small>
+      <div style={{ borderTop: "1px solid var(--iraky-card-border)" }}>
+        <div className="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <small style={{ display: "block", fontFamily: "var(--f-body)", color: "var(--iraky-muted-dim)", fontSize: "12.5px" }}>
+              © 2026 IRAKY Delivery — Toliara, Madagascar
+            </small>
+            <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("FAIT AVEC 🛵 À TOLIARA")}</small>
+          </div>
+
+          <div className="d-flex flex-wrap gap-3">
+            {[
+              { to: "/confidentialite", label: t("Confidentialité") },
+              { to: "/conditions", label: t("Conditions d'utilisation") },
+            ].map((l) => (
+              <Link key={l.to} to={l.to} style={{
+                fontFamily: "var(--f-body)", fontSize: "13px", color: "var(--iraky-muted)",
+                textDecoration: "none", transition: "color 0.2s ease",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = "var(--iraky-gold)"}
+              onMouseLeave={e => e.currentTarget.style.color = "var(--iraky-muted)"}
+              >{l.label}</Link>
+            ))}
+          </div>
+
+          <div className="d-flex align-items-center gap-2">
+            <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("RÉALISÉ PAR")}</small>
+            <a href="https://raiky.mg/" target="_blank" rel="noopener noreferrer" title="RAIKY" style={{ display: "flex", alignItems: "center" }}>
+              <img src={raikyLogo} alt="RAIKY" style={{ height: "30px", width: "auto", objectFit: "contain" }} />
+            </a>
+            <a href="https://fulgence-damivelo.vercel.app/" target="_blank" rel="noopener noreferrer" title="Fulgence Damivelo" style={{ display: "flex", alignItems: "center" }}>
+              <img src={fulgenceImg} alt="Fulgence Damivelo" style={{
+                width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover",
+                border: "1.5px solid var(--iraky-gold-line)",
+              }} />
+            </a>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,0 +1,10 @@
+.legal-body p { font-family: var(--f-body); color: var(--iraky-muted); font-size: 14.5px; line-height: 1.8; margin: 0 0 12px; }
+.legal-body p:last-child, .legal-body ul:last-child { margin-bottom: 0; }
+.legal-body ul { padding: 0; list-style: none; margin: 0 0 12px; }
+.legal-body li { position: relative; padding-left: 22px; font-family: var(--f-body); color: var(--iraky-muted); font-size: 14.5px; line-height: 1.8; margin-bottom: 6px; }
+.legal-body li::before { content: ""; position: absolute; left: 4px; top: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--iraky-gold); }
+.legal-body strong { color: var(--iraky-ink); font-weight: 600; }
+.legal-body a { color: var(--iraky-gold); text-decoration: none; }
+.legal-body a:hover { text-decoration: underline; }
+.legal-toc a { display: block; font-family: var(--f-body); font-size: 13.5px; color: var(--iraky-muted); text-decoration: none; padding: 7px 12px; border-left: 2px solid var(--iraky-card-border); transition: all 0.2s ease; }
+.legal-toc a:hover { color: var(--iraky-gold); border-left-color: var(--iraky-gold); }

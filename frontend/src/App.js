@@ -11,6 +11,8 @@ import OubliMotDePasse from "./pages/auth/OubliMotDePasse";
 import DashboardClient from "./pages/client/DashboardClient";
 import DashboardCoursier from "./pages/coursier/DashboardCoursier";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import Confidentialite from "./pages/legal/Confidentialite";
+import Conditions from "./pages/legal/Conditions";
 
 function Portail() {
   return (
@@ -33,6 +35,8 @@ function App() {
         <Route path="/connexion" element={<Connexion />} />
         <Route path="/inscription" element={<Inscription />} />
         <Route path="/oubli-mot-de-passe" element={<OubliMotDePasse />} />
+        <Route path="/confidentialite" element={<Confidentialite />} />
+        <Route path="/conditions" element={<Conditions />} />
         <Route path="/dashboard-client" element={<DashboardClient />} />
         <Route path="/dashboard-coursier" element={<DashboardCoursier />} />
         <Route path="/dashboard-admin" element={<DashboardAdmin />} />
