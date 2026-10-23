@@ -882,5 +882,17 @@
   "Chargement de la carte...": "Mampiditra ny sarintany...",
   "Adresse de prise en charge introuvable sur la carte.": "Tsy hita eo amin'ny sarintany ny adiresy fakana entana.",
   "Position du client indisponible.": "Tsy misy ny toerana misy ny mpanjifa.",
-  "Aucune donnée de localisation exploitable pour cette course.": "Tsy misy angona toerana azo ampiasaina ho an'ity dia ity."
+  "Aucune donnée de localisation exploitable pour cette course.": "Tsy misy angona toerana azo ampiasaina ho an'ity dia ity.",
+  "Qui doit réaliser votre commande ?": "Iza no hanatanteraka ny baikonao?",
+  "Publier pour tous les coursiers": "Alefa amin'ny mpitondra entana rehetra",
+  "Choisir un coursier": "Misafidiana mpitondra entana",
+  "Tous les coursiers recevront une notification.": "Ny mpitondra entana rehetra dia handray fampandrenesana.",
+  "Le coursier choisi recevra votre commande directement (statut Accepté).": "Ny mpitondra entana nofidinao dia handray mivantana ny baikonao (toetra Eken'ny roa tonta).",
+  "Les meilleurs coursiers": "Ny mpitondra entana tsara indrindra",
+  "Vos coursiers habituels": "Ny mpitondra entana mahazatra anao",
+  "Autres coursiers": "Mpitondra entana hafa",
+  "Aucun coursier disponible pour le moment.": "Tsy misy mpitondra entana azo ampiasaina amin'izao fotoana izao.",
+  "{{n}} terminées": "{{n}} vita",
+  "Veuillez choisir un coursier": "Misafidiana mpitondra entana azafady",
+  "🚀 Commande envoyée directement au coursier !": "🚀 Naindrana mivantana tany amin'ny mpitondra entana ny baiko!"
 }

@@ -882,5 +882,17 @@
   "Chargement de la carte...": "Loading the map...",
   "Adresse de prise en charge introuvable sur la carte.": "Pick-up address not found on the map.",
   "Position du client indisponible.": "Client location unavailable.",
-  "Aucune donnée de localisation exploitable pour cette course.": "No usable location data for this ride."
+  "Aucune donnée de localisation exploitable pour cette course.": "No usable location data for this ride.",
+  "Qui doit réaliser votre commande ?": "Who should carry out your order?",
+  "Publier pour tous les coursiers": "Publish to all couriers",
+  "Choisir un coursier": "Choose a courier",
+  "Tous les coursiers recevront une notification.": "All couriers will receive a notification.",
+  "Le coursier choisi recevra votre commande directement (statut Accepté).": "The chosen courier will receive your order directly (status Accepted).",
+  "Les meilleurs coursiers": "Top couriers",
+  "Vos coursiers habituels": "Your usual couriers",
+  "Autres coursiers": "Other couriers",
+  "Aucun coursier disponible pour le moment.": "No courier available at the moment.",
+  "{{n}} terminées": "{{n}} completed",
+  "Veuillez choisir un coursier": "Please choose a courier",
+  "🚀 Commande envoyée directement au coursier !": "🚀 Order sent directly to the courier!"
 }

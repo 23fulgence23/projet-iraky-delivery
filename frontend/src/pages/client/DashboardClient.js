@@ -1,3 +1,4 @@
+import CoursierPicker from "../../components/CoursierPicker";
 import ThemeToggle from "../../components/ThemeToggle";
 import React, { useState, useEffect, useRef } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
@@ -819,6 +820,9 @@ useEffect(() => {
     if (!form.service || !form.moyen || !form.detail || !form.heure_debut || !form.heure_livraison) {
       showToast(tr("Veuillez remplir tous les champs obligatoires"), "error"); return;
     }
+    if (form.mode_coursier === "choisir" && !form.coursier_id) {
+      showToast(tr("Veuillez choisir un coursier"), "error"); return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -836,6 +840,7 @@ useEffect(() => {
           adresse_pickup:    form.adresse_pickup,
           heure_debut:       form.heure_debut,
           heure_livraison:   form.heure_livraison,
+          coursier_id:       form.mode_coursier === "choisir" ? form.coursier_id : null,
         }),
       });
       const data = await response.json();
@@ -846,9 +851,9 @@ useEffect(() => {
           texte: tr("Commande publiée — {{service}}", { service: data.commande.service }),
           lu: false, time: tr("À l'instant"), type: "info",
         }, ...prev]);
-        setForm({ service: "", moyen: "", detail: "", adresse_pickup: "", heure_publication: "", heure_debut: "", heure_livraison: "" });
+        setForm({ service: "", moyen: "", detail: "", adresse_pickup: "", heure_publication: "", heure_debut: "", heure_livraison: "", mode_coursier: "tous", coursier_id: null });
         setOnglet("historique");
-        showToast(tr("🚀 Commande publiée ! Tous les coursiers ont été notifiés."));
+        showToast(data.commande?.coursier_id ? tr("🚀 Commande envoyée directement au coursier !") : tr("🚀 Commande publiée ! Tous les coursiers ont été notifiés."));
       } else {
         showToast(data.message || tr("Erreur lors de la publication"), "error");
       }
@@ -1443,6 +1448,14 @@ const noterCoursier = async (id, note) => {
     </div>
 
   </div>
+</div>
+{/* ── ÉTAPE 4 : Coursier ── */}
+<div style={{ marginBottom:28 }}>
+  <CoursierPicker
+    mode={form.mode_coursier || "tous"}
+    coursierId={form.coursier_id || null}
+    onMode={(m)=>setForm(f=>({...f, mode_coursier:m}))}
+    onPick={(id)=>setForm(f=>({...f, coursier_id:id}))} />
 </div>
 {form.service && form.moyen && (
   <div style={{ background:"linear-gradient(135deg,#FFD70012,#ff950008)",
