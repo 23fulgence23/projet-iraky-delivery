@@ -400,6 +400,9 @@ public function terminer(Request $request, $id)
             'email'        => $coursier->email,
             'adresse'      => $coursier->adresse,
             'note'         => $coursier->note ?? 0,
+            'trophees'     => (int) $coursier->trophees,
+            'etoiles_actuelles' => (int) $coursier->etoiles_actuelles,
+            'nb_missions'  => Commande::where('coursier_id', $coursier->id)->count(),
             'nb_terminees' => Commande::where('coursier_id', $coursier->id)
                                 ->where('statut', 'termine')->count(),
         ]);

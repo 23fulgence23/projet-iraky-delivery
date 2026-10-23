@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MdStar } from "react-icons/md";
+import EtoilesAvecTrophees from "../pages/etoiles/EtoilesAvecTrophees";
 
 function initiales(nom) {
   const parts = String(nom || "").trim().split(/\s+/).filter(Boolean);
@@ -38,11 +38,9 @@ export default function CoursierInfoCard({ cmd, onOpen }) {
           textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cmd.coursier}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 3, fontSize: 12 }}>
           <span style={{ color: "#10b981", fontWeight: 700 }}>
-            {nb <= 1 ? t("{{nb}} mission terminée", { nb }) : t("{{nb}} missions terminées", { nb })}
+            {t("{{n}} missions", { n: Number(cmd.coursier_nb_missions || 0) })} · {nb <= 1 ? t("{{nb}} mission terminée", { nb }) : t("{{nb}} missions terminées", { nb })}
           </span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "#FFD700", fontWeight: 700 }}>
-            <MdStar style={{ fontSize: 15 }} /> {nb}
-          </span>
+          <EtoilesAvecTrophees trophees={Number(cmd.coursier_trophees || 0)} etoilesActuelles={Number(cmd.coursier_etoiles || 0)} size={14} />
         </div>
       </div>
     </div>

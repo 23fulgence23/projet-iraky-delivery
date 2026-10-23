@@ -1,3 +1,4 @@
+import EtoilesAvecTrophees from "../pages/etoiles/EtoilesAvecTrophees";
 import { useEffect, useState } from "react";
 import { MdClose, MdStar, MdStarBorder, MdEmail, MdLocationOn } from "react-icons/md";
 import { AvatarRond } from "./AvatarProfil";
@@ -80,8 +81,7 @@ export default function ApercuCoursierModal({ coursierId, apiUrl, onClose }) {
             </div>
             <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>{data.prenom} {data.nom}</div>
             <div style={{ marginTop: 10, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
-              <Etoiles5 note={data.note} />
-              <span style={{ color: "#888", fontSize: 12 }}>({Math.round(Number(data.note) || 0)}/5)</span>
+              <EtoilesAvecTrophees trophees={Number(data.trophees || 0)} etoilesActuelles={Number(data.etoiles_actuelles || 0)} size={18} />
             </div>
             <div style={{ marginTop: 16, display: "grid", gap: 8, textAlign: "left" }}>
               {[{ Icon: MdEmail, label: "Email", val: data.email },
