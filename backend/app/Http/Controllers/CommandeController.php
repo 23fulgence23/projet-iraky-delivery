@@ -20,10 +20,22 @@ class CommandeController extends Controller
             'detail'            => 'required|string',
             'heure_debut'       => 'required|date',
             'heure_livraison'   => 'required|date',
+            'coursier_id'       => 'nullable|integer',
         ]);
+
+        // Coursier choisi directement (sinon : publication pour tous)
+        $coursier = null;
+        if ($request->filled('coursier_id')) {
+            $coursier = \App\Http\Controllers\CoursiersListeController::coursiersEligibles()
+                ->where('id', $request->coursier_id)->first();
+            if (!$coursier) {
+                return response()->json(['message' => 'Coursier indisponible.'], 422);
+            }
+        }
 
         $commande = Commande::create([
             'client_id'         => $user->id,
+            'coursier_id'       => $coursier ? $coursier->id : null,
             'service'           => $request->service,
             'moyen'             => $request->moyen,
             'tarif'             => $request->tarif,
@@ -32,10 +44,32 @@ class CommandeController extends Controller
             'heure_publication' => now(),
             'heure_debut'       => $request->heure_debut,
             'heure_livraison'   => $request->heure_livraison,
-            'statut'            => 'en_attente',
+            'statut'            => $coursier ? 'accepte' : 'en_attente',
+            'accord_client'     => $coursier ? true : false,
+            'accord_coursier'   => $coursier ? true : false,
         ]);
 
-        // ✅ Notifier TOUS les admins (pas seulement le premier)
+        // Notification des coursiers
+        if ($coursier) {
+            \App\Models\Notification::create([
+                'user_id'     => $coursier->id,
+                'texte'       => "📦 Commande pour vous : {$commande->service} — Client {$user->prenom} {$user->nom}",
+                'type'        => 'info',
+                'commande_id' => $commande->id,
+            ]);
+        } else {
+            $coursiers = \App\Http\Controllers\CoursiersListeController::coursiersEligibles()->get(['id']);
+            foreach ($coursiers as $c) {
+                \App\Models\Notification::create([
+                    'user_id'     => $c->id,
+                    'texte'       => "📦 Nouvelle mission disponible : {$commande->service} — {$commande->tarif} Ar",
+                    'type'        => 'info',
+                    'commande_id' => $commande->id,
+                ]);
+            }
+        }
+
+        // Notifier TOUS les admins
         $admins = \App\Models\User::where('role','admin')->get();
         foreach ($admins as $admin) {
             \App\Models\Notification::create([
@@ -51,7 +85,7 @@ class CommandeController extends Controller
         ], 201);
     }
 
-   
+
         // ── Commandes du client ────────────────────────
         public function mesCommandes()
         {

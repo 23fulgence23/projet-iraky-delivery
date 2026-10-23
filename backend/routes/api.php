@@ -120,6 +120,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post  ('/commandes/{id}/terminer',          [CommandeController::class, 'terminer']);
     Route::delete('/commandes/{id}',                   [CommandeController::class, 'destroy']);
     Route::get   ('/coursiers/{id}/apercu',            [CommandeController::class, 'apercuCoursier']);
+    Route::get   ('/coursiers-pour-commande',           [\App\Http\Controllers\CoursiersListeController::class, 'index']);
 
     // ── Messages ─────────────────────────────────
     Route::get   ('/commandes/{id}/messages',                       [MessageController::class, 'index']);
