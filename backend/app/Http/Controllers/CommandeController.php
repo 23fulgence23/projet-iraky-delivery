@@ -91,7 +91,7 @@ class CommandeController extends Controller
         {
             $user = JWTAuth::user();
             $commandes = Commande::where('client_id', $user->id)
-                ->with('coursier:id,prenom,nom,note,trophees,photo_profil') // charge déjà la relation
+                ->with('coursier:id,prenom,nom,note,trophees,etoiles_actuelles,photo_profil') // charge déjà la relation
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(fn($c) => [
@@ -102,6 +102,7 @@ class CommandeController extends Controller
                     // ✅ Expose la note et les trophées du coursier directement
                     'coursier_note'     => $c->coursier->note ?? null,
                     'coursier_trophees' => $c->coursier->trophees ?? null,
+                    'coursier_etoiles'  => $c->coursier->etoiles_actuelles ?? null,
                     'coursier_photo'        => ($c->coursier && in_array($c->statut, ['negociable', 'accepte'])) ? $c->coursier->photo_profil : null,
                     'coursier_nb_missions'  => $c->coursier_id ? \App\Models\Commande::where('coursier_id', $c->coursier_id)->count() : null,
                     'coursier_nb_terminees' => $c->coursier_id ? \App\Models\Commande::where('coursier_id', $c->coursier_id)->where('statut', 'termine')->count() : null,

@@ -845,7 +845,7 @@ useEffect(() => {
       });
       const data = await response.json();
       if (response.ok) {
-        setCommandes(prev => [data.commande, ...prev]);
+        setCommandes(prev => [{ ...data.commande, coursier: data.commande.coursier ? `${data.commande.coursier.prenom} ${data.commande.coursier.nom}` : null }, ...prev]);
         setNotifs(prev => [{
           id: Date.now(),
           texte: tr("Commande publiée — {{service}}", { service: data.commande.service }),
