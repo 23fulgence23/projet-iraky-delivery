@@ -999,7 +999,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     { label: "MISSIONS",  val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
                     { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
                     { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
-                    { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
+                    { label: "MA NOTE",   val: `${profil.etoiles_actuelles || 0}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
                   ].map(s => (
                     <div key={s.label} style={{
                       backgroundColor: "var(--d-card)", borderRadius: 12, padding: "14px 20px",
@@ -1031,7 +1031,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                     <EtoilesAvecTrophees trophees={profil.trophees} etoilesActuelles={profil.etoiles_actuelles} />
-                    <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 20 }}>{profil.note}/5</span>
+                    <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 20 }}>{profil.etoiles_actuelles || 0}/5</span>
                     <span style={{ color: "#888", fontSize: 13 }}>{tr("basé sur {{nb}} missions terminées", { nb: profil.nb_terminees })}</span>
                   </div>
                 </div>
@@ -1636,7 +1636,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             { label: "TOTAL",     val: profil.nb_missions,  Icon: MdDeliveryDining, color: "#3b82f6" },
                             { label: "TERMINÉES", val: profil.nb_terminees, Icon: MdCheckCircle,    color: "#10b981" },
                             { label: "EN COURS",  val: missions.filter(m => ["negociable","accepte"].includes(m.statut)).length, Icon: MdAccessTime, color: "#f59e0b" },
-                            { label: "MA NOTE",   val: `${profil.note}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
+                            { label: "MA NOTE",   val: `${profil.etoiles_actuelles || 0}/5`,  Icon: MdStar,           color: "var(--d-gold)" },
                           ].map(s => (
                             <div key={s.label} style={{
                               backgroundColor: "var(--d-card)", borderRadius: 12, padding: "14px 20px",
