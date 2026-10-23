@@ -12,6 +12,8 @@ import {
   MdForum,
 } from "react-icons/md";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import SignalementsAdmin from "../../components/SignalementsAdmin";
+import { MdReportProblem as IconeSignalement } from "react-icons/md";
 import PaiementsAbonnementAdmin from "../../components/PaiementsAbonnementAdmin";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
@@ -136,7 +138,7 @@ function DonutChart({ segments, size=120 }) {
 // ══════════════════════════════════════════════
 //  SIDEBAR — style original inchangé
 // ══════════════════════════════════════════════
-function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
+function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsNouveaux }) {
   const items = [
     { id:"accueil",   Icon:MdDashboard,      label:"Tableau de bord",  badge:0                        },
     { id:"clients",   Icon:MdPeople,         label:"Clients",           badge:stats.clients_inactifs   },
@@ -145,6 +147,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus }) {
     { id:"paiements", Icon:MdAttachMoney,    label:"Abonnements",       badge:0                        },
     { id:"historique",Icon:MdHistory,        label:"Historique",        badge:0                        },
     { id:"support",   Icon:MdForum,          label:"Support Chat",      badge:supportNonLus || 0       },
+    { id:"signalements", Icon:IconeSignalement, label:"Signalements", badge:signalementsNouveaux || 0 },
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
@@ -378,6 +381,21 @@ function DashboardAdmin() {
         .then(r=>r.ok?r.json():null).then(d=>{ if(Array.isArray(d)) setCoursiers(d); }).catch(()=>{});
     }, 5000);
     return () => { clearInterval(iv); clearInterval(iv2); };
+  }, []);
+
+  // ── Signalements : compteur des nouveaux (badge du menu) ──
+  const [sigNouveaux, setSigNouveaux] = useState(0);
+  const chargerSigNouveaux = () => {
+    fetch(BASE_URL + "/api/admin/signalements/compteur", { headers: getHeaders() })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d && typeof d.nouveaux === "number") setSigNouveaux(d.nouveaux); })
+      .catch(() => {});
+  };
+  useEffect(() => {
+    chargerSigNouveaux();
+    const ivSig = setInterval(chargerSigNouveaux, 5000);
+    return () => clearInterval(ivSig);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Recharger l'historique à l'ouverture de l'onglet ou changement de filtre ──
@@ -962,7 +980,7 @@ function DashboardAdmin() {
           borderRight:"1px solid #FFD70015",padding:"28px 0",
           position:"fixed",top:66,left:0,zIndex:50,
         }}>
-          <SidebarContent onglet={onglet} setOnglet={setOnglet} stats={stats} supportNonLus={supportNonLus}/>
+          <SidebarContent onglet={onglet} setOnglet={setOnglet} stats={stats} supportNonLus={supportNonLus} signalementsNouveaux={sigNouveaux}/>
         </aside>
 
         {/* SIDEBAR mobile */}
@@ -972,7 +990,7 @@ function DashboardAdmin() {
             <aside style={{ width:252,position:"fixed",top:66,left:0,bottom:0,
               backgroundColor:"var(--d-bg2)",borderRight:"1px solid #FFD70015",
               padding:"28px 0",zIndex:50,overflowY:"auto" }}>
-              <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}} stats={stats} supportNonLus={supportNonLus}/>
+              <SidebarContent onglet={onglet} setOnglet={o=>{setOnglet(o);setSidebarOpen(false);}} stats={stats} supportNonLus={supportNonLus} signalementsNouveaux={sigNouveaux}/>
             </aside>
           </>
         )}
@@ -986,6 +1004,10 @@ function DashboardAdmin() {
                 <div style={{ width:40,height:40,border:"3px solid #FFD70033",
                   borderTop:"3px solid var(--d-gold)",borderRadius:"50%",
                   animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>{tr("Chargement des données...")}</div>
+            )}
+
+            {onglet==="signalements" && (
+              <SignalementsAdmin apiUrl={BASE_URL} onChange={chargerSigNouveaux} />
             )}
 
             {/* ═══ TABLEAU DE BORD — données BDD ═══ */}

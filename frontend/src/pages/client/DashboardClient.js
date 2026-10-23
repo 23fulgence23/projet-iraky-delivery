@@ -4,6 +4,7 @@ import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import SignalerProbleme from "../../components/SignalerProbleme";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
@@ -354,6 +355,7 @@ const [notifs, setNotifs] = useState([]);
  const [commandes, setCommandes] = useState([]);
   const [detailCmd, setDetailCmd]     = useState(null);
   const [noteCmd, setNoteCmd]         = useState(null);
+  const [signalCmd, setSignalCmd] = useState(null);
   const [noteTmp, setNoteTmp]         = useState(0);
   const [confirmDel, setConfirmDel]   = useState(null);
 
@@ -1579,6 +1581,17 @@ const noterCoursier = async (id, note) => {
                         </div>
                       </div>
 
+                      {/* signaler */}
+                      {cmd.coursier_id && (
+                        <div style={{ marginTop:10, textAlign:"right" }}>
+                          <button onClick={e=>{ e.stopPropagation(); setSignalCmd(cmd); }}
+                            style={{ background:"#ef444415", border:"1px solid #ef444430", color:"#ef6666",
+                              borderRadius:8, padding:"5px 12px", cursor:"pointer", fontSize:12,
+                              display:"inline-flex", alignItems:"center", gap:6 }}>
+                            🚩 {tr("Signaler un problème")}</button>
+                        </div>
+                      )}
+
                       {/* noter */}
                       {cmd.statut==="termine" && (
                         <div style={{ marginTop:14, borderTop:"1px solid #FFD70010", paddingTop:14 }}>
@@ -2586,6 +2599,10 @@ const noterCoursier = async (id, note) => {
             </div>
           )}
         </Modal>
+      )}
+
+      {signalCmd && (
+        <SignalerProbleme cmd={signalCmd} apiUrl="https://projet-iraky-delivery.onrender.com" onClose={() => setSignalCmd(null)} />
       )}
 
       {/* MODAL NOTE */}

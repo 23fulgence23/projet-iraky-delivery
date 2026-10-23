@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AbonnementController;
+use App\Http\Controllers\SignalementController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
@@ -27,6 +28,16 @@ Route::middleware('auth:api')->group(function () {
     // ── Abonnement coursier ──
     Route::get ('/abonnement',           [AbonnementController::class, 'etat']);
     Route::post('/abonnement/paiements', [AbonnementController::class, 'soumettre']);
+
+    // ── Signalements (client / coursier → admin) ──
+    Route::post('/signalements', [SignalementController::class, 'store']);
+    Route::prefix('admin/signalements')->group(function () {
+        Route::get   ('/',             [SignalementController::class, 'liste']);
+        Route::get   ('/compteur',     [SignalementController::class, 'compteur']);
+        Route::get   ('/{id}',         [SignalementController::class, 'detail']);
+        Route::post  ('/{id}/traiter', [SignalementController::class, 'traiter']);
+        Route::delete('/{id}',         [SignalementController::class, 'supprimer']);
+    });
     Route::prefix('admin/abonnements')->group(function () {
         Route::get ('/paiements',                [AbonnementController::class, 'liste']);
         Route::post('/paiements/{id}/valider',   [AbonnementController::class, 'valider']);
