@@ -89,7 +89,7 @@ export default function AbonnementImpaye({ profil, apiUrl }) {
   const echeanceFuture = etat && etat.abonnement_expire && new Date(etat.abonnement_expire) > new Date();
   const attenteReactivation = !enAttente && dernier && dernier.statut === "valide" && echeanceFuture;
   const rejete = !enAttente && !attenteReactivation && dernier && dernier.statut === "rejete";
-  const peutPayer = !enAttente && !attenteReactivation;
+  const peutPayer = !!etat && !enAttente;
 
   const bandeau = (couleur, Icone, contenu) => (
     <div style={{ backgroundColor: couleur + "14", border: `1px solid ${couleur}55`, borderRadius: 14,
