@@ -1,3 +1,4 @@
+import EtoilesAvecTrophees from "../etoiles/EtoilesAvecTrophees";
 import CoursierPicker from "../../components/CoursierPicker";
 import ThemeToggle from "../../components/ThemeToggle";
 import React, { useState, useEffect, useRef } from "react";
@@ -2019,19 +2020,13 @@ const noterCoursier = async (id, note) => {
                     display:"flex", alignItems:"center", justifyContent:"space-between",
                     flexWrap:"wrap", gap:10 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                      <div style={{ width:36, height:36, borderRadius:"50%",
-                        background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
-                        display:"flex", alignItems:"center", justifyContent:"center",
-                        fontWeight:800, color:"#000", fontSize:14 }}>
-                        {cmd.coursier[0]}
-                      </div>
+                      <AvatarRond photo={cmd.coursier_photo} initiales={cmd.coursier.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase()} size={36} fontSize={14} />
                       <div>
                         <div style={{ color:"var(--d-gold)", fontWeight:700, fontSize:14 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
                         {/* ✅ Étoile du coursier directement visible */}
                         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                          <Etoiles value={cmd.coursier_note || 0}/>
-                          <span style={{ color:"#888", fontSize:11 }}>({cmd.coursier_note || 0}/5)</span>
-                          <span style={{ color:"#888", fontSize:11 }}>· {cmd.coursier_nb_missions ?? 0} {tr("missions")} · {cmd.coursier_nb_terminees ?? 0} {tr("terminées")} · {cmd.coursier_nb_terminees ?? 0} ⭐</span>
+                          <EtoilesAvecTrophees trophees={cmd.coursier_trophees || 0} etoilesActuelles={cmd.coursier_etoiles || 0} size={14} />
+                          <span style={{ color:"#888", fontSize:11 }}>· {cmd.coursier_nb_missions ?? 0} {tr("missions")} · {cmd.coursier_nb_terminees ?? 0} {tr("terminées")}</span>
                         </div>
                       </div>
                     </div>

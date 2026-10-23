@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import EtoilesAvecTrophees from "../pages/etoiles/EtoilesAvecTrophees";
 
 const API = "https://projet-iraky-delivery.onrender.com/api/coursiers-pour-commande";
 
@@ -17,15 +18,6 @@ function Avatar({ photo, nom }) {
   );
 }
 
-function Etoiles({ n }) {
-  return (
-    <span style={{ letterSpacing: 1 }}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} style={{ color: i <= n ? "#f59e0b" : "var(--d-border)" }}>★</span>
-      ))}
-    </span>
-  );
-}
 
 export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
   const { t } = useTranslation();
@@ -92,13 +84,10 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                         <span style={{ color: "var(--d-text)", fontWeight: 700, fontSize: 14 }}>{c.nom_complet}</span>
-                        {c.trophees > 0 && (
-                          <span style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b", backgroundColor: "#f59e0b18",
-                            border: "1px solid #f59e0b44", borderRadius: 999, padding: "1px 8px" }}>🏆 ×{c.trophees}</span>
-                        )}
+                        
                       </span>
                       <span style={{ display: "block", ...gris, marginTop: 2 }}>
-                        <Etoiles n={c.etoiles} /> · {t("{{n}} missions", { n: c.nb_missions })} · {t("{{n}} terminées", { n: c.nb_terminees })}
+                        <span style={{ display:"inline-block", verticalAlign:"middle", marginRight:6 }}><EtoilesAvecTrophees trophees={c.trophees} etoilesActuelles={c.etoiles} size={14} /></span>· {t("{{n}} missions", { n: c.nb_missions })} · {t("{{n}} terminées", { n: c.nb_terminees })}
                       </span>
                     </span>
                     {sel && <span style={{ color: "var(--d-gold)", fontWeight: 800 }}>✓</span>}
