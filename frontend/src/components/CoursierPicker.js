@@ -43,7 +43,7 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
   const groupes = data ? [
     [t("Les meilleurs coursiers"), data.top, "🏆"],
     [t("Vos coursiers habituels"), data.habituels, "🤝"],
-    [t("Autres coursiers"), data.autres, "🛵"],
+    [t("Autres coursiers"), data.autres, ""],
   ].filter(([, l]) => l.length > 0) : [];
 
   const gris = { color: "var(--d-c-aaa)", fontSize: 12 };
@@ -79,7 +79,7 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
             <div key={titre}>
               <div style={{ position: "sticky", top: 0, zIndex: 1, padding: "8px 14px", fontSize: 11.5, fontWeight: 800,
                 letterSpacing: 0.5, color: "var(--d-gold)", backgroundColor: "var(--d-card3)" }}>
-                {ico} {titre.toUpperCase()}
+                {ico ? ico + " " : ""}{titre.toUpperCase()}
               </div>
               {liste.map((c) => {
                 const sel = coursierId === c.id;
