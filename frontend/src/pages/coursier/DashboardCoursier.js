@@ -1563,7 +1563,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         <MdVerified style={{ fontSize: 14 }}/>{" "}{tr("Vérifié")}</span>
                     </div>
                     <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
-                      <Etoiles value={profil.note}/>
+                      <EtoilesAvecTrophees trophees={profil.trophees} etoilesActuelles={profil.etoiles_actuelles} size={22} />
                     </div>
                   </div>
 
