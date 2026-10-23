@@ -314,20 +314,26 @@ public function terminer(Request $request, $id)
         return response()->json(['message' => 'La commande doit être acceptée avant de terminer'], 400);
     }
 
-    // ✅ Note obligatoire entre 1 et 5 — pas de défaut silencieux
+    // Evaluation obligatoire : une des 4 expressions
+    $libelles = [
+        'excellent'    => '🤝 Excellent travail',
+        'retard'       => '⏰ Travail en retard',
+        'rapide'       => '⚡ Travail rapide',
+        'satisfaisant' => '👍 Travail satisfaisant',
+    ];
     $request->validate([
-        'note' => 'required|integer|min:1|max:5',
+        'evaluation' => 'required|in:' . implode(',', array_keys($libelles)),
     ], [
-        'note.required' => 'Vous devez attribuer une note au coursier.',
-        'note.min'       => 'La note minimale est 1 étoile.',
-        'note.max'       => 'La note maximale est 5 étoiles.',
+        'evaluation.required' => 'Vous devez choisir une évaluation avant de terminer la mission.',
+        'evaluation.in'       => 'Évaluation invalide.',
     ]);
 
-    $note = (int) $request->note;
+    $evaluation = $request->evaluation;
+    $libelle    = $libelles[$evaluation];
 
     $commande->update([
         'statut' => 'termine',
-        'note'   => $note,
+        'evaluation' => $evaluation,
     ]);
 
     if ($commande->coursier_id) {
@@ -342,7 +348,7 @@ public function terminer(Request $request, $id)
 
         Notification::create([
             'user_id'     => $commande->coursier_id,
-            'texte'       => "🎉 Mission terminée ! Le client vous a donné {$note}/5 ⭐",
+            'texte'       => "🎉 Mission terminée ! Évaluation du client : {$libelle}",
             'type'        => 'success',
             'commande_id' => $commande->id,
         ]);
@@ -351,7 +357,7 @@ public function terminer(Request $request, $id)
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id'     => $admin->id,
-                'texte'       => "🏁 Commande terminée : {$commande->service} — {$note}⭐",
+                'texte'       => "🏁 Commande terminée : {$commande->service} — {$libelle}",
                 'type'        => 'success',
                 'commande_id' => $commande->id,
             ]);

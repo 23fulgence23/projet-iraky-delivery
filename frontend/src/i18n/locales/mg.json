@@ -895,5 +895,10 @@
   "{{n}} terminées": "{{n}} vita",
   "Veuillez choisir un coursier": "Misafidiana mpitondra entana azafady",
   "🚀 Commande envoyée directement au coursier !": "🚀 Naindrana mivantana tany amin'ny mpitondra entana ny baiko!",
-  "{{n}} missions": "{{n}} asa"
+  "{{n}} missions": "{{n}} asa",
+  "Excellent travail": "Asa tena tsara",
+  "Travail en retard": "Asa tara",
+  "Travail rapide": "Asa haingana",
+  "Travail satisfaisant": "Asa mahafa-po",
+  "Évaluez le service pour pouvoir terminer la mission :": "Anombohy ny serivisy mba ahafahanao mamarana ny asa :"
 }

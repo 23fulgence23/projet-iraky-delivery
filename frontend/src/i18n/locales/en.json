@@ -895,5 +895,10 @@
   "{{n}} terminées": "{{n}} completed",
   "Veuillez choisir un coursier": "Please choose a courier",
   "🚀 Commande envoyée directement au coursier !": "🚀 Order sent directly to the courier!",
-  "{{n}} missions": "{{n}} missions"
+  "{{n}} missions": "{{n}} missions",
+  "Excellent travail": "Excellent work",
+  "Travail en retard": "Work delivered late",
+  "Travail rapide": "Fast work",
+  "Travail satisfaisant": "Satisfactory work",
+  "Évaluez le service pour pouvoir terminer la mission :": "Rate the service to be able to finish the mission:"
 }

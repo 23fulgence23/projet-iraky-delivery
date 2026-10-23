@@ -1,3 +1,4 @@
+import { EvaluationChoix, EvaluationBadge } from "../../components/Evaluation";
 import EtoilesAvecTrophees from "../etoiles/EtoilesAvecTrophees";
 import CoursierPicker from "../../components/CoursierPicker";
 import ThemeToggle from "../../components/ThemeToggle";
@@ -359,6 +360,7 @@ const [notifs, setNotifs] = useState([]);
   const [noteCmd, setNoteCmd]         = useState(null);
   const [signalCmd, setSignalCmd] = useState(null);
   const [noteTmp, setNoteTmp]         = useState(0);
+  const [evalChoix, setEvalChoix] = useState({});
   const [confirmDel, setConfirmDel]   = useState(null);
 
   // ── Masquage LOCAL du suivi (client uniquement — la commande
@@ -1569,7 +1571,7 @@ const noterCoursier = async (id, note) => {
                           {cmd.coursier && (
                             <div style={{ color:"var(--d-c-aaa)", fontSize:13, marginTop:8 }}>{["negociable","accepte"].includes(cmd.statut)
                               ? <CoursierInfoCard cmd={cmd} onOpen={setApercuCoursierId} />
-                              : <>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"var(--d-gold)", fontWeight:700 }} /></>}
+                              : <>{tr("👤 Coursier :")}{" "}<LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} style={{ color:"var(--d-gold)", fontWeight:700 }} />{cmd.evaluation && <span style={{ marginLeft:10 }}><EvaluationBadge value={cmd.evaluation} /></span>}</>}
                             </div>
                           )}
                           <div style={{ color:"#666", fontSize:12, marginTop:6,
@@ -1616,7 +1618,7 @@ const noterCoursier = async (id, note) => {
                             </div>
                           ) : (
                             <button onClick={e=>{ e.stopPropagation(); setNoteCmd(cmd); }}
-                              style={{ ...btnY, padding:"7px 18px", fontSize:13 }}>{tr("⭐ Évaluer le coursier")}</button>
+                              style={{ display:"none" }}>{tr("⭐ Évaluer le coursier")}</button>
                           )}
                         </div>
                       )}
@@ -2033,8 +2035,12 @@ const noterCoursier = async (id, note) => {
 
                 {/* ✅ Bouton terminer — visible uniquement si statut = accepte */}
 {cmd.statut === "accepte" && (
+  <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:10, maxWidth:"100%" }}>
+  <EvaluationChoix value={evalChoix[cmd.id] || null} onChange={(v)=>setEvalChoix(p=>({...p,[cmd.id]:v}))} />
   <button
+    disabled={!evalChoix[cmd.id]}
     onClick={async () => {
+      if (!evalChoix[cmd.id]) return;
       const { isConfirmed } = await Swal.fire({
         title: tr("Terminer la mission ?"),
         html: tr("Confirmer la fin de la mission <b>\"{{service}}\"</b> ?<br/> Le coursier recevra 1 étoile automatiquement.", { service: cmd.service }),
@@ -2059,7 +2065,7 @@ const noterCoursier = async (id, note) => {
               "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ note: 1 }),
+            body: JSON.stringify({ evaluation: evalChoix[cmd.id] }),
           }
         );
         const data = await res.json();
@@ -2097,7 +2103,7 @@ const noterCoursier = async (id, note) => {
     style={{
       background: "linear-gradient(135deg,#10b981,#059669)",
       color: "var(--d-text)", border: "none", borderRadius: 12,
-      padding: "10px 20px", cursor: "pointer",
+      padding: "10px 20px", cursor: evalChoix[cmd.id] ? "pointer" : "not-allowed", opacity: evalChoix[cmd.id] ? 1 : 0.45,
       fontWeight: 700, fontSize: 13,
       display: "flex", alignItems: "center", gap: 8,
       boxShadow: "0 4px 16px #10b98133",
@@ -2108,6 +2114,7 @@ const noterCoursier = async (id, note) => {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
       <polyline points="20 6 9 17 4 12"/>
     </svg>{tr("Marquer comme terminé")}</button>
+  </div>
 )}
               </div>
             )}
