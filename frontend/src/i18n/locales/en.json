@@ -894,5 +894,6 @@
   "Aucun coursier disponible pour le moment.": "No courier available at the moment.",
   "{{n}} terminées": "{{n}} completed",
   "Veuillez choisir un coursier": "Please choose a courier",
-  "🚀 Commande envoyée directement au coursier !": "🚀 Order sent directly to the courier!"
+  "🚀 Commande envoyée directement au coursier !": "🚀 Order sent directly to the courier!",
+  "{{n}} missions": "{{n}} missions"
 }

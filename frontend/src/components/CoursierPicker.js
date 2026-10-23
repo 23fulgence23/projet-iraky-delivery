@@ -1,8 +1,31 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MdStar } from "react-icons/md";
 
 const API = "https://projet-iraky-delivery.onrender.com/api/coursiers-pour-commande";
+
+function Avatar({ photo, nom }) {
+  const [ko, setKo] = useState(false);
+  const ini = nom.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
+  return (
+    <span style={{ width: 42, height: 42, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14,
+      background: "linear-gradient(135deg,var(--d-gold),#ff8c00)", color: "#000" }}>
+      {photo && !ko
+        ? <img src={photo} alt="" onError={() => setKo(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        : ini}
+    </span>
+  );
+}
+
+function Etoiles({ n }) {
+  return (
+    <span style={{ letterSpacing: 1 }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} style={{ color: i <= n ? "#f59e0b" : "var(--d-border)" }}>★</span>
+      ))}
+    </span>
+  );
+}
 
 export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
   const { t } = useTranslation();
@@ -23,6 +46,8 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
     [t("Autres coursiers"), data.autres, "🛵"],
   ].filter(([, l]) => l.length > 0) : [];
 
+  const gris = { color: "var(--d-c-aaa)", fontSize: 12 };
+
   return (
     <div>
       <label style={{ color: "var(--d-gold)", fontSize: 13, fontWeight: 700, display: "block", marginBottom: 12 }}>
@@ -36,19 +61,19 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
         <option value="choisir">{t("Choisir un coursier")}</option>
       </select>
 
-      <div style={{ color: "var(--d-c-aaa)", fontSize: 12.5, marginTop: 8 }}>
+      <div style={{ ...gris, fontSize: 12.5, marginTop: 8 }}>
         {mode === "tous"
           ? t("Tous les coursiers recevront une notification.")
           : t("Le coursier choisi recevra votre commande directement (statut Accepté).")}
       </div>
 
       {mode === "choisir" && (
-        <div style={{ marginTop: 14, maxHeight: 340, overflowY: "auto", borderRadius: 12,
+        <div style={{ marginTop: 14, maxHeight: 380, overflowY: "auto", borderRadius: 12,
           border: "1px solid var(--d-border)", backgroundColor: "var(--d-bg2)" }}>
-          {!data && !erreur && <div style={{ padding: 16, color: "var(--d-c-aaa)", fontSize: 13 }}>{t("Chargement…")}</div>}
+          {!data && !erreur && <div style={{ padding: 16, ...gris, fontSize: 13 }}>{t("Chargement…")}</div>}
           {erreur && <div style={{ padding: 16, color: "#ef4444", fontSize: 13 }}>{t("Erreur de connexion au serveur")}</div>}
           {data && groupes.length === 0 && (
-            <div style={{ padding: 16, color: "var(--d-c-aaa)", fontSize: 13 }}>{t("Aucun coursier disponible pour le moment.")}</div>
+            <div style={{ padding: 16, ...gris, fontSize: 13 }}>{t("Aucun coursier disponible pour le moment.")}</div>
           )}
           {groupes.map(([titre, liste, ico]) => (
             <div key={titre}>
@@ -58,19 +83,22 @@ export default function CoursierPicker({ mode, coursierId, onMode, onPick }) {
               </div>
               {liste.map((c) => {
                 const sel = coursierId === c.id;
-                const ini = c.nom_complet.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
                 return (
                   <div key={c.id} onClick={() => onPick(c.id)}
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", cursor: "pointer",
                       borderLeft: sel ? "4px solid var(--d-gold)" : "4px solid transparent",
                       backgroundColor: sel ? "#FFD70014" : "transparent", borderBottom: "1px solid var(--d-border)" }}>
-                    <span style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex",
-                      alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13,
-                      background: "linear-gradient(135deg,var(--d-gold),#ff8c00)", color: "#000" }}>{ini}</span>
+                    <Avatar photo={c.photo_profil} nom={c.nom_complet} />
                     <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ display: "block", color: "var(--d-text)", fontWeight: 700, fontSize: 14 }}>{c.nom_complet}</span>
-                      <span style={{ color: "var(--d-c-aaa)", fontSize: 12 }}>
-                        <MdStar style={{ color: "#f59e0b", verticalAlign: "-2px" }} /> {c.note.toFixed(1)} · {t("{{n}} terminées", { n: c.nb_terminees })}
+                      <span style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                        <span style={{ color: "var(--d-text)", fontWeight: 700, fontSize: 14 }}>{c.nom_complet}</span>
+                        {c.trophees > 0 && (
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b", backgroundColor: "#f59e0b18",
+                            border: "1px solid #f59e0b44", borderRadius: 999, padding: "1px 8px" }}>🏆 ×{c.trophees}</span>
+                        )}
+                      </span>
+                      <span style={{ display: "block", ...gris, marginTop: 2 }}>
+                        <Etoiles n={c.etoiles} /> · {t("{{n}} missions", { n: c.nb_missions })} · {t("{{n}} terminées", { n: c.nb_terminees })}
                       </span>
                     </span>
                     {sel && <span style={{ color: "var(--d-gold)", fontWeight: 800 }}>✓</span>}

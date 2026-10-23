@@ -23,7 +23,17 @@ class CoursiersListeController extends Controller
             ->pluck('coursier_id')->unique()->all();
 
         $tous = self::coursiersEligibles()
-            ->get(['id', 'prenom', 'nom', 'photo_profil', 'note', 'nb_terminees']);
+            ->get(['id', 'prenom', 'nom', 'photo_profil', 'note', 'trophees', 'etoiles_actuelles']);
+
+        // Missions comptees directement dans les commandes
+        $stats = Commande::whereIn('coursier_id', $tous->pluck('id'))
+            ->selectRaw("coursier_id, count(*) as total, sum(case when statut = 'termine' then 1 else 0 end) as termines")
+            ->groupBy('coursier_id')->get()->keyBy('coursier_id');
+        $tous->each(function ($c) use ($stats) {
+            $st = $stats->get($c->id);
+            $c->nb_missions  = (int) ($st->total ?? 0);
+            $c->nb_terminees = (int) ($st->termines ?? 0);
+        });
 
         // Groupe 1 : les meilleurs (missions terminees, puis note)
         $top = $tous->where('nb_terminees', '>', 0)
@@ -48,6 +58,9 @@ class CoursiersListeController extends Controller
             'photo_profil' => $c->photo_profil,
             'note'         => (float) $c->note,
             'nb_terminees' => (int) $c->nb_terminees,
+            'nb_missions'  => (int) $c->nb_missions,
+            'trophees'     => (int) $c->trophees,
+            'etoiles'      => (int) $c->etoiles_actuelles,
             'groupe'       => $g,
         ];
 
