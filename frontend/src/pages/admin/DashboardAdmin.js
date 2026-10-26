@@ -15,6 +15,7 @@ import {
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import SignalementsAdmin from "../../components/SignalementsAdmin";
 import LocalisationAdmin from "../../components/LocalisationAdmin";
+import TopUtilisateursAdmin from "../../components/TopUtilisateursAdmin";
 import { MdMyLocation as IconeLocalisation } from "react-icons/md";
 import { MdReportProblem as IconeSignalement } from "react-icons/md";
 import PaiementsAbonnementAdmin from "../../components/PaiementsAbonnementAdmin";
@@ -155,7 +156,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
-    <div style={{ height:"100%", display:"flex", flexDirection:"column" }}>
+    <div style={{ height:"100%", maxHeight:"calc(100vh - 66px)", overflowY:"auto", display:"flex", flexDirection:"column" }}>
       <div style={{ padding:"0 20px 24px", borderBottom:"1px solid #FFD70018", marginBottom:8 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ width:46, height:46, borderRadius:12,
@@ -1170,39 +1171,7 @@ function DashboardAdmin() {
                       de stats (BDD). Le total au centre = somme
                       réelle clients+coursiers.
                   ──────────────────────────────────────────── */}
-                  <div style={card}>
-                    <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:20 }}>
-                      <div style={{ width:34,height:34,borderRadius:10,backgroundColor:"#8b5cf618",
-                        border:"1px solid #8b5cf633",display:"flex",alignItems:"center",justifyContent:"center" }}>
-                        <MdPieChart style={{ color:"#8b5cf6",fontSize:18 }}/>
-                      </div>
-                      <span style={{ color:"#8b5cf6",fontWeight:700,fontSize:14 }}>{tr("Utilisateurs")}</span>
-                    </div>
-                    <div style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:12 }}>
-                      <DonutChart segments={[
-                        { val: stats.clients_actifs    || 0, color:"#3b82f6" },  // ← BDD exact
-                        { val: stats.clients_inactifs  || 0, color:"#1e3a5f" },  // ← BDD exact
-                        { val: stats.coursiers_actifs  || 0, color:"var(--d-gold)" },  // ← BDD exact
-                        { val: stats.coursiers_inactifs|| 0, color:"#ef4444" },  // ← BDD exact
-                      ]} size={110}/>
-                      <div style={{ display:"flex",flexDirection:"column",gap:6,width:"100%" }}>
-                        {[
-                          { label:"Clients actifs",     val: stats.clients_actifs    || 0, color:"#3b82f6" },
-                          { label:"Clients inactifs",   val: stats.clients_inactifs  || 0, color:"#1e3a5f" },
-                          { label:"Coursiers actifs",   val: stats.coursiers_actifs  || 0, color:"var(--d-gold)" },
-                          { label:"Coursiers inactifs", val: stats.coursiers_inactifs|| 0, color:"#ef4444" },
-                        ].map(s=>(
-                          <div key={s.label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                            <div style={{ display:"flex",alignItems:"center",gap:6 }}>
-                              <div style={{ width:8,height:8,borderRadius:"50%",backgroundColor:s.color }}/>
-                              <span style={{ color:"#888",fontSize:11 }}>{tr(s.label)}</span>
-                            </div>
-                            <span style={{ color:"var(--d-text)",fontWeight:700,fontSize:12 }}>{s.val}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <TopUtilisateursAdmin apiUrl={BASE_URL} />
                 </div>
 
                 {/* Services populaires BDD */}

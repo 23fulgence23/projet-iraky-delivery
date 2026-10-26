@@ -951,5 +951,14 @@
   "Fichier trop lourd (3 Mo maximum pour un PDF).": "Lehibe loatra ny rakitra (3 Mo farafahabetsany ho an'ny PDF).",
   "Photo ou PDF (3 Mo maximum pour un PDF).": "Sary na PDF (3 Mo farafahabetsany ho an'ny PDF).",
   "Fichier perdu : à renvoyer": "Very ny rakitra : alefaso indray",
-  "Ouvrir le PDF": "Sokafy ny PDF"
+  "Ouvrir le PDF": "Sokafy ny PDF",
+  "Meilleurs utilisateurs": "Mpampiasa tsara indrindra",
+  "Coursier le plus actif": "Coursier mavitrika indrindra",
+  "Client le plus actif": "Mpanjifa mavitrika indrindra",
+  "en cours": "mandeha",
+  "étoiles": "kintana",
+  "trophées": "amboara",
+  "commandes": "baiko",
+  "Prochain trophée : {{n}}/5 étoiles": "Amboara manaraka : kintana {{n}}/5",
+  "Aucune donnée pour le moment.": "Tsy mbola misy angona."
 }

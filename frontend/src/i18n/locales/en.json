@@ -951,5 +951,14 @@
   "Fichier trop lourd (3 Mo maximum pour un PDF).": "File too large (3 MB maximum for a PDF).",
   "Photo ou PDF (3 Mo maximum pour un PDF).": "Photo or PDF (3 MB maximum for a PDF).",
   "Fichier perdu : à renvoyer": "File lost: please upload again",
-  "Ouvrir le PDF": "Open the PDF"
+  "Ouvrir le PDF": "Open the PDF",
+  "Meilleurs utilisateurs": "Top users",
+  "Coursier le plus actif": "Most active courier",
+  "Client le plus actif": "Most active client",
+  "en cours": "in progress",
+  "étoiles": "stars",
+  "trophées": "trophies",
+  "commandes": "orders",
+  "Prochain trophée : {{n}}/5 étoiles": "Next trophy: {{n}}/5 stars",
+  "Aucune donnée pour le moment.": "No data yet."
 }

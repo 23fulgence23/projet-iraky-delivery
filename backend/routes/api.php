@@ -3,6 +3,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\SignalementController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\TopUtilisateursController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
@@ -40,6 +41,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/position/consentement', [PositionController::class, 'consentement']);
     Route::post('/position',              [PositionController::class, 'enregistrer']);
     Route::get ('/admin/localisations',   [PositionController::class, 'adminListe']);
+    Route::get ('/admin/top-utilisateurs', [TopUtilisateursController::class, 'show']);
     Route::prefix('admin/signalements')->group(function () {
         Route::get   ('/',             [SignalementController::class, 'liste']);
         Route::get   ('/compteur',     [SignalementController::class, 'compteur']);
