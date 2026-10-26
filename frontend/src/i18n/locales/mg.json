@@ -933,5 +933,8 @@
   "Tapez votre quartier (ex : Tsimenatse)": "Soraty ny faritrao (oh : Tsimenatse)",
   "Aucun quartier trouvé": "Tsy misy faritra hita",
   "Choisissez un quartier dans la liste.": "Misafidiana faritra ao amin'ny lisitra.",
-  "Précision (facultatif) : rue, repère, près de...": "Fanampiny (tsy voatery) : arabe, famantarana, akaikin'ny..."
+  "Précision (facultatif) : rue, repère, près de...": "Fanampiny (tsy voatery) : arabe, famantarana, akaikin'ny...",
+  "Référence de transaction mobile money": "Laharana fanamarinana ny fifanakalozana Mobile Money",
+  "Ex: référence reçue par SMS": "Oh : laharana azo tamin'ny SMS",
+  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Laharana fanamarinana azo tamin'ny SMS aorian'ny fandoavanao Mobile Money."
 }

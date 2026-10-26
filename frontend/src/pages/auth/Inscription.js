@@ -5,6 +5,7 @@ import { MdVisibility, MdVisibilityOff, MdCheckCircle, MdClose,
 import logo from "../../logo.png";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import AdresseQuartier from "../../components/AdresseQuartier";
 
 // Aperçu de la photo CIN choisie (même ratio qu'une carte, image entière visible)
 function ApercuCIN({ fichier }) {
@@ -384,13 +385,13 @@ useEffect(() => {
             {errors.telephone && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.telephone)}</small>}
           </div>
 
-          {/* Adresse */}
+          {role === "client" && (
           <div className="col-12">
             <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Adresse")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" name="adresse" className="form-control mt-1"
-              placeholder={t("Votre adresse à Toliara")} value={form.adresse} onChange={handleChange} style={inp("adresse")} />
+            <AdresseQuartier onChange={(v) => { setForm(f => ({ ...f, adresse: v })); if (v) setErrors(pr => ({ ...pr, adresse: "" })); }} inputStyle={inp("adresse")} />
             {errors.adresse && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.adresse)}</small>}
           </div>
+          )}
 
           {/* Mot de passe */}
           <div className="col-md-6">
@@ -432,7 +433,7 @@ useEffect(() => {
           <div className="col-12">
             <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rôle")}</label>
             <select className="form-select mt-1" value={role}
-              onChange={(e) => { setRole(e.target.value); if (e.target.value === "coursier" && !localisation) getLocalisation(); }} style={inp("role")}>
+              onChange={(e) => { setRole(e.target.value); setForm(f => ({ ...f, adresse: "" })); if (e.target.value === "coursier" && !localisation) getLocalisation(); }} style={inp("role")}>
               <option value="client">{"👤 " + t("Client — Gratuit")}</option>
               <option value="coursier">{"🚴 " + t("Coursier — 10 000 Ar droit d'inscription")}</option>
             </select>
@@ -476,22 +477,9 @@ useEffect(() => {
               {/* Zone de livraison */}
               <div className="col-12">
                 <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  🏙️ {t("Zone d'opération")} <span style={{ color: "#ef4444" }}>*</span>
+                  {t("Adresse")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
-                <select name="zone" className="form-select mt-1"
-                  onChange={e => {
-                    setForm({...form, adresse: e.target.value});
-                    if (errors.adresse) setErrors(prev => ({...prev, adresse: ""}));
-                  }}
-                  style={inp("adresse")}>
-                  <option value="">{t("Sélectionnez votre zone")}</option>
-                  <option value="Toliara Centre">Toliara Centre</option>
-                  <option value="Toliara - Mahavatsy">Toliara - Mahavatsy</option>
-                  <option value="Toliara - Mangabe">Toliara - Mangabe</option>
-                  <option value="Toliara - Tsimenatse">Toliara - Tsimenatse</option>
-                  <option value="Toliara - Sanfily">Toliara - Sanfily</option>
-                  <option value="Toliara - Besakoa">Toliara - Besakoa</option>
-                </select>
+                <AdresseQuartier onChange={(v) => { setForm(f => ({ ...f, adresse: v })); if (v) setErrors(pr => ({ ...pr, adresse: "" })); }} inputStyle={inp("adresse")} />
                 {errors.adresse && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.adresse)}</small>}
               </div>
 
@@ -564,17 +552,17 @@ useEffect(() => {
                   <label style={{ color: "var(--d-c-aaa)", fontSize: "14px",
                     display: "flex", alignItems: "center", gap: 6 }}>
                     <MdReceipt style={{ color: "var(--d-gold)", fontSize: 16 }}/>
-                    {t("Référence de transaction MVola")} <span style={{ color: "#ef4444" }}>*</span>
+                    {t("Référence de transaction mobile money")} <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input type="text" name="mvola_transaction"
                     className="form-control mt-1"
-                    placeholder="Ex: MVOLA-2026-XXXXXXXX"
+                    placeholder={t("Ex: référence reçue par SMS")}
                     value={form.mvola_transaction} onChange={handleChange}
                     style={{ ...inp("mvola_transaction"), marginTop: 6 }} />
                   {errors.mvola_transaction && (
                     <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.mvola_transaction)}</small>
                   )}
-                  <small style={{ color: "#666", fontSize: 11, marginTop: 4, display: "block" }}>{t("Numéro de référence reçu par SMS après votre paiement MVola.")}</small>
+                  <small style={{ color: "#666", fontSize: 11, marginTop: 4, display: "block" }}>{t("Numéro de référence reçu par SMS après votre paiement mobile money.")}</small>
                 </div>
               </div>
             </>

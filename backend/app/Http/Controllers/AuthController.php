@@ -52,7 +52,7 @@ public function register(Request $request)
         'photo_verso.required_if'   => 'La photo verso du CIN est obligatoire.',
         'photo_verso.max'           => 'La photo verso doit être inférieure ou égale à 10 Mo.',
         'photo_verso.mimes'         => 'La photo verso doit être au format jpg, jpeg, png ou webp.',
-        'mvola_transaction.required_if' => 'La référence MVola est obligatoire pour les coursiers.',
+        'mvola_transaction.required_if' => 'La référence de transaction mobile money est obligatoire pour les coursiers.',
         'certificat_residence.required_if' => 'Le certificat de résidence est obligatoire pour les coursiers.',
         'certificat_residence.mimes' => 'Le certificat doit être au format jpg, jpeg, png, webp ou pdf.',
         'certificat_residence.max' => 'Le certificat doit être inférieur ou égal à 10 Mo.',

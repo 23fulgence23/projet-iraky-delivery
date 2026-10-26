@@ -933,5 +933,8 @@
   "Tapez votre quartier (ex : Tsimenatse)": "Type your neighborhood (e.g. Tsimenatse)",
   "Aucun quartier trouvé": "No neighborhood found",
   "Choisissez un quartier dans la liste.": "Choose a neighborhood from the list.",
-  "Précision (facultatif) : rue, repère, près de...": "Details (optional): street, landmark, near..."
+  "Précision (facultatif) : rue, repère, près de...": "Details (optional): street, landmark, near...",
+  "Référence de transaction mobile money": "Mobile money transaction reference",
+  "Ex: référence reçue par SMS": "E.g. reference received by SMS",
+  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Reference number received by SMS after your mobile money payment."
 }
