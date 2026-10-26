@@ -936,5 +936,16 @@
   "Précision (facultatif) : rue, repère, près de...": "Fanampiny (tsy voatery) : arabe, famantarana, akaikin'ny...",
   "Référence de transaction mobile money": "Laharana fanamarinana ny fifanakalozana Mobile Money",
   "Ex: référence reçue par SMS": "Oh : laharana azo tamin'ny SMS",
-  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Laharana fanamarinana azo tamin'ny SMS aorian'ny fandoavanao Mobile Money."
+  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Laharana fanamarinana azo tamin'ny SMS aorian'ny fandoavanao Mobile Money.",
+  "Masquer le mot de passe": "Afenina ny tenimiafina",
+  "Afficher le mot de passe": "Asehoy ny tenimiafina",
+  "Compte": "Kaonty",
+  "Vérification": "Fanamarinana",
+  "Finalisation": "Famaranana",
+  "Continuer": "Hanohy",
+  "Gratuit": "Maimaim-poana",
+  "10 000 Ar droit d'inscription": "10 000 Ar sarany fisoratana anarana",
+  "Choisir un fichier": "Mifidiana rakitra",
+  "En créant un compte, vous acceptez nos": "Amin'ny famoronana kaonty dia manaiky ny",
+  "et notre": "sy ny"
 }

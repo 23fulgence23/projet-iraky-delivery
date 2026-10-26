@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { MdLocationOn, MdEdit } from "react-icons/md";
 import QUARTIERS from "../data/quartiersToliara";
 
 const norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-export default function AdresseQuartier({ onChange, inputStyle = {} }) {
+export default function AdresseQuartier({ onChange, error }) {
   const { t } = useTranslation();
   const [texte, setTexte] = useState("");
   const [quartier, setQuartier] = useState("");
@@ -17,44 +18,35 @@ export default function AdresseQuartier({ onChange, inputStyle = {} }) {
   }, [texte]);
 
   const emettre = (q, c) => onChange(q ? (c.trim() ? q + " — " + c.trim() : q) : "");
-
-  const saisir = (v) => {
-    setTexte(v); setQuartier(""); setOuvert(true); emettre("", complement);
-  };
-  const choisir = (q) => {
-    setTexte(q); setQuartier(q); setOuvert(false); emettre(q, complement);
-  };
+  const saisir = (v) => { setTexte(v); setQuartier(""); setOuvert(true); emettre("", complement); };
+  const choisir = (q) => { setTexte(q); setQuartier(q); setOuvert(false); emettre(q, complement); };
 
   return (
     <div>
-      <div style={{ position: "relative" }}>
-        <input type="text" className="form-control mt-1" value={texte} style={inputStyle}
+      <div className="au-input-wrap">
+        <span className="au-ico"><MdLocationOn /></span>
+        <input type="text" value={texte} autoComplete="off"
+          className={"au-input" + (error ? " err" : "")}
           placeholder={t("Tapez votre quartier (ex : Tsimenatse)")}
           onChange={(e) => saisir(e.target.value)}
           onFocus={() => setOuvert(true)}
-          onBlur={() => setTimeout(() => setOuvert(false), 120)}
-          autoComplete="off" />
+          onBlur={() => setTimeout(() => setOuvert(false), 120)} />
         {ouvert && (
-          <div style={{ position: "absolute", left: 0, right: 0, top: "100%", zIndex: 50, maxHeight: 220, overflowY: "auto",
-            marginTop: 4, borderRadius: 10, border: "1px solid var(--d-border, #333355)",
-            backgroundColor: "var(--d-card, #131330)", boxShadow: "0 10px 30px rgba(0,0,0,0.35)" }}>
-            {liste.length === 0 && (
-              <div style={{ padding: "10px 14px", color: "#888", fontSize: 13 }}>{t("Aucun quartier trouvé")}</div>
-            )}
+          <div className="au-dd">
+            {liste.length === 0 && <div className="au-dd-item" style={{ cursor: "default" }}>{t("Aucun quartier trouvé")}</div>}
             {liste.map((q) => (
-              <div key={q} onMouseDown={(e) => { e.preventDefault(); choisir(q); }}
-                style={{ padding: "9px 14px", cursor: "pointer", fontSize: 14, color: "var(--d-text, #fff)",
-                  borderBottom: "1px solid var(--d-border, #333355)" }}>{q}</div>
+              <div key={q} className="au-dd-item" onMouseDown={(e) => { e.preventDefault(); choisir(q); }}>{q}</div>
             ))}
           </div>
         )}
       </div>
-      {texte && !quartier && (
-        <small style={{ color: "#f59e0b", fontSize: 11 }}>{t("Choisissez un quartier dans la liste.")}</small>
-      )}
-      <input type="text" className="form-control mt-2" value={complement} style={inputStyle}
-        placeholder={t("Précision (facultatif) : rue, repère, près de...")}
-        onChange={(e) => { setComplement(e.target.value); emettre(quartier, e.target.value); }} />
+      {texte && !quartier && <small className="au-hint" style={{ color: "#f59e0b" }}>{t("Choisissez un quartier dans la liste.")}</small>}
+      <div className="au-input-wrap" style={{ marginTop: 10 }}>
+        <span className="au-ico"><MdEdit /></span>
+        <input type="text" value={complement} className="au-input"
+          placeholder={t("Précision (facultatif) : rue, repère, près de...")}
+          onChange={(e) => { setComplement(e.target.value); emettre(quartier, e.target.value); }} />
+      </div>
     </div>
   );
 }

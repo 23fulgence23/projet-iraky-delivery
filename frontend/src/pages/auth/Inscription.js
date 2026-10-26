@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MdVisibility, MdVisibilityOff, MdCheckCircle, MdClose,
-         MdDeliveryDining, MdAttachMoney, MdReceipt } from "react-icons/md";
-import logo from "../../logo.png";
+import { MdPerson, MdEmail, MdPhone, MdLock, MdBadge, MdPhotoCamera, MdHome, MdMyLocation,
+         MdArrowBack, MdArrowForward, MdCheckCircle, MdErrorOutline, MdDeliveryDining,
+         MdAttachMoney, MdReceipt, MdUploadFile, MdVerified, MdCancel, MdRefresh } from "react-icons/md";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../../components/LanguageSwitcher";
+import { AuthShell, AuthHead, Champ, sans } from "../../components/AuthUi";
 import AdresseQuartier from "../../components/AdresseQuartier";
 
-// Aperçu de la photo CIN choisie (même ratio qu'une carte, image entière visible)
+const API = "https://projet-iraky-delivery.onrender.com/api";
+const ETAPE1 = ["nom", "prenom", "email", "telephone", "adresse", "password", "password_confirmation"];
+
 function ApercuCIN({ fichier }) {
   const { t } = useTranslation();
   const [url, setUrl] = useState(null);
   useEffect(() => {
-    if (!fichier) { setUrl(null); return; }
+    if (!fichier || !fichier.type || !fichier.type.startsWith("image/")) { setUrl(null); return; }
     const u = URL.createObjectURL(fichier);
     setUrl(u);
     return () => URL.revokeObjectURL(u);
@@ -20,23 +22,58 @@ function ApercuCIN({ fichier }) {
   if (!url) return null;
   return (
     <img src={url} alt={t("Aperçu CIN")}
-      style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain",
-        backgroundColor: "#000", borderRadius: 10, border: "1px solid #ffffff20",
-        marginTop: 8, display: "block" }} />
+      style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000",
+        borderRadius: 10, border: "1px solid var(--d-border)", marginTop: 8, display: "block" }} />
+  );
+}
+
+function Fichier({ label, name, accept, fichier, onChange, error, Icon, aide, apercu }) {
+  const { t } = useTranslation();
+  return (
+    <Champ label={label} required error={error}>
+      <label className={"au-file" + (fichier ? " has" : "") + (error ? " err" : "")}>
+        <input type="file" name={name} accept={accept} onChange={onChange} hidden />
+        <span className="au-file-ico">{fichier ? <MdCheckCircle /> : <Icon />}</span>
+        <span className="au-file-txt">
+          <strong>{fichier ? fichier.name : t("Choisir un fichier")}</strong>
+          {aide && <small>{aide}</small>}
+        </span>
+      </label>
+      {apercu && <ApercuCIN fichier={fichier} />}
+    </Champ>
+  );
+}
+
+function Etapes({ etape, libelle2 }) {
+  const { t } = useTranslation();
+  const items = [t("Compte"), libelle2];
+  return (
+    <div className="au-steps">
+      <span className="au-steps-bar"><i style={{ width: etape === 1 ? "0%" : "100%" }} /></span>
+      {items.map((l, i) => {
+        const n = i + 1;
+        const etat = etape > n ? "done" : etape === n ? "on" : "";
+        return (
+          <div key={n} className={"au-step " + etat}>
+            <span className="au-step-dot">{etape > n ? <MdCheckCircle /> : n}</span>
+            <span className="au-step-lbl">{l}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
 function Inscription() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [etape, setEtape] = useState(1);
   const [role, setRole] = useState("client");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const [localisation, setLocalisation] = useState(null);
   const [locLoading, setLocLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [modalSucces, setModalSucces] = useState(false);
   const [userIdCree, setUserIdCree] = useState(null);
   const [etapeValidation, setEtapeValidation] = useState(1);
@@ -44,25 +81,22 @@ function Inscription() {
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     adresse: "", password: "", password_confirmation: "",
-    cin: "", photo_recto: null, photo_verso: null, certificat_residence: null,
-    mvola_transaction: "",
+    cin: "", photo_recto: null, photo_verso: null,
+    mvola_transaction: "", certificat_residence: null,
   });
 
+  const haut = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
   const handleChange = (e) => {
-    if (e.target.type === "file") {
-      setForm({ ...form, [e.target.name]: e.target.files[0] });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
-      if (errors[e.target.name]) {
-        setErrors(prev => ({ ...prev, [e.target.name]: "" }));
-      }
-    }
+    const { name, type, files, value } = e.target;
+    setForm((f) => ({ ...f, [name]: type === "file" ? files[0] : value }));
+    if (errors[name]) setErrors((p) => ({ ...p, [name]: "" }));
   };
 
   const getLocalisation = () => {
     setLocLoading(true);
     if (!navigator.geolocation) {
-      setErrors(prev => ({ ...prev, localisation: t("Géolocalisation non supportée.") }));
+      setErrors((p) => ({ ...p, localisation: t("Géolocalisation non supportée.") }));
       setLocLoading(false);
       return;
     }
@@ -70,76 +104,70 @@ function Inscription() {
       (pos) => {
         setLocalisation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
         setLocLoading(false);
-        setErrors(prev => ({ ...prev, localisation: "" }));
+        setErrors((p) => ({ ...p, localisation: "" }));
       },
       (err) => {
         setLocLoading(false);
-        if (err.code === 1) {
-          setErrors(prev => ({ ...prev, localisation:
-            t("Permission refusée. Cliquez sur le 🔒 cadenas → Localisation → Autoriser, puis réessayez.") }));
-        } else {
-          setErrors(prev => ({ ...prev, localisation: t("Position indisponible. Réessayez.") }));
-        }
+        setErrors((p) => ({ ...p, localisation: err.code === 1
+          ? t("Permission refusée. Cliquez sur le 🔒 cadenas → Localisation → Autoriser, puis réessayez.")
+          : t("Position indisponible. Réessayez.") }));
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
-  // ✅ CORRECTION : accolades bien fermées
-  const valider = () => {
+  const validerEtape1 = () => {
     const e = {};
-    if (!form.nom.trim())    e.nom    = t("Le nom est obligatoire.");
+    if (!form.nom.trim()) e.nom = t("Le nom est obligatoire.");
     if (!form.prenom.trim()) e.prenom = t("Le prénom est obligatoire.");
-    if (!form.email.trim())  e.email  = t("L'email est obligatoire.");
-    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = t("Email invalide.");
+    if (!form.email.trim()) e.email = t("L'email est obligatoire.");
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = t("Email invalide.");
     if (!form.telephone.trim()) e.telephone = t("Le téléphone est obligatoire.");
-    if (!form.adresse.trim())   e.adresse   = t("L'adresse est obligatoire.");
-    if (!form.password)         e.password  = t("Le mot de passe est obligatoire.");
-    if (form.password.length < 6) e.password = t("Minimum 6 caractères.");
-    if (form.password !== form.password_confirmation)
-      e.password_confirmation = t("Les mots de passe ne correspondent pas.");
+    if (!form.adresse.trim()) e.adresse = t("L'adresse est obligatoire.");
+    if (!form.password) e.password = t("Le mot de passe est obligatoire.");
+    else if (form.password.length < 6) e.password = t("Minimum 6 caractères.");
+    if (form.password !== form.password_confirmation) e.password_confirmation = t("Les mots de passe ne correspondent pas.");
+    return e;
+  };
 
-    if (role === "coursier") {
-      if (!form.cin.trim())              e.cin               = t("Le numéro CIN est obligatoire.");
-      if (!form.photo_recto)             e.photo_recto       = t("La photo recto est obligatoire.");
-      if (!form.photo_verso)             e.photo_verso       = t("La photo verso est obligatoire.");
-      if (!form.mvola_transaction.trim()) e.mvola_transaction = t("La référence de paiement est obligatoire.");
-      if (!form.certificat_residence) e.certificat_residence = t("Le certificat de résidence est obligatoire.");
-      else if (form.certificat_residence.size > 10 * 1024 * 1024) e.certificat_residence = t("Fichier trop lourd (10 Mo maximum).");
-      if (!localisation) e.localisation = t("La localisation est obligatoire pour les coursiers.");
-    } // ✅ fermeture du if coursier
+  const validerEtape2 = () => {
+    const e = {};
+    if (!form.cin.trim()) e.cin = t("Le numéro CIN est obligatoire.");
+    if (!form.photo_recto) e.photo_recto = t("La photo recto est obligatoire.");
+    if (!form.photo_verso) e.photo_verso = t("La photo verso est obligatoire.");
+    if (!form.certificat_residence) e.certificat_residence = t("Le certificat de résidence est obligatoire.");
+    else if (form.certificat_residence.size > 10 * 1024 * 1024) e.certificat_residence = t("Fichier trop lourd (10 Mo maximum).");
+    if (!localisation) e.localisation = t("La localisation est obligatoire pour les coursiers.");
+    if (!form.mvola_transaction.trim()) e.mvola_transaction = t("La référence de paiement est obligatoire.");
+    return e;
+  };
 
-    return e; // ✅ return HORS du if
+  const continuer = () => {
+    const e = validerEtape1();
+    if (Object.keys(e).length > 0) { setErrors(e); return; }
+    setErrors({});
+    setEtape(2);
+    haut();
+    if (role === "coursier" && !localisation) getLocalisation();
   };
 
   const handleSubmit = async () => {
-    const errs = valider();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
+    if (role === "coursier") {
+      const e2 = validerEtape2();
+      if (Object.keys(e2).length > 0) { setErrors(e2); return; }
     }
-
     setLoading(true);
     setError("");
     setErrors({});
-
     try {
       const formData = new FormData();
-      formData.append("nom", form.nom);
-      formData.append("prenom", form.prenom);
-      formData.append("email", form.email);
-      formData.append("telephone", form.telephone);
-      formData.append("adresse", form.adresse);
-      formData.append("password", form.password);
-      formData.append("password_confirmation", form.password_confirmation);
+      ETAPE1.forEach((k) => formData.append(k, form[k]));
       formData.append("role", role);
-
       if (localisation) {
         formData.append("latitude", localisation.latitude);
         formData.append("longitude", localisation.longitude);
         formData.append("localisation", `${localisation.latitude},${localisation.longitude}`);
       }
-
       if (role === "coursier") {
         formData.append("cin", form.cin);
         formData.append("photo_recto", form.photo_recto);
@@ -147,32 +175,19 @@ function Inscription() {
         formData.append("mvola_transaction", form.mvola_transaction);
         formData.append("certificat_residence", form.certificat_residence);
       }
-
-      const response = await fetch("https://projet-iraky-delivery.onrender.com/api/register", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(`${API}/register`, { method: "POST", body: formData });
       const data = await response.json();
-
-    if (response.ok) {
-      if (role === "coursier") {
-        setUserIdCree(data.user.id); // ✅ récupère l'ID pour le polling
-        setModalSucces(true);
+      if (response.ok) {
+        if (role === "coursier") { setUserIdCree(data.user.id); setModalSucces(true); }
+        else navigate("/connexion", { state: { success: "Inscription réussie ! Connectez-vous maintenant." } });
+      } else if (data.errors) {
+        const le = {};
+        Object.keys(data.errors).forEach((k) => { le[k] = data.errors[k][0]; });
+        if (le.latitude || le.longitude) le.localisation = le.latitude || le.longitude;
+        setErrors(le);
+        if (ETAPE1.some((k) => le[k])) { setEtape(1); haut(); }
       } else {
-        navigate("/connexion", {
-          state: { success: "Inscription réussie ! Connectez-vous maintenant." }
-        });
-      }
-    } else {
-        if (data.errors) {
-          const laravelErrors = {};
-          Object.keys(data.errors).forEach(k => {
-            laravelErrors[k] = data.errors[k][0];
-          });
-          setErrors(laravelErrors);
-        } else {
-          setError(data.message || t("Erreur lors de l'inscription"));
-        }
+        setError(data.message || t("Erreur lors de l'inscription"));
       }
     } catch {
       setError(t("Erreur de connexion au serveur"));
@@ -180,430 +195,221 @@ function Inscription() {
     setLoading(false);
   };
 
-  const inp = (champ) => ({
-    backgroundColor: "var(--d-bg2)",
-    border: `1px solid ${errors[champ] ? "#ef4444" : "#FFD70033"}`,
-    color: "var(--d-text)",
-    borderRadius: "10px",
-    transition: "border-color 0.2s",
-  });
-useEffect(() => {
-  if (!modalSucces || !userIdCree) return;
+  useEffect(() => {
+    if (!modalSucces || !userIdCree) return;
+    const iv = setInterval(async () => {
+      try {
+        const res = await fetch(`${API}/verifier-statut-coursier/${userIdCree}`);
+        if (res.status === 404) { setEtapeValidation(0); clearInterval(iv); return; }
+        const data = await res.json();
+        if (data.statut === "actif") { setEtapeValidation(4); clearInterval(iv); }
+        else if (data.statut === "rejete") {
+          setMsgRejetRecu(data.message || "Votre dossier a été rejeté.");
+          setEtapeValidation(0);
+          clearInterval(iv);
+        } else setEtapeValidation(2);
+      } catch (e) { console.error(e); }
+    }, 3000);
+    return () => clearInterval(iv);
+  }, [modalSucces, userIdCree]);
 
-  const iv = setInterval(async () => {
-    try {
-      const res = await fetch(`https://projet-iraky-delivery.onrender.com/api/verifier-statut-coursier/${userIdCree}`);
+  const estCoursier = role === "coursier";
+  const rolesDispo = [
+    { id: "client", Icon: MdPerson, titre: t("Client"), sous: t("Gratuit") },
+    { id: "coursier", Icon: MdDeliveryDining, titre: t("Coursier"), sous: t("10 000 Ar droit d'inscription") },
+  ];
+  const sequence = [
+    t("Dossier envoyé à l'administrateur"), t("Vérification en cours..."),
+    t("Notification de validation"), t("Connexion autorisée"),
+  ];
 
-      if (res.status === 404) {
-        setEtapeValidation(0);
-        clearInterval(iv);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data.statut === "actif") {
-        setEtapeValidation(4);
-        clearInterval(iv);
-      } else if (data.statut === "rejete") {
-        // ✅ Stocker le message de rejet pour l'afficher
-        setMsgRejetRecu(data.message || "Votre dossier a été rejeté.");
-        setEtapeValidation(0);
-        clearInterval(iv);
-      } else {
-        setEtapeValidation(2);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, 3000);
-
-  return () => clearInterval(iv);
-}, [modalSucces, userIdCree]);
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg2)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "40px 20px" }}>
-      <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
-
-      {/* MODAL SUCCÈS COURSIER */}
+    <>
       {modalSucces && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 500,
-          backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-          <div style={{ backgroundColor: "var(--d-card)", borderRadius: 20, padding: 36,
-            width: "100%", maxWidth: 480, border: "1px solid #FFD70040",
-            boxShadow: "0 0 60px rgba(255,215,0,0.15)", textAlign: "center",
-            animation: "modalIn 0.3s ease" }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%",
-              background: "linear-gradient(135deg,#f59e0b,var(--d-gold))",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              margin: "0 auto 20px", boxShadow: "0 0 30px #FFD70055" }}>
-              <MdDeliveryDining style={{ fontSize: 42, color: "#000" }}/>
-            </div>
-            <h4 style={{ color: "var(--d-gold)", fontWeight: 800, marginBottom: 12, fontSize: 20 }}>{t("Inscription reçue ! 🎉")}</h4>
-            <p style={{ color: "var(--d-text)", fontSize: 15, lineHeight: 1.7, marginBottom: 8 }}>
-              {t("Merci")} <strong style={{ color: "var(--d-gold)" }}>{form.prenom} {form.nom}</strong> {t("pour votre inscription.")}
-            </p>
-            <p style={{ color: "var(--d-c-aaa)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t("Votre dossier est en cours de vérification par l'administrateur. Vous recevrez une notification dès que votre compte sera validé.")}</p>
-              <div style={{ backgroundColor: "var(--d-bg2)", borderRadius: 14,
-                padding: 16, marginBottom: 24, textAlign: "left" }}>
-                {[
-                  { step: "1", text: t("Dossier envoyé à l'administrateur") },
-                  { step: "2", text: t("Vérification en cours...") },
-                  { step: "3", text: t("Notification de validation") },
-                  { step: "4", text: t("Connexion autorisée") },
-                ].map((s) => {
-          const num = parseInt(s.step);
-          const done = etapeValidation >= num;
-                      return (
-            <div key={s.step} style={{ display: "flex", alignItems: "center",
-              gap: 12, marginBottom: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                backgroundColor: done ? "var(--d-gold)" : "var(--d-card3)",
-                border: `2px solid ${done ? "var(--d-gold)" : "#ffffff20"}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 12, fontWeight: 800, color: done ? "#000" : "#555",
-                transition: "all 0.4s ease" }}>
-                {done ? "✓" : s.step}
+        <div className="au-modal">
+          <div className="au-card">
+            <div className="au-head" style={{ marginBottom: 16 }}>
+              <div className="au-logo" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: "linear-gradient(135deg,#f59e0b,#FFD700)", color: "#000" }}>
+                <MdDeliveryDining size={40} />
               </div>
-              <span style={{ color: done ? "var(--d-gold)" : "#666", fontSize: 13,
-                transition: "color 0.4s ease" }}>
-                {s.text}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      {/* ✅ Message dynamique selon l'état */}
-      {etapeValidation === 4 && (
-        <div style={{ backgroundColor: "#10b98118", border: "1px solid #10b98144",
-          borderRadius: 10, padding: "10px 14px", marginBottom: 16, textAlign: "center" }}>
-          <span style={{ color: "#10b981", fontWeight: 700, fontSize: 13 }}>{t("🎉 Votre compte a été validé ! Vous pouvez vous connecter.")}</span>
-        </div>
-      )}
-{etapeValidation === 0 && (
-  <div style={{ backgroundColor: "#ef444418", border: "1px solid #ef444444",
-    borderRadius: 12, padding: "16px", marginBottom: 16, textAlign: "left" }}>
-    <p style={{ color: "#ef4444", fontWeight: 800, fontSize: 14, margin: "0 0 8px" }}>{t("❌ Votre dossier a été rejeté")}</p>
-    {/* ✅ Affiche le message de l'admin */}
-    {msgRejetRecu && (
-      <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
-        padding: "10px 12px", marginBottom: 10 }}>
-        <p style={{ color: "var(--d-c-aaa)", fontSize: 12, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
-        <p style={{ color: "var(--d-text)", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-          {msgRejetRecu.replace("❌ Votre dossier a été rejeté. Raison : ", "").replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
-        </p>
-      </div>
-    )}
-    <p style={{ color: "#888", fontSize: 12, margin: "0 0 10px" }}>
-      {t("📧 Un email de notification a été envoyé à")} <strong style={{ color: "var(--d-text)" }}>{form.email}</strong>
-    </p>
-    <button
-      onClick={() => { setModalSucces(false); setEtapeValidation(1); }}
-      style={{ backgroundColor: "#ef4444", color: "#fff", border: "none",
-        borderRadius: 8, padding: "8px 16px", cursor: "pointer",
-        fontWeight: 700, fontSize: 13, width: "100%" }}>{t("🔄 Corriger et se réinscrire")}</button>
-  </div>
-)}
-          <button
-            onClick={() => navigate("/connexion", {
-              state: etapeValidation === 4
-                ? { coursierValide: true, prenom: form.prenom }
-                : {}
-            })}
-            style={{ width: "100%", padding: "13px", borderRadius: 12,
-              background: "linear-gradient(135deg,var(--d-gold),#ff9500)",
-              color: "#000", border: "none", cursor: "pointer",
-              fontWeight: 800, fontSize: 15 }}>{t("Retour à la connexion")}</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ backgroundColor: "var(--d-card3)", borderRadius: "20px",
-        padding: "40px", width: "100%", maxWidth: "640px",
-        boxShadow: "0 0 50px #FFD70022" }}>
-
-        <div className="text-center mb-4">
-          <img src={logo} alt="IRAKY" style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-          <h4 className="fw-bold mt-3" style={{ color: "var(--d-gold)" }}>{t("Créer un compte")}</h4>
-          <p style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rejoignez IRAKY Delivery")}</p>
-        </div>
-
-        {error && (
-          <div className="mb-3 p-3" style={{ backgroundColor: "#dc354522", color: "#dc3545",
-            borderRadius: "10px", fontSize: "14px", display: "flex", alignItems: "center", gap: 8 }}>
-            <MdClose style={{ fontSize: 18, flexShrink: 0 }}/> {t(error)}
-          </div>
-        )}
-
-        {role === "coursier" && (
-          <div style={{ backgroundColor: "#f59e0b11", border: "1px solid #f59e0b33",
-            borderRadius: 12, padding: "12px 16px", marginBottom: 20,
-            display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <MdDeliveryDining style={{ color: "#f59e0b", fontSize: 22, flexShrink: 0, marginTop: 2 }}/>
-            <div>
-              <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 13, margin: 0 }}>{t("Inscription coursier — Vérification requise")}</p>
-              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>
-                {t("Votre compte sera vérifié par l'administrateur avant activation. Payez le droit d'inscription de")} <strong style={{ color: "var(--d-gold)" }}>10 000 Ar</strong> {t("par MVola au")} <strong style={{ color: "var(--d-gold)" }}>+261 38 56 040 35</strong> {t("(Administrateur) puis renseignez la référence ci-dessous.")}
+              <h2 className="au-title" style={{ fontSize: 21 }}>{sans(t("Inscription reçue ! 🎉"))}</h2>
+              <p style={{ color: "var(--d-text)", fontSize: 15, margin: "6px 0" }}>
+                {t("Merci")} <strong style={{ color: "var(--d-gold)" }}>{form.prenom} {form.nom}</strong> {t("pour votre inscription.")}
               </p>
+              <p className="au-sub">{t("Votre dossier est en cours de vérification par l'administrateur. Vous recevrez une notification dès que votre compte sera validé.")}</p>
             </div>
-          </div>
-        )}
 
-        <div className="row g-3">
-
-          {/* Nom */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Nom")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" name="nom" className="form-control mt-1"
-              placeholder={t("Votre nom")} value={form.nom} onChange={handleChange} style={inp("nom")} />
-            {errors.nom && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.nom)}</small>}
-          </div>
-
-          {/* Prénom */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Prénom")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" name="prenom" className="form-control mt-1"
-              placeholder={t("Votre prénom")} value={form.prenom} onChange={handleChange} style={inp("prenom")} />
-            {errors.prenom && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.prenom)}</small>}
-          </div>
-
-          {/* Email */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Email")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="email" name="email" className="form-control mt-1"
-              placeholder="votre@email.com" value={form.email} onChange={handleChange} style={inp("email")} />
-            {errors.email && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.email)}</small>}
-          </div>
-
-          {/* Téléphone */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Téléphone")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <input type="text" name="telephone" className="form-control mt-1"
-              placeholder="+261 XX XX XXX XX" value={form.telephone} onChange={handleChange} style={inp("telephone")} />
-            {errors.telephone && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.telephone)}</small>}
-          </div>
-
-          {role === "client" && (
-          <div className="col-12">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Adresse")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <AdresseQuartier onChange={(v) => { setForm(f => ({ ...f, adresse: v })); if (v) setErrors(pr => ({ ...pr, adresse: "" })); }} inputStyle={inp("adresse")} />
-            {errors.adresse && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.adresse)}</small>}
-          </div>
-          )}
-
-          {/* Mot de passe */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Mot de passe")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <div style={{ position: "relative" }}>
-              <input type={showPassword ? "text" : "password"} name="password"
-                className="form-control mt-1" placeholder="••••••••"
-                value={form.password} onChange={handleChange}
-                style={{ ...inp("password"), paddingRight: "42px" }} />
-              <span onClick={() => setShowPassword(!showPassword)}
-                style={{ position: "absolute", right: 12, top: "calc(50% + 4px)",
-                  transform: "translateY(-50%)", cursor: "pointer", color: "var(--d-c-aaa)",
-                  display: "flex", alignItems: "center" }}>
-                {showPassword ? <MdVisibilityOff style={{ fontSize: 20 }}/> : <MdVisibility style={{ fontSize: 20 }}/>}
-              </span>
+            <div className="au-seq">
+              {sequence.map((txt, i) => {
+                const done = etapeValidation >= i + 1;
+                return (
+                  <div key={i} className={"au-seq-row" + (done ? " done" : "")}>
+                    <span className="au-seq-dot">{done ? <MdCheckCircle /> : i + 1}</span>{txt}
+                  </div>
+                );
+              })}
             </div>
-            {errors.password && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.password)}</small>}
-          </div>
 
-          {/* Confirmation */}
-          <div className="col-md-6">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Confirmation")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <div style={{ position: "relative" }}>
-              <input type={showPasswordConfirm ? "text" : "password"} name="password_confirmation"
-                className="form-control mt-1" placeholder="••••••••"
-                value={form.password_confirmation} onChange={handleChange}
-                style={{ ...inp("password_confirmation"), paddingRight: "42px" }} />
-              <span onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                style={{ position: "absolute", right: 12, top: "calc(50% + 4px)",
-                  transform: "translateY(-50%)", cursor: "pointer", color: "var(--d-c-aaa)",
-                  display: "flex", alignItems: "center" }}>
-                {showPasswordConfirm ? <MdVisibilityOff style={{ fontSize: 20 }}/> : <MdVisibility style={{ fontSize: 20 }}/>}
-              </span>
-            </div>
-            {errors.password_confirmation && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.password_confirmation)}</small>}
-          </div>
-
-          {/* Rôle */}
-          <div className="col-12">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rôle")}</label>
-            <select className="form-select mt-1" value={role}
-              onChange={(e) => { setRole(e.target.value); setForm(f => ({ ...f, adresse: "" })); if (e.target.value === "coursier" && !localisation) getLocalisation(); }} style={inp("role")}>
-              <option value="client">{"👤 " + t("Client — Gratuit")}</option>
-              <option value="coursier">{"🚴 " + t("Coursier — 10 000 Ar droit d'inscription")}</option>
-            </select>
-          </div>
-
-          {/* ✅ Localisation optionnelle pour tous */}
-          <div className="col-12">
-            <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-              📍 {t("Localisation")} {role === "coursier" ? <span style={{ color: "#ef4444" }}>*</span> : <span style={{ color: "#666", fontSize: 12 }}>{t("(optionnelle)")}</span>}
-            </label>
-            <div className="d-flex gap-2 mt-1 align-items-center flex-wrap">
-              <button type="button" onClick={getLocalisation} disabled={locLoading}
-                className="btn fw-bold"
-                style={{ backgroundColor: localisation ? "#10b98122" : "#FFD70022",
-                  color: localisation ? "#10b981" : "var(--d-gold)",
-                  border: `1px solid ${localisation ? "#10b98133" : "#FFD70033"}`,
-                  borderRadius: "10px", padding: "8px 16px", fontSize: "13px" }}>
-                {locLoading ? t("⏳ En cours...") : localisation ? t("✅ Position obtenue") : t("📍 Activer ma localisation")}
-              </button>
-              {localisation && (
-                <span style={{ color: "#10b981", fontSize: "12px" }}>
-                  ({localisation.latitude.toFixed(4)}, {localisation.longitude.toFixed(4)})
-                </span>
-              )}
-            </div>
-            {errors.localisation && (
-              <div style={{ backgroundColor: "#f59e0b11", border: "1px solid #f59e0b33",
-                borderRadius: 8, padding: "8px 12px", marginTop: 6 }}>
-                <small style={{ color: "#f59e0b", fontSize: 11 }}>⚠️ {t(errors.localisation)}</small>
-                <small style={{ color: "#666", fontSize: 11, display: "block", marginTop: 2 }}>{t("💡 Cliquez sur le 🔒 cadenas → Localisation → Autoriser")}</small>
+            {etapeValidation === 4 && (
+              <div className="au-banner ok" style={{ justifyContent: "center" }}>
+                <p><strong>{sans(t("🎉 Votre compte a été validé ! Vous pouvez vous connecter."))}</strong></p>
               </div>
             )}
-            <small style={{ color: "#666", fontSize: "11px", display: "block", marginTop: 4 }}>
-              {role === "coursier" ? t("Obligatoire pour les coursiers.") : t("Pour que les coursiers vous trouvent facilement.")}
-            </small>
-          </div>
 
-          {/* ✅ Champs spécifiques coursier */}
-          {role === "coursier" && (
-            <>
-              {/* Zone de livraison */}
-              <div className="col-12">
-                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  {t("Adresse")} <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <AdresseQuartier onChange={(v) => { setForm(f => ({ ...f, adresse: v })); if (v) setErrors(pr => ({ ...pr, adresse: "" })); }} inputStyle={inp("adresse")} />
-                {errors.adresse && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.adresse)}</small>}
+            {etapeValidation === 0 && (
+              <div className="au-banner bad" style={{ textAlign: "left", flexDirection: "column" }}>
+                <p><strong>{sans(t("❌ Votre dossier a été rejeté"))}</strong></p>
+                {msgRejetRecu && (
+                  <p className="s">
+                    {msgRejetRecu.replace("❌ Votre dossier a été rejeté. Raison : ", "").replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
+                  </p>
+                )}
+                <p className="s">{sans(t("📧 Un email de notification a été envoyé à"))} <strong>{form.email}</strong></p>
+                <button type="button" className="au-btn" style={{ height: 42, marginTop: 6, background: "#ef4444", color: "#fff", boxShadow: "none" }}
+                  onClick={() => { setModalSucces(false); setEtapeValidation(1); setEtape(1); }}>
+                  <MdRefresh /> {sans(t("🔄 Corriger et se réinscrire"))}
+                </button>
               </div>
+            )}
 
-              {/* CIN */}
-              <div className="col-12">
-                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  {t("Numéro CIN")} <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <input type="text" name="cin" className="form-control mt-1"
-                  placeholder={t("Votre numéro CIN")} value={form.cin} onChange={handleChange}
-                  style={inp("cin")} />
-                {errors.cin && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.cin)}</small>}
-              </div>
-
-              {/* Photos CIN */}
-              <div className="col-md-6">
-                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  📷 {t("Photo CIN — Recto")} <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <input type="file" name="photo_recto" className="form-control mt-1"
-                  accept="image/*" onChange={handleChange} style={inp("photo_recto")} />
-                {errors.photo_recto && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.photo_recto)}</small>}
-                <ApercuCIN fichier={form.photo_recto} />
-              </div>
-
-              <div className="col-md-6">
-                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  📷 {t("Photo CIN — Verso")} <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <input type="file" name="photo_verso" className="form-control mt-1"
-                  accept="image/*" onChange={handleChange} style={inp("photo_verso")} />
-                {errors.photo_verso && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.photo_verso)}</small>}
-                <ApercuCIN fichier={form.photo_verso} />
-              </div>
-
-              {/* Certificat de résidence */}
-              <div className="col-12">
-                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-                  🏠 {t("Certificat de résidence")} <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <input type="file" name="certificat_residence" className="form-control mt-1"
-                  accept="image/*,application/pdf" onChange={handleChange} style={inp("certificat_residence")} />
-                <small style={{ color: "#666", fontSize: 11, display: "block", marginTop: 4 }}>{t("Photo ou PDF — 10 Mo maximum.")}</small>
-                {form.certificat_residence && <small style={{ color: "#10b981", fontSize: 11 }}>✅ {form.certificat_residence.name}</small>}
-                {errors.certificat_residence && <small style={{ color: "#ef4444", fontSize: 11, display: "block" }}>{t(errors.certificat_residence)}</small>}
-              </div>
-
-              {/* Bloc paiement MVola */}
-              <div className="col-12">
-                <div style={{ backgroundColor: "#FFD70010", border: "1px solid #FFD70030",
-                  borderRadius: 14, padding: 18 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <MdAttachMoney style={{ color: "var(--d-gold)", fontSize: 22 }}/>
-                    <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 14 }}>{t("Paiement du droit d'inscription")}</span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-                    {[
-                      { label: t("Montant"),          val: "10 000 Ar",         color: "var(--d-gold)" },
-                      { label: t("Service"),           val: "MVola",             color: "#10b981" },
-                      { label: t("Numéro admin"),      val: "+261 38 56 040 35", color: "#3b82f6" },
-                      { label: t("Nom bénéficiaire"),  val: t("Administrateur"),    color: "#8b5cf6" },
-                    ].map(item => (
-                      <div key={item.label} style={{ backgroundColor: "#0a0a1e40",
-                        borderRadius: 10, padding: "10px 14px" }}>
-                        <div style={{ color: "#666", fontSize: 11 }}>{item.label}</div>
-                        <div style={{ color: item.color, fontWeight: 700, fontSize: 13 }}>{item.val}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <label style={{ color: "var(--d-c-aaa)", fontSize: "14px",
-                    display: "flex", alignItems: "center", gap: 6 }}>
-                    <MdReceipt style={{ color: "var(--d-gold)", fontSize: 16 }}/>
-                    {t("Référence de transaction mobile money")} <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <input type="text" name="mvola_transaction"
-                    className="form-control mt-1"
-                    placeholder={t("Ex: référence reçue par SMS")}
-                    value={form.mvola_transaction} onChange={handleChange}
-                    style={{ ...inp("mvola_transaction"), marginTop: 6 }} />
-                  {errors.mvola_transaction && (
-                    <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.mvola_transaction)}</small>
-                  )}
-                  <small style={{ color: "#666", fontSize: 11, marginTop: 4, display: "block" }}>{t("Numéro de référence reçu par SMS après votre paiement mobile money.")}</small>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Bouton inscription */}
-          <div className="col-12 mt-2">
-            <button onClick={handleSubmit} disabled={loading}
-              className="btn fw-bold w-100 py-2"
-              style={{ backgroundColor: loading ? "#FFD70077" : "var(--d-gold)", color: "#000",
-                borderRadius: "10px", fontSize: "16px",
-                cursor: loading ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                gap: 10, transition: "all 0.2s" }}>
-              {loading ? (
-                <>
-                  <div style={{ width: 18, height: 18, border: "3px solid #00000040",
-                    borderTop: "3px solid #000", borderRadius: "50%",
-                    animation: "spin 0.7s linear infinite" }}/>
-                  {t("Inscription en cours...")}
-                </>
-              ) : t("S'inscrire gratuitement")}
+            <button type="button" className="au-btn"
+              onClick={() => navigate("/connexion", { state: etapeValidation === 4 ? { coursierValide: true, prenom: form.prenom } : {} })}>
+              {t("Retour à la connexion")}
             </button>
           </div>
-
         </div>
+      )}
 
-        <p className="text-center mt-3" style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-          {t("Déjà un compte ?")}{" "}
-          <Link to="/connexion" style={{ color: "var(--d-gold)" }}>{t("Se connecter")}</Link>
-        </p>
-        <p className="text-center mt-2">
-          <Link to="/" style={{ color: "var(--d-c-aaa)", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
-        </p>
-      </div>
+      <AuthShell maxWidth={640}>
+        <AuthHead titre={t("Créer un compte")} sousTitre={t("Rejoignez IRAKY Delivery")} />
+        <Etapes etape={etape} libelle2={estCoursier ? t("Vérification") : t("Finalisation")} />
 
-      <style>{`
-        @keyframes modalIn { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
-        @keyframes spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-      `}</style>
-    </div>
+        {error && (
+          <div className="au-banner bad"><MdErrorOutline className="bi" /><p>{t(error)}</p></div>
+        )}
+
+        <form onSubmit={(e) => { e.preventDefault(); if (etape === 1) continuer(); else handleSubmit(); }}>
+
+          {/* ───── Étape 1 : compte ───── */}
+          <div className="au-pane" style={{ display: etape === 1 ? "block" : "none" }}>
+            <div className="au-roles">
+              {rolesDispo.map((r) => (
+                <button type="button" key={r.id} className={"au-role" + (role === r.id ? " on" : "")}
+                  onClick={() => setRole(r.id)}>
+                  <r.Icon /><strong>{r.titre}</strong><small>{r.sous}</small>
+                </button>
+              ))}
+            </div>
+
+            {estCoursier && (
+              <div className="au-banner warn">
+                <MdVerified className="bi" />
+                <div>
+                  <p><strong>{t("Inscription coursier — Vérification requise")}</strong></p>
+                  <p className="s">
+                    {t("Votre compte sera vérifié par l'administrateur avant activation. Payez le droit d'inscription de")} <strong>10 000 Ar</strong> {t("par MVola au")} <strong>+261 38 56 040 35</strong> {t("(Administrateur) puis renseignez la référence ci-dessous.")}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="au-row">
+              <Champ label={t("Nom")} required Icon={MdPerson} name="nom" placeholder={t("Votre nom")} value={form.nom} onChange={handleChange} error={errors.nom} />
+              <Champ label={t("Prénom")} required Icon={MdPerson} name="prenom" placeholder={t("Votre prénom")} value={form.prenom} onChange={handleChange} error={errors.prenom} />
+            </div>
+            <div className="au-row">
+              <Champ label={t("Email")} required Icon={MdEmail} type="email" name="email" placeholder="votre@email.com" value={form.email} onChange={handleChange} error={errors.email} />
+              <Champ label={t("Téléphone")} required Icon={MdPhone} name="telephone" placeholder="+261 XX XX XXX XX" value={form.telephone} onChange={handleChange} error={errors.telephone} />
+            </div>
+
+            <Champ label={t("Adresse")} required error={errors.adresse}>
+              <AdresseQuartier error={errors.adresse}
+                onChange={(v) => { setForm((f) => ({ ...f, adresse: v })); if (v) setErrors((p) => ({ ...p, adresse: "" })); }} />
+            </Champ>
+
+            <div className="au-row">
+              <Champ label={t("Mot de passe")} required Icon={MdLock} password name="password" placeholder="••••••••" autoComplete="new-password" value={form.password} onChange={handleChange} error={errors.password} />
+              <Champ label={t("Confirmation")} required Icon={MdLock} password name="password_confirmation" placeholder="••••••••" autoComplete="new-password" value={form.password_confirmation} onChange={handleChange} error={errors.password_confirmation} />
+            </div>
+
+            <div className="au-actions">
+              <button type="submit" className="au-btn">{t("Continuer")} <MdArrowForward size={20} /></button>
+            </div>
+          </div>
+
+          {/* ───── Étape 2 ───── */}
+          <div className="au-pane" style={{ display: etape === 2 ? "block" : "none" }}>
+
+            {estCoursier && (
+              <>
+                <Champ label={t("Numéro CIN")} required Icon={MdBadge} name="cin" placeholder={t("Votre numéro CIN")} value={form.cin} onChange={handleChange} error={errors.cin} />
+                <div className="au-row">
+                  <Fichier label={t("Photo CIN — Recto")} name="photo_recto" accept="image/*" Icon={MdPhotoCamera}
+                    fichier={form.photo_recto} onChange={handleChange} error={errors.photo_recto} apercu />
+                  <Fichier label={t("Photo CIN — Verso")} name="photo_verso" accept="image/*" Icon={MdPhotoCamera}
+                    fichier={form.photo_verso} onChange={handleChange} error={errors.photo_verso} apercu />
+                </div>
+                <Fichier label={t("Certificat de résidence")} name="certificat_residence" accept="image/*,application/pdf" Icon={MdHome}
+                  aide={t("Photo ou PDF — 10 Mo maximum.")} fichier={form.certificat_residence} onChange={handleChange} error={errors.certificat_residence} />
+              </>
+            )}
+
+            <Champ label={<>{t("Localisation")}{!estCoursier && <span style={{ opacity: 0.7, fontWeight: 400 }}> {t("(optionnelle)")}</span>}</>} required={estCoursier} error={errors.localisation}>
+              <div className="au-loc">
+                <button type="button" className={localisation ? "ok" : ""} onClick={getLocalisation} disabled={locLoading}>
+                  {locLoading ? <span className="au-spin" style={{ borderColor: "rgba(255,215,0,.3)", borderTopColor: "#FFD700", width: 16, height: 16 }} />
+                    : localisation ? <MdCheckCircle size={18} /> : <MdMyLocation size={18} />}
+                  {sans(locLoading ? t("⏳ En cours...") : localisation ? t("✅ Position obtenue") : t("📍 Activer ma localisation"))}
+                </button>
+                {localisation && <span style={{ color: "#10b981", fontSize: 12 }}>({localisation.latitude.toFixed(4)}, {localisation.longitude.toFixed(4)})</span>}
+              </div>
+              <small className="au-hint">{estCoursier ? t("Obligatoire pour les coursiers.") : t("Pour que les coursiers vous trouvent facilement.")}</small>
+            </Champ>
+
+            {estCoursier && (
+              <div className="au-box">
+                <div className="au-box-title"><MdAttachMoney size={22} /> {t("Paiement du droit d'inscription")}</div>
+                <div className="au-kv">
+                  <div><small>{t("Montant")}</small><b style={{ color: "var(--d-gold)" }}>10 000 Ar</b></div>
+                  <div><small>{t("Service")}</small><b style={{ color: "#10b981" }}>MVola</b></div>
+                  <div><small>{t("Numéro admin")}</small><b style={{ color: "#3b82f6" }}>+261 38 56 040 35</b></div>
+                  <div><small>{t("Nom bénéficiaire")}</small><b style={{ color: "#8b5cf6" }}>{t("Administrateur")}</b></div>
+                </div>
+                <Champ label={t("Référence de transaction mobile money")} required Icon={MdReceipt} name="mvola_transaction"
+                  placeholder={t("Ex: référence reçue par SMS")} value={form.mvola_transaction} onChange={handleChange} error={errors.mvola_transaction} />
+                <small className="au-hint" style={{ marginTop: -8 }}>{t("Numéro de référence reçu par SMS après votre paiement mobile money.")}</small>
+              </div>
+            )}
+
+            {!estCoursier && (
+              <div className="au-banner gold">
+                <MdCheckCircle className="bi" />
+                <div>
+                  <p><strong>{form.prenom} {form.nom}</strong></p>
+                  <p className="s">{form.email} · {form.adresse}</p>
+                </div>
+              </div>
+            )}
+
+            <p className="au-hint" style={{ textAlign: "center", marginBottom: 14 }}>
+              {t("En créant un compte, vous acceptez nos")} <Link to="/conditions" className="au-link">{t("Conditions d'utilisation")}</Link> {t("et notre")} <Link to="/confidentialite" className="au-link">{t("Confidentialité")}</Link>
+            </p>
+
+            <div className="au-actions">
+              <button type="button" className="au-btn-ghost" onClick={() => { setEtape(1); haut(); }}><MdArrowBack size={20} /> {t("Retour")}</button>
+              <button type="submit" className="au-btn" disabled={loading}>
+                {loading ? (<><span className="au-spin" /> {t("Inscription en cours...")}</>) : t("S'inscrire gratuitement")}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <p className="au-foot">
+          {t("Déjà un compte ?")}{" "}<Link to="/connexion" className="au-link">{t("Se connecter")}</Link>
+        </p>
+      </AuthShell>
+    </>
   );
 }
 

@@ -936,5 +936,16 @@
   "Précision (facultatif) : rue, repère, près de...": "Details (optional): street, landmark, near...",
   "Référence de transaction mobile money": "Mobile money transaction reference",
   "Ex: référence reçue par SMS": "E.g. reference received by SMS",
-  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Reference number received by SMS after your mobile money payment."
+  "Numéro de référence reçu par SMS après votre paiement mobile money.": "Reference number received by SMS after your mobile money payment.",
+  "Masquer le mot de passe": "Hide password",
+  "Afficher le mot de passe": "Show password",
+  "Compte": "Account",
+  "Vérification": "Verification",
+  "Finalisation": "Finalization",
+  "Continuer": "Continue",
+  "Gratuit": "Free",
+  "10 000 Ar droit d'inscription": "10,000 Ar registration fee",
+  "Choisir un fichier": "Choose a file",
+  "En créant un compte, vous acceptez nos": "By creating an account, you accept our",
+  "et notre": "and our"
 }

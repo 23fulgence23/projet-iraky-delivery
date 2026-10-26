@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import logo from "../../logo.png";
+import { MdEmail, MdLock, MdLogin, MdCheckCircle, MdCancel, MdErrorOutline, MdRefresh, MdArrowForward } from "react-icons/md";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../../components/LanguageSwitcher";
+import { AuthShell, AuthHead, Champ, sans } from "../../components/AuthUi";
+
+const API = "https://projet-iraky-delivery.onrender.com/api";
 
 function Connexion() {
   const { t } = useTranslation();
@@ -12,55 +13,32 @@ function Connexion() {
   const successMessage = location.state?.success;
   const coursierValide = location.state?.coursierValide;
   const prenomCoursier = location.state?.prenom;
-  const coursierEnAttenteId = location.state?.coursierId ?? null; // ✅ ID pour polling
+  const coursierEnAttenteId = location.state?.coursierId ?? null;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // ✅ States pour le polling statut coursier
-  const [statutPolling, setStatutPolling] = useState(null); // null | 'attente' | 'valide' | 'rejete'
+  const [statutPolling, setStatutPolling] = useState(null); // null | attente | valide | rejete
   const [msgRejetConnexion, setMsgRejetConnexion] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ✅ Polling du statut coursier si un ID est présent (venant de la page Inscription)
   useEffect(() => {
     if (!coursierEnAttenteId) return;
-
     setStatutPolling("attente");
-
     const iv = setInterval(async () => {
       try {
-        const res = await fetch(
-          `https://projet-iraky-delivery.onrender.com/api/verifier-statut-coursier/${coursierEnAttenteId}`
-        );
-
-        if (res.status === 404) {
-          setStatutPolling("rejete");
-          clearInterval(iv);
-          return;
-        }
-
+        const res = await fetch(`${API}/verifier-statut-coursier/${coursierEnAttenteId}`);
+        if (res.status === 404) { setStatutPolling("rejete"); clearInterval(iv); return; }
         const data = await res.json();
-
-        if (data.statut === "actif") {
-          setStatutPolling("valide");
-          clearInterval(iv);
-        } else if (data.statut === "rejete") {
+        if (data.statut === "actif") { setStatutPolling("valide"); clearInterval(iv); }
+        else if (data.statut === "rejete") {
           setMsgRejetConnexion(data.message || "");
           setStatutPolling("rejete");
           clearInterval(iv);
         }
-        // sinon reste en "attente"
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     }, 3000);
-
     return () => clearInterval(iv);
   }, [coursierEnAttenteId]);
 
@@ -68,7 +46,7 @@ function Connexion() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("https://projet-iraky-delivery.onrender.com/api/login", {
+      const response = await fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -94,195 +72,81 @@ function Connexion() {
     setLoading(false);
   };
 
-  return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--d-bg2)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "80px 16px 40px 16px" }}>
-      <LanguageSwitcher style={{ position: "fixed", top: 14, right: 14, zIndex: 50 }} />
-      <div style={{ backgroundColor: "var(--d-card3)", borderRadius: "20px",
-        padding: "clamp(20px, 5vw, 40px)",
-        width: "100%", maxWidth: "450px",
-        boxShadow: "0 0 50px #FFD70022" }}>
-
-        {/* Logo */}
-        <div className="text-center mb-4">
-          <img src={logo} alt="IRAKY"
-            style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-          <h4 className="fw-bold mt-3" style={{ color: "var(--d-gold)" }}>{t("Se connecter")}</h4>
-          <p style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Accédez à votre espace IRAKY Delivery")}</p>
-        </div>
-
-        {/* ✅ Bandeau attente vérification — polling en cours */}
-        {statutPolling === "attente" && (
-          <div className="mb-3 p-3"
-            style={{ backgroundColor: "#f59e0b11", border: "1px solid #f59e0b44",
-              borderRadius: 12, display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: "50%",
-              backgroundColor: "#f59e0b22", border: "1px solid #f59e0b44",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <div style={{ width: 14, height: 14, border: "2px solid #f59e0b44",
-                borderTop: "2px solid #f59e0b", borderRadius: "50%",
-                animation: "spin 1s linear infinite" }}/>
-            </div>
-            <div>
-              <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 13, margin: 0 }}>
-                {t("⏳ Bonjour {{prenom}} ! Votre dossier est en cours de vérification...", { prenom: prenomCoursier })}
-              </p>
-              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>{t("L'administrateur examine votre inscription. Cette page se met à jour automatiquement.")}</p>
-            </div>
-          </div>
-        )}
-
-        {/* ✅ Bandeau validé via polling */}
-        {statutPolling === "valide" && (
-          <div className="mb-3 p-3"
-            style={{ backgroundColor: "#10b98118", border: "1px solid #10b98144",
-              borderRadius: 12, display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 28 }}>🎉</span>
-            <div>
-              <p style={{ color: "#10b981", fontWeight: 800, fontSize: 14, margin: 0 }}>
-                {t("Félicitations {{prenom}} ! Votre compte est validé et activé.", { prenom: prenomCoursier })}
-              </p>
-              <p style={{ color: "#888", fontSize: 12, margin: "4px 0 0" }}>{t("Vous pouvez vous connecter maintenant avec votre email et mot de passe.")}</p>
-            </div>
-          </div>
-        )}
-
-        {/* ✅ Bandeau rejeté via polling, avec message de l'admin */}
-        {statutPolling === "rejete" && (
-          <div className="mb-3 p-3"
-            style={{ backgroundColor: "#ef444418", border: "1px solid #ef444444",
-              borderRadius: 12 }}>
-            <p style={{ color: "#ef4444", fontWeight: 800, fontSize: 14, margin: "0 0 8px" }}>{t("❌ Votre dossier d'inscription a été rejeté.")}</p>
-
-            {/* Message de l'admin */}
-            {msgRejetConnexion && (
-              <div style={{ backgroundColor: "#0a0a1e40", borderRadius: 8,
-                padding: "10px 12px", marginBottom: 10 }}>
-                <p style={{ color: "var(--d-c-aaa)", fontSize: 11, margin: "0 0 4px" }}>{t("Message de l'administrateur :")}</p>
-                <p style={{ color: "var(--d-text)", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-                  {msgRejetConnexion
-                    .replace("❌ Votre dossier a été rejeté. Raison : ", "")
-                    .replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
-                </p>
-              </div>
-            )}
-
-            <p style={{ color: "#888", fontSize: 12, margin: "0 0 12px" }}>{t("📧 Un email détaillé a été envoyé à votre adresse email. Corrigez les erreurs et réinscrivez-vous.")}</p>
-            <button
-              onClick={() => navigate("/inscription")}
-              style={{ backgroundColor: "#ef4444", color: "#fff", border: "none",
-                borderRadius: 8, padding: "10px 16px", cursor: "pointer",
-                fontWeight: 700, fontSize: 13, width: "100%" }}>{t("🔄 Se réinscrire avec les corrections")}</button>
-          </div>
-        )}
-
-        {/* ✅ Message spécial coursier validé (passé directement via state, sans polling) */}
-        {coursierValide && !statutPolling && (
-          <div className="mb-3 p-3 text-center"
-            style={{ backgroundColor: "#FFD70018", border: "1px solid #FFD70044",
-              borderRadius: "10px", display: "flex", alignItems: "center",
-              gap: 10, justifyContent: "center" }}>
-            <span style={{ fontSize: 22 }}>🎉</span>
-            <span style={{ color: "var(--d-gold)", fontSize: 14, fontWeight: 700 }}>
-              {t("Bravo {{prenom}} ! Votre compte coursier est validé et activé. Vous pouvez vous connecter dès maintenant.", { prenom: prenomCoursier })}
-            </span>
-          </div>
-        )}
-
-        {/* ✅ Message succès après inscription */}
-        {successMessage && !statutPolling && (
-          <div className="mb-3 p-2 text-center"
-            style={{ backgroundColor: "#28a74522", color: "#28a745",
-              borderRadius: "8px", fontSize: "14px" }}>
-            ✅ {t(successMessage)}
-          </div>
-        )}
-
-        {/* Erreur */}
-        {error && (
-          <div className="mb-3 p-2 text-center"
-            style={{ backgroundColor: "#dc354522", color: "#dc3545",
-              borderRadius: "8px", fontSize: "14px" }}>{t(error)}</div>
-        )}
-
-        {/* Email */}
-        <div className="mb-3">
-          <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Email")}</label>
-          <input type="email" name="email" className="form-control mt-1"
-            placeholder="votre@email.com" value={form.email} onChange={handleChange}
-            style={{ backgroundColor: "var(--d-bg2)", border: "1px solid #FFD70033",
-              color: "var(--d-text)", borderRadius: "10px" }} />
-        </div>
-
-        {/* Mot de passe */}
-        <div className="mb-3">
-          <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Mot de passe")}</label>
-          <div style={{ position: "relative" }}>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              className="form-control mt-1"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              style={{
-                backgroundColor: "var(--d-bg2)",
-                border: "1px solid #FFD70033",
-                color: "var(--d-text)",
-                borderRadius: "10px",
-                paddingRight: "42px",
-              }}
-            />
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: 12,
-                top: "calc(50% + 4px)",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-                color: "var(--d-c-aaa)",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              {showPassword
-                ? <MdVisibilityOff style={{ fontSize: 20 }} />
-                : <MdVisibility style={{ fontSize: 20 }} />}
-            </span>
-          </div>
-        </div>
-
-        {/* Mot de passe oublié */}
-        <div className="text-end mb-3">
-          <Link to="/oubli-mot-de-passe" style={{ color: "var(--d-gold)", fontSize: "13px" }}>{t("Mot de passe oublié ?")}</Link>
-        </div>
-
-        {/* Bouton connexion */}
-        <button onClick={handleSubmit} disabled={loading}
-          className="btn fw-bold w-100 py-2"
-          style={{ backgroundColor: "var(--d-gold)", color: "#000",
-            borderRadius: "10px", fontSize: "16px" }}>
-          {loading ? t("Connexion...") : t("Se connecter")}
-        </button>
-
-        {/* Lien inscription */}
-        <p className="text-center mt-3" style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-          {t("Pas encore de compte ?")}{" "}
-          <Link to="/inscription" style={{ color: "var(--d-gold)" }}>{t("S'inscrire gratuitement")}</Link>
-        </p>
-
-        {/* Retour portail */}
-        <p className="text-center mt-2">
-          <Link to="/" style={{ color: "var(--d-c-aaa)", fontSize: "13px" }}>{t("← Retour au portail")}</Link>
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-      `}</style>
+  const Banniere = ({ type, Icon, children }) => (
+    <div className={"au-banner " + type}>
+      {Icon ? <Icon className="bi" /> : <span className="spinner" />}
+      <div style={{ flex: 1 }}>{children}</div>
     </div>
+  );
+
+  return (
+    <AuthShell maxWidth={450}>
+      <AuthHead titre={t("Se connecter")} sousTitre={t("Accédez à votre espace IRAKY Delivery")} />
+
+      {statutPolling === "attente" && (
+        <Banniere type="warn">
+          <p><strong>{sans(t("⏳ Bonjour {{prenom}} ! Votre dossier est en cours de vérification...", { prenom: prenomCoursier }))}</strong></p>
+          <p className="s">{t("L'administrateur examine votre inscription. Cette page se met à jour automatiquement.")}</p>
+        </Banniere>
+      )}
+
+      {statutPolling === "valide" && (
+        <Banniere type="ok" Icon={MdCheckCircle}>
+          <p><strong>{t("Félicitations {{prenom}} ! Votre compte est validé et activé.", { prenom: prenomCoursier })}</strong></p>
+          <p className="s">{t("Vous pouvez vous connecter maintenant avec votre email et mot de passe.")}</p>
+        </Banniere>
+      )}
+
+      {statutPolling === "rejete" && (
+        <Banniere type="bad" Icon={MdCancel}>
+          <p><strong>{sans(t("❌ Votre dossier d'inscription a été rejeté."))}</strong></p>
+          {msgRejetConnexion && (
+            <p className="s">
+              {msgRejetConnexion
+                .replace("❌ Votre dossier a été rejeté. Raison : ", "")
+                .replace(". Réinscrivez-vous en corrigeant les erreurs.", "")}
+            </p>
+          )}
+          <p className="s">{sans(t("📧 Un email détaillé a été envoyé à votre adresse email. Corrigez les erreurs et réinscrivez-vous."))}</p>
+          <button type="button" className="au-btn" style={{ marginTop: 10, height: 42, background: "#ef4444", color: "#fff", boxShadow: "none" }}
+            onClick={() => navigate("/inscription")}>
+            <MdRefresh /> {sans(t("🔄 Se réinscrire avec les corrections"))}
+          </button>
+        </Banniere>
+      )}
+
+      {coursierValide && !statutPolling && (
+        <Banniere type="gold" Icon={MdCheckCircle}>
+          <p><strong>{t("Bravo {{prenom}} ! Votre compte coursier est validé et activé. Vous pouvez vous connecter dès maintenant.", { prenom: prenomCoursier })}</strong></p>
+        </Banniere>
+      )}
+
+      {successMessage && !statutPolling && (
+        <Banniere type="ok" Icon={MdCheckCircle}><p>{t(successMessage)}</p></Banniere>
+      )}
+
+      {error && <Banniere type="bad" Icon={MdErrorOutline}><p>{t(error)}</p></Banniere>}
+
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <Champ label={t("Email")} Icon={MdEmail} type="email" name="email" autoComplete="email"
+          placeholder="votre@email.com" value={form.email} onChange={handleChange} />
+        <Champ label={t("Mot de passe")} Icon={MdLock} password name="password" autoComplete="current-password"
+          placeholder="••••••••" value={form.password} onChange={handleChange} />
+
+        <div style={{ textAlign: "right", margin: "-4px 0 18px" }}>
+          <Link to="/oubli-mot-de-passe" className="au-link" style={{ fontSize: 13 }}>{t("Mot de passe oublié ?")}</Link>
+        </div>
+
+        <button type="submit" className="au-btn" disabled={loading}>
+          {loading ? (<><span className="au-spin" /> {t("Connexion...")}</>) : (<><MdLogin size={20} /> {t("Se connecter")}</>)}
+        </button>
+      </form>
+
+      <p className="au-foot">
+        {t("Pas encore de compte ?")}{" "}
+        <Link to="/inscription" className="au-link">{t("S'inscrire gratuitement")} <MdArrowForward style={{ verticalAlign: "-3px" }} /></Link>
+      </p>
+    </AuthShell>
   );
 }
 
