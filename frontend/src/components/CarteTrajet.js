@@ -40,7 +40,7 @@ export default function CarteTrajet({ pickup, client, coursier, positions }) {
   const cle = JSON.stringify([
     pickup,
     client && [client.latitude, client.longitude, client.adresse],
-    coursier && [coursier.latitude, coursier.longitude],
+    coursier && [coursier.latitude, coursier.longitude, coursier.position_latitude, coursier.position_longitude],
     positions ? positions.length : 0,
   ]);
 
@@ -80,7 +80,9 @@ export default function CarteTrajet({ pickup, client, coursier, positions }) {
 
       if (ptPickup) marqueur(ptPickup, "#f59e0b", t("Prise en charge"));
       if (ptClient) marqueur(ptClient, "#3b82f6", t("Client"));
-      if (coursier && coursier.latitude != null && coursier.longitude != null) {
+      if (coursier && coursier.position_latitude != null && coursier.position_longitude != null) {
+        marqueur([coursier.position_latitude, coursier.position_longitude], "#10b981", t("Dernière position connue du coursier"));
+      } else if (coursier && coursier.latitude != null && coursier.longitude != null) {
         marqueur([coursier.latitude, coursier.longitude], "#9ca3af", t("Position enregistrée du coursier"));
       }
 
@@ -132,6 +134,7 @@ export default function CarteTrajet({ pickup, client, coursier, positions }) {
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 8, fontSize: 12, color: "#888" }}>
         <span>{point("#f59e0b")}{t("Prise en charge")}</span>
         <span>{point("#3b82f6")}{t("Client")}</span>
+        <span>{point("#10b981")}{t("Dernière position connue du coursier")}</span>
         <span>{point("#9ca3af")}{t("Position enregistrée du coursier")}</span>
         {positions && positions.length > 1 && <span>{point("#10b981")}{t("Trajet parcouru par le coursier")}</span>}
       </div>

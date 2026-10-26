@@ -8,6 +8,7 @@ import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil"
 import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import SignalerProbleme from "../../components/SignalerProbleme";
+import SuiviPosition from "../../components/SuiviPosition";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
@@ -2619,6 +2620,8 @@ const noterCoursier = async (id, note) => {
       {signalCmd && (
         <SignalerProbleme cmd={signalCmd} apiUrl="https://projet-iraky-delivery.onrender.com" onClose={() => setSignalCmd(null)} />
       )}
+
+      <SuiviPosition apiUrl="https://projet-iraky-delivery.onrender.com" role="client" />
 
       {/* MODAL NOTE */}
 {noteCmd && (

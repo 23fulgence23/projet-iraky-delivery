@@ -5,6 +5,8 @@ import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import RappelAbonnement from "../../components/RappelAbonnement";
+import SignalerProbleme from "../../components/SignalerProbleme";
+import SuiviPosition from "../../components/SuiviPosition";
 import AbonnementImpaye from "../../components/AbonnementImpaye";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
@@ -262,6 +264,7 @@ function DashboardCoursier() {
     note: 0, nb_missions: 0, nb_terminees: 0,
   });
   const [profilLoading, setProfilLoading] = useState(true);
+  const [signalCmd, setSignalCmd] = useState(null);
 
   // ── Aide & Support (identique au dashboard client, contenu adapté coursier) ──
   const [aideVue, setAideVue]                 = useState("menu"); // menu | chat | guide
@@ -840,6 +843,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           </div>
           <LanguageSwitcher style={{ marginRight: 4 }} />
           <RappelAbonnement apiUrl={BASE_URL} />
+          {signalCmd && <SignalerProbleme cmd={signalCmd} apiUrl={BASE_URL} onClose={() => setSignalCmd(null)} />}
+          <SuiviPosition apiUrl={BASE_URL} role="coursier" />
           <div onClick={() => setOnglet("profil")} style={{ cursor: "pointer" }}>
             <AvatarRond photo={profil.photo_profil} initiales={(profil.prenom?.[0] || "") + (profil.nom?.[0] || "")} size={38} fontSize={15} style={{ boxShadow: "0 0 12px #FFD70044" }} />
           </div>
@@ -1159,6 +1164,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         </div>
                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                           <StatutBadge statut={mission.statut}/>
+                          <><button onClick={e=>{ e.stopPropagation(); setSignalCmd(mission); }}
+                            title={tr("Signaler un problème")}
+                            style={{ background:"#ef444415", border:"1px solid #ef444430", color:"#ef6666", borderRadius:8,
+                              padding:"4px 10px", cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
+                            🚩 {tr("Signaler")}</button>
                           <button
                             onClick={()=>demanderRetraitMission(mission.id)}
                             title={tr("Retirer de mes missions (reste visible côté admin)")}
@@ -1166,7 +1176,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
                               display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                             <MdDelete style={{ fontSize:15 }}/>
-                          </button>
+                          </button></>
                         </div>
                       </div>
 

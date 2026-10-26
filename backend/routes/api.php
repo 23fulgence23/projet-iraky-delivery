@@ -2,6 +2,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\SignalementController;
+use App\Http\Controllers\PositionController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\MessageController;
@@ -31,6 +32,12 @@ Route::middleware('auth:api')->group(function () {
 
     // ── Signalements (client / coursier → admin) ──
     Route::post('/signalements', [SignalementController::class, 'store']);
+
+    // ── Localisation (utilisateurs connectes, avec consentement) ──
+    Route::get ('/position/etat',         [PositionController::class, 'etat']);
+    Route::post('/position/consentement', [PositionController::class, 'consentement']);
+    Route::post('/position',              [PositionController::class, 'enregistrer']);
+    Route::get ('/admin/localisations',   [PositionController::class, 'adminListe']);
     Route::prefix('admin/signalements')->group(function () {
         Route::get   ('/',             [SignalementController::class, 'liste']);
         Route::get   ('/compteur',     [SignalementController::class, 'compteur']);

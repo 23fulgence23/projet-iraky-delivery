@@ -169,6 +169,9 @@ class SignalementController extends Controller
             'adresse'   => $u->adresse,
             'latitude'  => $u->latitude !== null ? (float) $u->latitude : null,
             'longitude' => $u->longitude !== null ? (float) $u->longitude : null,
+            'position_latitude'  => $u->position_lat !== null ? (float) $u->position_lat : null,
+            'position_longitude' => $u->position_lng !== null ? (float) $u->position_lng : null,
+            'position_at'        => $u->position_at ? \Illuminate\Support\Carbon::parse($u->position_at)->toIso8601String() : null,
         ] : null;
 
         return response()->json(array_merge($this->resume($s), [
@@ -185,7 +188,12 @@ class SignalementController extends Controller
             ] : null,
             'client'    => $personne($c ? $c->client : null),
             'coursier'  => $personne($c ? $c->coursier : null),
-            'positions' => [],
+            'positions' => ($c && $c->coursier_id)
+                ? \App\Models\PositionUtilisateur::where('commande_id', $c->id)->where('user_id', $c->coursier_id)
+                    ->orderBy('created_at')->limit(2000)->get(['latitude', 'longitude', 'created_at'])
+                    ->map(fn ($p) => ['lat' => (float) $p->latitude, 'lng' => (float) $p->longitude, 'at' => $p->created_at ? $p->created_at->toIso8601String() : null])
+                    ->values()
+                : [],
         ]));
     }
 

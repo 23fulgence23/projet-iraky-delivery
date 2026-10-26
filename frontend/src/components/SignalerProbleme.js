@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { MdFlag, MdClose, MdCheckCircle } from "react-icons/md";
+import { MdFlag, MdClose, MdCheckCircle, MdHelpOutline } from "react-icons/md";
 import { MOTIFS } from "../utils/signalements";
 
 const texte = "var(--d-text, #fff)";
@@ -13,6 +13,7 @@ const champ = {
 
 export default function SignalerProbleme({ cmd, apiUrl, onClose }) {
   const { t } = useTranslation();
+  const [etape, setEtape] = useState("confirmation"); // confirmation | formulaire
   const [motif, setMotif] = useState("");
   const [description, setDescription] = useState("");
   const [envoi, setEnvoi] = useState(false);
@@ -49,7 +50,81 @@ export default function SignalerProbleme({ cmd, apiUrl, onClose }) {
     setEnvoi(false);
   };
 
-  const contenu = (
+  const principal = {
+    padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 14,
+    background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", cursor: "pointer",
+  };
+  const secondaire = {
+    padding: 12, borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: "pointer",
+    backgroundColor: "transparent", color: "#aaa", border: "1px solid var(--d-border, #ffffff30)",
+  };
+
+  let corps;
+  if (envoye) {
+    corps = (
+      <div>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: 12,
+          backgroundColor: "#10b98118", border: "1px solid #10b98155", marginBottom: 16 }}>
+          <MdCheckCircle style={{ color: "#10b981", fontSize: 24, flexShrink: 0 }} />
+          <span style={{ color: "#10b981", fontWeight: 700, fontSize: 14 }}>
+            {t("Signalement envoyé. L'administrateur a été notifié.")}
+          </span>
+        </div>
+        <button type="button" onClick={onClose} style={{ ...principal, width: "100%" }}>{t("Fermer")}</button>
+      </div>
+    );
+  } else if (etape === "confirmation") {
+    corps = (
+      <div>
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: 12,
+          backgroundColor: "#f59e0b18", border: "1px solid #f59e0b55", marginBottom: 16 }}>
+          <MdHelpOutline style={{ color: "#f59e0b", fontSize: 24, flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>
+              {t("Voulez-vous vraiment signaler un problème concernant la commande #{{id}} ?", { id: cmd.id })}
+            </div>
+            <div style={{ color: "#aaa", fontSize: 12, marginTop: 4 }}>
+              {t("L'administrateur sera informé et pourra consulter les détails de la course.")}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button type="button" onClick={onClose} style={{ ...secondaire, flex: 1 }}>{t("Annuler")}</button>
+          <button type="button" onClick={() => setEtape("formulaire")} style={{ ...principal, flex: 2 }}>{t("Oui, signaler")}</button>
+        </div>
+      </div>
+    );
+  } else {
+    corps = (
+      <form onSubmit={soumettre}>
+        <label style={{ color: "#aaa", fontSize: 13 }}>{t("Motif")} <span style={{ color: "#ef4444" }}>*</span></label>
+        <select value={motif} onChange={(e) => setMotif(e.target.value)} style={champ}>
+          <option value="">{t("Choisissez un motif")}</option>
+          {MOTIFS.map((m) => <option key={m.code} value={m.code}>{t(m.label)}</option>)}
+        </select>
+
+        <label style={{ color: "#aaa", fontSize: 13 }}>{t("Description du problème")} <span style={{ color: "#ef4444" }}>*</span></label>
+        <textarea rows={5} maxLength={1000} value={description} onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("Décrivez le problème en quelques phrases (10 caractères minimum)")}
+          style={{ ...champ, resize: "vertical" }} />
+
+        {erreur && (
+          <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 8, fontSize: 13,
+            backgroundColor: "#ef444422", color: "#ef4444" }}>{erreur}</div>
+        )}
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button type="button" onClick={onClose} style={{ ...secondaire, flex: 1 }}>{t("Annuler")}</button>
+          <button type="submit" disabled={envoi}
+            style={{ ...principal, flex: 2, cursor: envoi ? "not-allowed" : "pointer", opacity: envoi ? 0.7 : 1 }}>
+            {envoi ? t("Envoi en cours...") : t("Envoyer le signalement")}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return createPortal(
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 2000, backgroundColor: "rgba(0,0,0,0.78)",
       display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--d-card, #131330)", color: texte,
@@ -67,58 +142,9 @@ export default function SignalerProbleme({ cmd, apiUrl, onClose }) {
         <div style={{ color: "#888", fontSize: 12, marginBottom: 16 }}>
           {t("Commande #{{id}} — {{service}}", { id: cmd.id, service: cmd.service })}
         </div>
-
-        {envoye ? (
-          <div>
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: 12,
-              backgroundColor: "#10b98118", border: "1px solid #10b98155", marginBottom: 16 }}>
-              <MdCheckCircle style={{ color: "#10b981", fontSize: 24, flexShrink: 0 }} />
-              <span style={{ color: "#10b981", fontWeight: 700, fontSize: 14 }}>
-                {t("Signalement envoyé. L'administrateur a été notifié.")}
-              </span>
-            </div>
-            <button type="button" onClick={onClose}
-              style={{ width: "100%", padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 14,
-                background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000", cursor: "pointer" }}>
-              {t("Fermer")}
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={soumettre}>
-            <label style={{ color: "#aaa", fontSize: 13 }}>{t("Motif")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <select value={motif} onChange={(e) => setMotif(e.target.value)} style={champ}>
-              <option value="">{t("Choisissez un motif")}</option>
-              {MOTIFS.map((m) => <option key={m.code} value={m.code}>{t(m.label)}</option>)}
-            </select>
-
-            <label style={{ color: "#aaa", fontSize: 13 }}>{t("Description du problème")} <span style={{ color: "#ef4444" }}>*</span></label>
-            <textarea rows={5} maxLength={1000} value={description} onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("Décrivez le problème en quelques phrases (10 caractères minimum)")}
-              style={{ ...champ, resize: "vertical" }} />
-
-            {erreur && (
-              <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 8, fontSize: 13,
-                backgroundColor: "#ef444422", color: "#ef4444" }}>{erreur}</div>
-            )}
-
-            <div style={{ display: "flex", gap: 10 }}>
-              <button type="button" onClick={onClose}
-                style={{ flex: 1, padding: 12, borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: "pointer",
-                  backgroundColor: "transparent", color: "#aaa", border: "1px solid var(--d-border, #ffffff30)" }}>
-                {t("Annuler")}
-              </button>
-              <button type="submit" disabled={envoi}
-                style={{ flex: 2, padding: 12, borderRadius: 12, border: "none", fontWeight: 800, fontSize: 14,
-                  background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000",
-                  cursor: envoi ? "not-allowed" : "pointer", opacity: envoi ? 0.7 : 1 }}>
-                {envoi ? t("Envoi en cours...") : t("Envoyer le signalement")}
-              </button>
-            </div>
-          </form>
-        )}
+        {corps}
       </div>
-    </div>
+    </div>,
+    document.body
   );
-
-  return createPortal(contenu, document.body);
 }

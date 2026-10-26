@@ -13,6 +13,8 @@ import {
 } from "react-icons/md";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import SignalementsAdmin from "../../components/SignalementsAdmin";
+import LocalisationAdmin from "../../components/LocalisationAdmin";
+import { MdMyLocation as IconeLocalisation } from "react-icons/md";
 import { MdReportProblem as IconeSignalement } from "react-icons/md";
 import PaiementsAbonnementAdmin from "../../components/PaiementsAbonnementAdmin";
 import i18n from "../../i18n";
@@ -148,6 +150,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
     { id:"historique",Icon:MdHistory,        label:"Historique",        badge:0                        },
     { id:"support",   Icon:MdForum,          label:"Support Chat",      badge:supportNonLus || 0       },
     { id:"signalements", Icon:IconeSignalement, label:"Signalements", badge:signalementsNouveaux || 0 },
+    { id:"localisation", Icon:IconeLocalisation, label:"Localisation", badge:0 },
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
@@ -1004,6 +1007,10 @@ function DashboardAdmin() {
                 <div style={{ width:40,height:40,border:"3px solid #FFD70033",
                   borderTop:"3px solid var(--d-gold)",borderRadius:"50%",
                   animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>{tr("Chargement des données...")}</div>
+            )}
+
+            {onglet==="localisation" && (
+              <LocalisationAdmin apiUrl={BASE_URL} />
             )}
 
             {onglet==="signalements" && (
