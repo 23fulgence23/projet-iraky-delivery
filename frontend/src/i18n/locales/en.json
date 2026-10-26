@@ -947,5 +947,9 @@
   "10 000 Ar droit d'inscription": "10,000 Ar registration fee",
   "Choisir un fichier": "Choose a file",
   "En créant un compte, vous acceptez nos": "By creating an account, you accept our",
-  "et notre": "and our"
+  "et notre": "and our",
+  "Fichier trop lourd (3 Mo maximum pour un PDF).": "File too large (3 MB maximum for a PDF).",
+  "Photo ou PDF (3 Mo maximum pour un PDF).": "Photo or PDF (3 MB maximum for a PDF).",
+  "Fichier perdu : à renvoyer": "File lost: please upload again",
+  "Ouvrir le PDF": "Open the PDF"
 }

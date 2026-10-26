@@ -1,3 +1,4 @@
+import PiecesIdentite from "../../components/PiecesIdentite";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect } from "react";
 import logo from "../../images/logo.png";
@@ -2367,27 +2368,7 @@ function DashboardAdmin() {
                 display:"flex",alignItems:"center",gap:8 }}>
                 <MdBadge style={{ fontSize:18 }}/>{" "}{tr("Photos CIN")}</div>
               <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
-                {[{label:"CIN Recto",chemin:detailUser.photo_recto,color:"#06b6d4"},
-                  {label:"CIN Verso",chemin:detailUser.photo_verso,color:"#8b5cf6"}].map(p=>(
-                  <div key={p.label} style={{ backgroundColor:"var(--d-bg)",borderRadius:12,
-                    border:`1px solid ${p.color}22`,overflow:"hidden" }}>
-                    <div style={{ padding:"8px 12px",borderBottom:`1px solid ${p.color}18`,
-                      color:"var(--d-c-aaa)",fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
-                      <MdBadge style={{ color:p.color }}/> {tr(p.label)}
-                    </div>
-                    {p.chemin?(
-                      <img src={`${BASE_URL}/storage/${p.chemin}`} alt={tr(p.label)}
-                        style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000",display:"block" }}
-                        onError={e=>{ e.target.style.display="none"; }}/>
-                    ):(
-                      <div style={{ aspectRatio: "85.6 / 54", display: "flex",alignItems:"center",
-                        justifyContent:"center",flexDirection:"column",gap:8,color:"#444" }}>
-                        <MdBadge style={{ fontSize:36 }}/>
-                        <span style={{ fontSize:12 }}>{tr("Non fourni")}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                <PiecesIdentite key={detailUser.id} endpoint={`/api/admin/users/${detailUser.id}/pieces`} />
               </div>
             </div>
           )}
@@ -2597,23 +2578,7 @@ function DashboardAdmin() {
 
           {/* Photos CIN */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 20 }}>
-            {[
-              {label: "CIN Recto", chemin: coursierVerif.photo_recto, color: "#06b6d4"},
-              {label: "CIN Verso", chemin: coursierVerif.photo_verso, color: "#8b5cf6"},
-            ].map(p => (
-              <div key={p.label} style={{ backgroundColor: "var(--d-bg)", borderRadius: 12,
-                border: `1px solid ${p.color}22`, overflow: "hidden" }}>
-                <div style={{ padding: "8px 12px", borderBottom: `1px solid ${p.color}18`,
-                  color: "var(--d-c-aaa)", fontSize: 12 }}>{tr(p.label)}</div>
-                {p.chemin ? (
-                  <img src={`${BASE_URL}/storage/${p.chemin}`} alt={tr(p.label)}
-                    style={{ width: "100%", aspectRatio: "85.6 / 54", objectFit: "contain", backgroundColor: "#000", display: "block" }}/>
-                ) : (
-                  <div style={{ aspectRatio: "85.6 / 54", display: "flex", alignItems: "center",
-                    justifyContent: "center", color: "#444", fontSize: 13 }}>{tr("Non fourni")}</div>
-                )}
-              </div>
-            ))}
+            <PiecesIdentite key={coursierVerif.id} endpoint={`/api/admin/users/${coursierVerif.id}/pieces`} />
           </div>
 
           {/* Zone message rejet — visible seulement si msgRejet n'est pas vide */}

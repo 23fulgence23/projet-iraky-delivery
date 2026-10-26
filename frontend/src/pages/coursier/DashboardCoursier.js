@@ -1,3 +1,4 @@
+import PiecesIdentite from "../../components/PiecesIdentite";
 import { EvaluationBadge } from "../../components/Evaluation";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect, useRef  } from "react";
@@ -1628,8 +1629,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
                           {/* ✅ Seulement recto et verso — photo_identite supprimée */}
-                          <PhotoCIN chemin={profil.photo_recto} label={tr("CIN Recto")} couleur="#06b6d4" />
-                          <PhotoCIN chemin={profil.photo_verso} label={tr("CIN Verso")} couleur="#8b5cf6" />
+                          <PiecesIdentite endpoint="/api/mes-pieces" />
                         </div>
                       </div>
 

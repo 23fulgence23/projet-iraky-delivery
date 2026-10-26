@@ -32,7 +32,7 @@ class User extends Authenticatable implements JWTSubject
         'etoiles_actuelles',
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'photo_recto', 'photo_verso', 'photo_identite', 'certificat_residence'];
 
     public function getJWTIdentifier()
     {

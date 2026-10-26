@@ -164,8 +164,6 @@ public function commandesMensuelles()
                 'note'        => round((float)$u->note, 1),
                 'nb_missions' => $u->nb_missions ?? 0,
                 'nb_terminees' => Commande::where('coursier_id',$u->id)->where('statut','termine')->count(),
-                'photo_recto' => $u->photo_recto,
-                'photo_verso' => $u->photo_verso,
                 'created_at'  => $u->created_at->format('Y-m-d'),
                 'missions'    => Commande::where('coursier_id',$u->id)->count(),
             ]);
@@ -253,8 +251,6 @@ public function coursiersEnAttente()
             'telephone'   => $u->telephone,
             'adresse'     => $u->adresse,
             'cin'         => $u->cin,
-            'photo_recto' => $u->photo_recto,
-            'photo_verso' => $u->photo_verso,
             'mvola_transaction' => $u->mvola_transaction, // ✅ doit être présent
             'latitude'    => $u->latitude,                 // ✅ doit être présent
             'longitude'   => $u->longitude,                // ✅ doit être présent

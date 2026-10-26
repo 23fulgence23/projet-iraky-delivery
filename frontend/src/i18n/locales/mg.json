@@ -947,5 +947,9 @@
   "10 000 Ar droit d'inscription": "10 000 Ar sarany fisoratana anarana",
   "Choisir un fichier": "Mifidiana rakitra",
   "En créant un compte, vous acceptez nos": "Amin'ny famoronana kaonty dia manaiky ny",
-  "et notre": "sy ny"
+  "et notre": "sy ny",
+  "Fichier trop lourd (3 Mo maximum pour un PDF).": "Lehibe loatra ny rakitra (3 Mo farafahabetsany ho an'ny PDF).",
+  "Photo ou PDF (3 Mo maximum pour un PDF).": "Sary na PDF (3 Mo farafahabetsany ho an'ny PDF).",
+  "Fichier perdu : à renvoyer": "Very ny rakitra : alefaso indray",
+  "Ouvrir le PDF": "Sokafy ny PDF"
 }

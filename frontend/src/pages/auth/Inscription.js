@@ -6,6 +6,7 @@ import { MdPerson, MdEmail, MdPhone, MdLock, MdBadge, MdPhotoCamera, MdHome, MdM
 import { useTranslation } from "react-i18next";
 import { AuthShell, AuthHead, Champ, sans } from "../../components/AuthUi";
 import AdresseQuartier from "../../components/AdresseQuartier";
+import compresserImage from "../../utils/compresserImage";
 
 const API = "https://projet-iraky-delivery.onrender.com/api";
 const ETAPE1 = ["nom", "prenom", "email", "telephone", "adresse", "password", "password_confirmation"];
@@ -87,9 +88,14 @@ function Inscription() {
 
   const haut = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, type, files, value } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "file" ? files[0] : value }));
+    let v = type === "file" ? files[0] : value;
+    if (type === "file" && v) {
+      if (v.type && v.type.startsWith("image/")) { try { v = await compresserImage(v); } catch (err) { /* garde l'original */ } }
+      else if (v.size > 3 * 1024 * 1024) { setErrors((pr) => ({ ...pr, [name]: t("Fichier trop lourd (3 Mo maximum pour un PDF).") })); return; }
+    }
+    setForm((f) => ({ ...f, [name]: v }));
     if (errors[name]) setErrors((p) => ({ ...p, [name]: "" }));
   };
 
@@ -351,7 +357,7 @@ function Inscription() {
                     fichier={form.photo_verso} onChange={handleChange} error={errors.photo_verso} apercu />
                 </div>
                 <Fichier label={t("Certificat de résidence")} name="certificat_residence" accept="image/*,application/pdf" Icon={MdHome}
-                  aide={t("Photo ou PDF — 10 Mo maximum.")} fichier={form.certificat_residence} onChange={handleChange} error={errors.certificat_residence} />
+                  aide={t("Photo ou PDF (3 Mo maximum pour un PDF).")} fichier={form.certificat_residence} onChange={handleChange} error={errors.certificat_residence} />
               </>
             )}
 

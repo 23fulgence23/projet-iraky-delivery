@@ -10,7 +10,12 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-public function register(Request $request)
+private static function enDataUrl($fichier): string
+    {
+        return 'data:' . ($fichier->getMimeType() ?: 'application/octet-stream') . ';base64,' . base64_encode(file_get_contents($fichier->getRealPath()));
+    }
+
+    public function register(Request $request)
 {
     // ✅ Si un compte rejeté existe avec cet email, le supprimer avant validation
     $ancienCompte = User::where('email', $request->email)
@@ -80,14 +85,14 @@ public function register(Request $request)
     ];
 
     if ($request->hasFile('photo_recto')) {
-        $data['photo_recto'] = $request->file('photo_recto')->store('identites', 'public');
+        $data['photo_recto'] = self::enDataUrl($request->file('photo_recto'));
     }
     if ($request->hasFile('photo_verso')) {
-        $data['photo_verso'] = $request->file('photo_verso')->store('identites', 'public');
+        $data['photo_verso'] = self::enDataUrl($request->file('photo_verso'));
     }
 
     if ($request->hasFile('certificat_residence')) {
-        $data['certificat_residence'] = $request->file('certificat_residence')->store('residences', 'public');
+        $data['certificat_residence'] = self::enDataUrl($request->file('certificat_residence'));
     }
 
     $user = User::create($data);
