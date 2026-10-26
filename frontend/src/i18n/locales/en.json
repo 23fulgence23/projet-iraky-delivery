@@ -923,5 +923,15 @@
   "il y a {{n}} min": "{{n}} min ago",
   "Mission #{{id}} — {{service}}": "Mission #{{id}} — {{service}}",
   "Précision : {{m}} m": "Accuracy: {{m}} m",
-  "Dernière position connue du coursier": "Courier's last known location"
+  "Dernière position connue du coursier": "Courier's last known location",
+  "Certificat de résidence": "Residence certificate",
+  "Le certificat de résidence est obligatoire.": "The residence certificate is required.",
+  "Fichier trop lourd (10 Mo maximum).": "File too large (10 MB maximum).",
+  "La localisation est obligatoire pour les coursiers.": "Location is required for couriers.",
+  "Obligatoire pour les coursiers.": "Required for couriers.",
+  "Photo ou PDF — 10 Mo maximum.": "Photo or PDF — 10 MB maximum.",
+  "Tapez votre quartier (ex : Tsimenatse)": "Type your neighborhood (e.g. Tsimenatse)",
+  "Aucun quartier trouvé": "No neighborhood found",
+  "Choisissez un quartier dans la liste.": "Choose a neighborhood from the list.",
+  "Précision (facultatif) : rue, repère, près de...": "Details (optional): street, landmark, near..."
 }

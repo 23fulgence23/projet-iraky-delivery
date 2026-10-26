@@ -923,5 +923,15 @@
   "il y a {{n}} min": "{{n}} minitra lasa",
   "Mission #{{id}} — {{service}}": "Iraka #{{id}} — {{service}}",
   "Précision : {{m}} m": "Fahamarinana : {{m}} m",
-  "Dernière position connue du coursier": "Toerana farany fantatra an'ny coursier"
+  "Dernière position connue du coursier": "Toerana farany fantatra an'ny coursier",
+  "Certificat de résidence": "Taratasy fanamarinana ny toeram-ponenana",
+  "Le certificat de résidence est obligatoire.": "Takiana ny taratasy fanamarinana ny toeram-ponenana.",
+  "Fichier trop lourd (10 Mo maximum).": "Lehibe loatra ny rakitra (10 Mo farafahabetsany).",
+  "La localisation est obligatoire pour les coursiers.": "Takiana ny toerana ho an'ny coursier.",
+  "Obligatoire pour les coursiers.": "Takiana ho an'ny coursier.",
+  "Photo ou PDF — 10 Mo maximum.": "Sary na PDF — 10 Mo farafahabetsany.",
+  "Tapez votre quartier (ex : Tsimenatse)": "Soraty ny faritrao (oh : Tsimenatse)",
+  "Aucun quartier trouvé": "Tsy misy faritra hita",
+  "Choisissez un quartier dans la liste.": "Misafidiana faritra ao amin'ny lisitra.",
+  "Précision (facultatif) : rue, repère, près de...": "Fanampiny (tsy voatery) : arabe, famantarana, akaikin'ny..."
 }

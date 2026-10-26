@@ -32,6 +32,9 @@ public function register(Request $request)
         'photo_recto' => 'required_if:role,coursier|nullable|file|mimes:jpg,jpeg,png,webp|max:10240',
         'photo_verso' => 'required_if:role,coursier|nullable|file|mimes:jpg,jpeg,png,webp|max:10240',
         'mvola_transaction' => 'required_if:role,coursier|nullable|string|max:100',
+        'certificat_residence' => 'required_if:role,coursier|nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+        'latitude'  => 'required_if:role,coursier|nullable|numeric|between:-90,90',
+        'longitude' => 'required_if:role,coursier|nullable|numeric|between:-180,180',
     ], [
         'nom.required'              => 'Le nom est obligatoire.',
         'prenom.required'           => 'Le prénom est obligatoire.',
@@ -50,6 +53,11 @@ public function register(Request $request)
         'photo_verso.max'           => 'La photo verso doit être inférieure ou égale à 10 Mo.',
         'photo_verso.mimes'         => 'La photo verso doit être au format jpg, jpeg, png ou webp.',
         'mvola_transaction.required_if' => 'La référence MVola est obligatoire pour les coursiers.',
+        'certificat_residence.required_if' => 'Le certificat de résidence est obligatoire pour les coursiers.',
+        'certificat_residence.mimes' => 'Le certificat doit être au format jpg, jpeg, png, webp ou pdf.',
+        'certificat_residence.max' => 'Le certificat doit être inférieur ou égal à 10 Mo.',
+        'latitude.required_if' => 'La localisation est obligatoire pour les coursiers.',
+        'longitude.required_if' => 'La localisation est obligatoire pour les coursiers.',
     ]);
 
     $statutInitial = ($request->role === 'coursier') ? 'inactif' : 'actif';
@@ -76,6 +84,10 @@ public function register(Request $request)
     }
     if ($request->hasFile('photo_verso')) {
         $data['photo_verso'] = $request->file('photo_verso')->store('identites', 'public');
+    }
+
+    if ($request->hasFile('certificat_residence')) {
+        $data['certificat_residence'] = $request->file('certificat_residence')->store('residences', 'public');
     }
 
     $user = User::create($data);

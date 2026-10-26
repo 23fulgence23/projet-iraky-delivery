@@ -43,7 +43,7 @@ function Inscription() {
   const [form, setForm] = useState({
     nom: "", prenom: "", email: "", telephone: "",
     adresse: "", password: "", password_confirmation: "",
-    cin: "", photo_recto: null, photo_verso: null,
+    cin: "", photo_recto: null, photo_verso: null, certificat_residence: null,
     mvola_transaction: "",
   });
 
@@ -103,6 +103,9 @@ function Inscription() {
       if (!form.photo_recto)             e.photo_recto       = t("La photo recto est obligatoire.");
       if (!form.photo_verso)             e.photo_verso       = t("La photo verso est obligatoire.");
       if (!form.mvola_transaction.trim()) e.mvola_transaction = t("La référence de paiement est obligatoire.");
+      if (!form.certificat_residence) e.certificat_residence = t("Le certificat de résidence est obligatoire.");
+      else if (form.certificat_residence.size > 10 * 1024 * 1024) e.certificat_residence = t("Fichier trop lourd (10 Mo maximum).");
+      if (!localisation) e.localisation = t("La localisation est obligatoire pour les coursiers.");
     } // ✅ fermeture du if coursier
 
     return e; // ✅ return HORS du if
@@ -141,6 +144,7 @@ function Inscription() {
         formData.append("photo_recto", form.photo_recto);
         formData.append("photo_verso", form.photo_verso);
         formData.append("mvola_transaction", form.mvola_transaction);
+        formData.append("certificat_residence", form.certificat_residence);
       }
 
       const response = await fetch("https://projet-iraky-delivery.onrender.com/api/register", {
@@ -428,7 +432,7 @@ useEffect(() => {
           <div className="col-12">
             <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>{t("Rôle")}</label>
             <select className="form-select mt-1" value={role}
-              onChange={(e) => setRole(e.target.value)} style={inp("role")}>
+              onChange={(e) => { setRole(e.target.value); if (e.target.value === "coursier" && !localisation) getLocalisation(); }} style={inp("role")}>
               <option value="client">{"👤 " + t("Client — Gratuit")}</option>
               <option value="coursier">{"🚴 " + t("Coursier — 10 000 Ar droit d'inscription")}</option>
             </select>
@@ -437,7 +441,7 @@ useEffect(() => {
           {/* ✅ Localisation optionnelle pour tous */}
           <div className="col-12">
             <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
-              📍 {t("Localisation")} <span style={{ color: "#666", fontSize: 12 }}>{t("(optionnelle)")}</span>
+              📍 {t("Localisation")} {role === "coursier" ? <span style={{ color: "#ef4444" }}>*</span> : <span style={{ color: "#666", fontSize: 12 }}>{t("(optionnelle)")}</span>}
             </label>
             <div className="d-flex gap-2 mt-1 align-items-center flex-wrap">
               <button type="button" onClick={getLocalisation} disabled={locLoading}
@@ -462,7 +466,7 @@ useEffect(() => {
               </div>
             )}
             <small style={{ color: "#666", fontSize: "11px", display: "block", marginTop: 4 }}>
-              {role === "coursier" ? t("Optionnelle — votre adresse ci-dessus suffit.") : t("Pour que les coursiers vous trouvent facilement.")}
+              {role === "coursier" ? t("Obligatoire pour les coursiers.") : t("Pour que les coursiers vous trouvent facilement.")}
             </small>
           </div>
 
@@ -521,6 +525,18 @@ useEffect(() => {
                   accept="image/*" onChange={handleChange} style={inp("photo_verso")} />
                 {errors.photo_verso && <small style={{ color: "#ef4444", fontSize: 11 }}>{t(errors.photo_verso)}</small>}
                 <ApercuCIN fichier={form.photo_verso} />
+              </div>
+
+              {/* Certificat de résidence */}
+              <div className="col-12">
+                <label style={{ color: "var(--d-c-aaa)", fontSize: "14px" }}>
+                  🏠 {t("Certificat de résidence")} <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <input type="file" name="certificat_residence" className="form-control mt-1"
+                  accept="image/*,application/pdf" onChange={handleChange} style={inp("certificat_residence")} />
+                <small style={{ color: "#666", fontSize: 11, display: "block", marginTop: 4 }}>{t("Photo ou PDF — 10 Mo maximum.")}</small>
+                {form.certificat_residence && <small style={{ color: "#10b981", fontSize: 11 }}>✅ {form.certificat_residence.name}</small>}
+                {errors.certificat_residence && <small style={{ color: "#ef4444", fontSize: 11, display: "block" }}>{t(errors.certificat_residence)}</small>}
               </div>
 
               {/* Bloc paiement MVola */}

@@ -169,7 +169,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
           </div>
         </div>
       </div>
-      <div style={{ flex:1, paddingTop:4 }}>
+      <div style={{ flex:1, paddingTop:4, overflowY:"auto", minHeight:0 }}>
         {items.map(item => (
           <div key={item.id} onClick={()=>setOnglet(item.id)}
             style={{

@@ -19,6 +19,7 @@ class User extends Authenticatable implements JWTSubject
         'cin',
         'photo_recto',
         'photo_verso',
+        'certificat_residence',
         'photo_profil',
         'latitude',
         'longitude',
