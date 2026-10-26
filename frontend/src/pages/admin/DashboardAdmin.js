@@ -834,7 +834,7 @@ function DashboardAdmin() {
           {[0,1,2].map(i=><div key={i} style={{ width:20,height:2,backgroundColor:"var(--d-gold)",margin:i<2?"0 0 4px 0":"0" }}/>)}
         </button>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <img src={logo} alt={tr("IRAKY")} style={{ width:50,height:50,borderRadius:"50%" }}/>
+          <img className="d-none d-lg-block" src={logo} alt={tr("IRAKY")} style={{ width:50,height:50,borderRadius:"50%" }}/>
           <div className="d-none d-lg-block">
             <div style={{ color:"var(--d-gold)", fontWeight:800, fontSize:17 }}>{tr("IRAKY Admin")}</div>
             <div style={{ color:"#555", fontSize:11 }}>{tr("Panneau de contrôle")}</div>

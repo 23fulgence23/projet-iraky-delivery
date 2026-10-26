@@ -3,6 +3,8 @@ set -e
 echo "Cache config..."
 php artisan config:cache
 php artisan route:cache
+echo "Lien de stockage..."
+php artisan storage:link || true
 echo "Migration..."
 timeout 120 php artisan migrate --force || echo "Migration : timeout ou echec, on continue quand meme"
 echo "Seed admin..."

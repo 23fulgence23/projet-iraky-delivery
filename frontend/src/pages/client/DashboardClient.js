@@ -943,7 +943,7 @@ const noterCoursier = async (id, note) => {
         </button>
 
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <img src={logo} alt={tr("IRAKY")}
+            <img className="d-none d-lg-block" src={logo} alt={tr("IRAKY")}
               style={{ width:70, height:70, borderRadius:"50%" }}/>
             <span style={{ color:"var(--d-gold)", fontWeight:800, fontSize:19,
               letterSpacing:-0.5 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
