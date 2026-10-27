@@ -979,5 +979,8 @@
   "Admin supprimé avec succès.": "Admin deleted successfully.",
   "Moyen de transport supprimé avec succès.": "Transport method deleted successfully.",
   "Commande supprimée avec succès.": "Order deleted successfully.",
-  "Notification supprimée avec succès.": "Notification deleted successfully."
+  "Notification supprimée avec succès.": "Notification deleted successfully.",
+  "Générer un mot de passe fort": "Generate a strong password",
+  "Notez-le ou copiez-le avant de continuer :": "Write it down or copy it before continuing:",
+  "Copier": "Copy"
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MdPerson, MdEmail, MdPhone, MdLock, MdBadge, MdPhotoCamera, MdHome, MdMyLocation,
          MdArrowBack, MdArrowForward, MdCheckCircle, MdErrorOutline, MdDeliveryDining,
-         MdAttachMoney, MdReceipt, MdUploadFile, MdVerified, MdCancel, MdRefresh } from "react-icons/md";
+         MdAttachMoney, MdReceipt, MdUploadFile, MdVerified, MdCancel, MdRefresh, MdAutorenew, MdContentCopy } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { AuthShell, AuthHead, Champ, sans } from "../../components/AuthUi";
 import AdresseQuartier from "../../components/AdresseQuartier";
@@ -147,6 +147,18 @@ function Inscription() {
     if (!form.mvola_transaction.trim()) e.mvola_transaction = t("La référence de paiement est obligatoire.");
     return e;
   };
+
+  const [mdpGenere, setMdpGenere] = useState("");
+  const genererMotDePasse = () => {
+    const jeu = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#%&*?";
+    const a = new Uint32Array(16);
+    window.crypto.getRandomValues(a);
+    const mdp = Array.from(a, (n) => jeu[n % jeu.length]).join("");
+    setForm((f) => ({ ...f, password: mdp, password_confirmation: mdp }));
+    setErrors((pr) => ({ ...pr, password: "", password_confirmation: "" }));
+    setMdpGenere(mdp);
+  };
+  const copierMdp = () => { try { navigator.clipboard.writeText(mdpGenere); } catch (e) { /* ignore */ } };
 
   const continuer = () => {
     const e = validerEtape1();
@@ -325,7 +337,7 @@ function Inscription() {
               <Champ label={t("Prénom")} required Icon={MdPerson} name="prenom" placeholder={t("Votre prénom")} value={form.prenom} onChange={handleChange} error={errors.prenom} />
             </div>
             <div className="au-row">
-              <Champ label={t("Email")} required Icon={MdEmail} type="email" name="email" placeholder="votre@email.com" value={form.email} onChange={handleChange} error={errors.email} />
+              <Champ label={t("Email")} required Icon={MdEmail} type="email" name="email" autoComplete="email" placeholder="votre@email.com" value={form.email} onChange={handleChange} error={errors.email} />
               <Champ label={t("Téléphone")} required Icon={MdPhone} name="telephone" placeholder="+261 XX XX XXX XX" value={form.telephone} onChange={handleChange} error={errors.telephone} />
             </div>
 
@@ -337,6 +349,23 @@ function Inscription() {
             <div className="au-row">
               <Champ label={t("Mot de passe")} required Icon={MdLock} password name="password" placeholder="••••••••" autoComplete="new-password" value={form.password} onChange={handleChange} error={errors.password} />
               <Champ label={t("Confirmation")} required Icon={MdLock} password name="password_confirmation" placeholder="••••••••" autoComplete="new-password" value={form.password_confirmation} onChange={handleChange} error={errors.password_confirmation} />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <button type="button" className="au-btn-ghost" style={{ height: 42, width: "100%" }} onClick={genererMotDePasse}>
+                <MdAutorenew size={20} /> {t("Générer un mot de passe fort")}
+              </button>
+              {mdpGenere && form.password === mdpGenere && (
+                <div className="au-banner gold" style={{ marginTop: 10, marginBottom: 0, alignItems: "center" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="s" style={{ marginTop: 0 }}>{t("Notez-le ou copiez-le avant de continuer :")}</p>
+                    <p style={{ fontFamily: "monospace", fontSize: 15, wordBreak: "break-all" }}><strong>{mdpGenere}</strong></p>
+                  </div>
+                  <button type="button" className="au-btn-ghost" style={{ height: 38, padding: "0 12px" }} onClick={copierMdp}>
+                    <MdContentCopy size={18} /> {t("Copier")}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="au-actions">
