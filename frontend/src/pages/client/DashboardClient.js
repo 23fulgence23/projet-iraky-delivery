@@ -1,4 +1,4 @@
-import supprimerUnifie from "../../utils/supprimer";
+import supprimerUnifie, { supprimerNotification } from "../../utils/supprimer";
 import { EvaluationChoix, EvaluationBadge } from "../../components/Evaluation";
 import EtoilesAvecTrophees from "../etoiles/EtoilesAvecTrophees";
 import CoursierPicker from "../../components/CoursierPicker";
@@ -1082,14 +1082,7 @@ const noterCoursier = async (id, note) => {
                 )}
                               {/* Supprimer */}
               <button
-                onClick={async () => {
-                  const token = localStorage.getItem("token");
-                  await fetch(`https://projet-iraky-delivery.onrender.com/api/notifications/${n.id}`, {
-                    method:"DELETE",
-                    headers:{ "Authorization":`Bearer ${token}` },
-                  });
-                  setNotifs(p => p.filter(x => x.id !== n.id));
-                }}
+                onClick={() => supprimerNotification({ id: n.id, url: "https://projet-iraky-delivery.onrender.com/api/notifications", headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }, onSuccess: () => setNotifs(p => p.filter(x => x.id !== n.id)) })}
                 title={tr("Supprimer")}
                 style={{ background:"#ef444415", border:"1px solid #ef444430",
                   color:"#ef6666", borderRadius:8, padding:"4px 10px",

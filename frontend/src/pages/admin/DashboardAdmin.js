@@ -2430,19 +2430,7 @@ function DashboardAdmin() {
       
 
     {/* MODAL CONFIRM DELETE NOTIF */}
-      {confirmNotifDel !== null && (
-        <Modal onClose={() => setConfirmNotifDel(null)}>
-          <h5 style={{ color:"#ef4444", marginBottom:12, fontWeight:800 }}>{tr("Supprimer cette notification ?")}</h5>
-          <div style={{ display:"flex", gap:12, marginTop:20 }}>
-            <button onClick={() => setConfirmNotifDel(null)}
-              style={{ flex:1, padding:"11px", borderRadius:10, border:"1px solid #ffffff20",
-                backgroundColor:"transparent", color:"var(--d-text)", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
-            <button onClick={() => deleteNotif(confirmNotifDel)}
-              style={{ flex:1, padding:"11px", borderRadius:10, border:"none",
-                backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
       {/* ✅ MODAL VÉRIFICATION COURSIER — AU BON NIVEAU, pas imbriqué */}
       {coursierVerif && (

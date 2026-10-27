@@ -1,3 +1,4 @@
+import { supprimerNotification } from "../../utils/supprimer";
 import PiecesIdentite from "../../components/PiecesIdentite";
 import { EvaluationBadge } from "../../components/Evaluation";
 import ThemeToggle from "../../components/ThemeToggle";
@@ -927,14 +928,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                 )}
                                 
                                 <button
-                                  onClick={async () => {
-                                    const token = localStorage.getItem("token");
-                                    await fetch(`${BASE_URL}/api/notifications/${n.id}`, {
-                                      method:"DELETE",
-                                      headers:{ "Authorization":`Bearer ${token}` },
-                                    });
-                                    setNotifs(p => p.filter(x => x.id !== n.id));
-                                  }}
+                                  onClick={() => supprimerNotification({ id: n.id, url: `${BASE_URL}/api/notifications`, headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }, onSuccess: () => setNotifs(p => p.filter(x => x.id !== n.id)) })}
                                   style={{ background:"#ef444415", border:"1px solid #ef444430",
                                     color:"#ef6666", borderRadius:8, padding:"4px 10px",
                                     cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
