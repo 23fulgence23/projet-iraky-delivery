@@ -960,5 +960,8 @@
   "trophées": "trophies",
   "commandes": "orders",
   "Prochain trophée : {{n}}/5 étoiles": "Next trophy: {{n}}/5 stars",
-  "Aucune donnée pour le moment.": "No data yet."
+  "Aucune donnée pour le moment.": "No data yet.",
+  "Plus de missions (coursier)": "Most missions (courier)",
+  "Plus de commandes (client)": "Most orders (client)",
+  "Filtrer": "Filter"
 }

@@ -156,8 +156,9 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
     { id:"settings",  Icon:MdSettings,       label:"Paramètres",        badge:0                        },
   ];
   return (
-    <div style={{ height:"100%", maxHeight:"calc(100vh - 66px)", overflowY:"auto", display:"flex", flexDirection:"column" }}>
-      <div style={{ padding:"0 20px 24px", borderBottom:"1px solid #FFD70018", marginBottom:8 }}>
+    <div className="sidebar-admin" style={{ height:"100%", display:"flex", flexDirection:"column" }}>
+      <style>{".sidebar-admin { max-height: calc(100vh - 96px); overflow-y: auto; }\n.sidebar-admin, .sidebar-admin * { scrollbar-width: none; -ms-overflow-style: none; }\n.sidebar-admin::-webkit-scrollbar, .sidebar-admin *::-webkit-scrollbar { display: none; width: 0; height: 0; }"}</style>
+      <div style={{ padding:"0 20px 14px", borderBottom:"1px solid #FFD70018", marginBottom:4 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <div style={{ width:46, height:46, borderRadius:12,
             background:"linear-gradient(135deg,var(--d-gold),#ff4500)",
@@ -171,12 +172,12 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
           </div>
         </div>
       </div>
-      <div style={{ flex:1, paddingTop:4, overflowY:"auto", minHeight:0 }}>
+      <div style={{ flexShrink:0, paddingTop:2 }}>
         {items.map(item => (
           <div key={item.id} onClick={()=>setOnglet(item.id)}
             style={{
               display:"flex", alignItems:"center", justifyContent:"space-between",
-              padding:"12px 20px", cursor:"pointer", fontSize:13.5,
+              padding:"7px 20px", cursor:"pointer", fontSize:13.5,
               backgroundColor:onglet===item.id?"#FFD70012":"transparent",
               borderLeft:onglet===item.id?"3px solid var(--d-gold)":"3px solid transparent",
               color:onglet===item.id?"var(--d-gold)":"#8888aa",
@@ -194,7 +195,7 @@ function SidebarContent({ onglet, setOnglet, stats, supportNonLus, signalementsN
           </div>
         ))}
       </div>
-      <div style={{ padding:16 }}>
+      <div style={{ padding:"8px 16px 28px" }}>
         <button onClick={()=>{ localStorage.clear(); window.location.href="/connexion"; }}
           style={{ width:"100%", padding:"10px", borderRadius:12,
             border:"1px solid #ef444430", backgroundColor:"#ef444410",

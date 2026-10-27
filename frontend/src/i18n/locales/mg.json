@@ -960,5 +960,8 @@
   "trophées": "amboara",
   "commandes": "baiko",
   "Prochain trophée : {{n}}/5 étoiles": "Amboara manaraka : kintana {{n}}/5",
-  "Aucune donnée pour le moment.": "Tsy mbola misy angona."
+  "Aucune donnée pour le moment.": "Tsy mbola misy angona.",
+  "Plus de missions (coursier)": "Iraka be indrindra (coursier)",
+  "Plus de commandes (client)": "Baiko be indrindra (mpanjifa)",
+  "Filtrer": "Sivano"
 }
