@@ -1,3 +1,4 @@
+import supprimer, { notifierSucces, supprimerNotification } from "../../utils/supprimer";
 import PiecesIdentite from "../../components/PiecesIdentite";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect } from "react";
@@ -514,30 +515,24 @@ function DashboardAdmin() {
   };
 
   // ── Supprimer utilisateur ───────────────────────
-  const deleteUser = async (id, nom) => {
-    const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
-      method:"DELETE", headers:getHeaders(),
-    });
-    if (res.ok) {
+  const deleteUser = (id, nom) => supprimer({
+    nom, texteSucces: tr("Utilisateur supprimé avec succès."),
+    action: async () => {
+      const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, { method:"DELETE", headers:getHeaders() });
+      if (!res.ok) throw new Error(tr("Erreur lors de la suppression"));
       setClients(prev=>prev.filter(c=>c.id!==id));
       setCoursiers(prev=>prev.filter(c=>c.id!==id));
-      setConfirmDelete(null);
-      showToast(tr("{{nom}} supprimé", { nom: nom }));
-      fetch(`${BASE_URL}/api/admin/stats`, {headers:getHeaders()})
-        .then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
-    } else {
-      showToast(tr("Erreur lors de la suppression"), "error");
-    }
-  };
+      fetch(`${BASE_URL}/api/admin/stats`, {headers:getHeaders()}).then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
+    },
+  });
+  useEffect(() => { if (confirmDelete) { deleteUser(confirmDelete.id, confirmDelete.nom); setConfirmDelete(null); } }, [confirmDelete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Supprimer notif ─────────────────────────────
-  const deleteNotif = async (id) => {
-    await fetch(`${BASE_URL}/api/admin/notifications/${id}`, {
-      method:"DELETE", headers:getHeaders(),
-    });
-    setNotifs(prev=>prev.filter(n=>n.id!==id));
-    setConfirmNotifDel(null);
-  };
+  const deleteNotif = (id) => supprimerNotification({
+    id, url: BASE_URL + "/api/admin/notifications", headers: getHeaders(),
+    onSuccess: () => setNotifs(prev=>prev.filter(n=>n.id!==id)),
+  });
+  useEffect(() => { if (confirmNotifDel) { deleteNotif(confirmNotifDel); setConfirmNotifDel(null); } }, [confirmNotifDel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Marquer tout lu ─────────────────────────────
   const marquerTousLus = async () => {
@@ -587,7 +582,7 @@ function DashboardAdmin() {
       }
 
       setAdminModal(null);
-      showToast(adminModal==="ajouter" ? tr("Admin créé avec succès") : tr("Admin modifié avec succès"));
+      notifierSucces(adminModal==="ajouter" ? tr("Admin créé avec succès") : tr("Admin modifié avec succès"));
       fetch(`${BASE_URL}/api/admin/admins`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setAdmins(d)).catch(()=>{});
     } catch (err) {
@@ -598,20 +593,16 @@ function DashboardAdmin() {
   };
 
   // ── Gestion des admins : supprimer ──────────────
-  const supprimerAdmin = async (id, nom) => {
-    const res = await fetch(`${BASE_URL}/api/admin/admins/${id}`, {
-      method:"DELETE", headers:getHeaders(),
-    });
-    const data = await res.json();
-    if (res.ok) {
+  const supprimerAdmin = (id, nom) => supprimer({
+    nom, texteSucces: tr("Admin supprimé avec succès."),
+    action: async () => {
+      const res = await fetch(`${BASE_URL}/api/admin/admins/${id}`, { method:"DELETE", headers:getHeaders() });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) throw new Error(data.message || tr("Suppression impossible"));
       setAdmins(prev=>prev.filter(a=>a.id!==id));
-      setConfirmDeleteAdmin(null);
-      showToast(tr("{{nom}} supprimé", { nom: nom }));
-    } else {
-      showToast(data.message || tr("Suppression impossible"), "error");
-      setConfirmDeleteAdmin(null);
-    }
-  };
+    },
+  });
+  useEffect(() => { if (confirmDeleteAdmin) { supprimerAdmin(confirmDeleteAdmin.id, confirmDeleteAdmin.nom); setConfirmDeleteAdmin(null); } }, [confirmDeleteAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Gestion des moyens de transport : ouvrir modal
   const ouvrirAjoutMoyen = () => {
@@ -649,7 +640,7 @@ function DashboardAdmin() {
       }
 
       setMoyenModal(null);
-      showToast(moyenModal==="ajouter" ? tr("Moyen de transport créé avec succès") : tr("Moyen de transport modifié avec succès"));
+      notifierSucces(moyenModal==="ajouter" ? tr("Moyen de transport créé avec succès") : tr("Moyen de transport modifié avec succès"));
       fetch(`${BASE_URL}/api/admin/moyens-transport`, {headers:getHeaders()})
         .then(r=>r.json()).then(d=>setMoyens(d)).catch(()=>{});
     } catch (err) {
@@ -660,20 +651,16 @@ function DashboardAdmin() {
   };
 
   // ── Gestion des moyens de transport : supprimer ──
-  const supprimerMoyen = async (id, nom) => {
-    const res = await fetch(`${BASE_URL}/api/admin/moyens-transport/${id}`, {
-      method:"DELETE", headers:getHeaders(),
-    });
-    const data = await res.json();
-    if (res.ok) {
+  const supprimerMoyen = (id, nom) => supprimer({
+    nom, texteSucces: tr("Moyen de transport supprimé avec succès."),
+    action: async () => {
+      const res = await fetch(`${BASE_URL}/api/admin/moyens-transport/${id}`, { method:"DELETE", headers:getHeaders() });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) throw new Error(data.message || tr("Suppression impossible"));
       setMoyens(prev=>prev.filter(m=>m.id!==id));
-      setConfirmDeleteMoyen(null);
-      showToast(tr("{{nom}} supprimé", { nom: nom }));
-    } else {
-      showToast(data.message || tr("Suppression impossible"), "error");
-      setConfirmDeleteMoyen(null);
-    }
-  };
+    },
+  });
+  useEffect(() => { if (confirmDeleteMoyen) { supprimerMoyen(confirmDeleteMoyen.id, confirmDeleteMoyen.nom); setConfirmDeleteMoyen(null); } }, [confirmDeleteMoyen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers CRUD Commandes ────────────────────
   const sauvegarderCommande = async () => {
@@ -710,7 +697,7 @@ function DashboardAdmin() {
             : c));
         }
         setCmdModal(null);
-        showToast(cmdModal==="ajouter" ? tr("Commande créée !") : tr("Commande modifiée !"));
+        notifierSucces(cmdModal==="ajouter" ? tr("Commande créée !") : tr("Commande modifiée !"));
       } else {
         setCmdErreur(data.message || tr("Erreur lors de l'opération"));
       }
@@ -743,7 +730,7 @@ function DashboardAdmin() {
           setClients(prev=>prev.map(c=>c.id===clientForm.id ? { ...c, ...clientForm } : c));
         }
         setClientModal(null);
-        showToast(clientModal==="ajouter" ? tr("Client créé !") : tr("Client modifié !"));
+        notifierSucces(clientModal==="ajouter" ? tr("Client créé !") : tr("Client modifié !"));
       } else {
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
         setClientErreur(premierMsg || data.message || tr("Erreur lors de l'opération"));
@@ -777,7 +764,7 @@ function DashboardAdmin() {
           setCoursiers(prev=>prev.map(c=>c.id===coursierForm.id ? { ...c, ...coursierForm } : c));
         }
         setCoursierModal(null);
-        showToast(coursierModal==="ajouter" ? tr("Coursier créé !") : tr("Coursier modifié !"));
+        notifierSucces(coursierModal==="ajouter" ? tr("Coursier créé !") : tr("Coursier modifié !"));
       } else {
         const premierMsg = data.errors ? Object.values(data.errors)[0]?.[0] : null;
         setCoursierErreur(premierMsg || data.message || tr("Erreur lors de l'opération"));
@@ -786,19 +773,15 @@ function DashboardAdmin() {
     setCoursierEnvoi(false);
   };
 
-  const supprimerCommande = async (id) => {
-    const res = await fetch(`${BASE_URL}/api/admin/commandes/${id}`, {
-      method:"DELETE", headers:getHeaders(),
-    });
-    if (res.ok) {
+  const supprimerCommande = (id) => supprimer({
+    libelle: tr("cette commande"), texteSucces: tr("Commande supprimée avec succès."),
+    action: async () => {
+      const res = await fetch(`${BASE_URL}/api/admin/commandes/${id}`, { method:"DELETE", headers:getHeaders() });
+      if (!res.ok) throw new Error(tr("Suppression impossible"));
       setCommandes(prev=>prev.filter(c=>c.id!==id));
-      setConfirmDeleteCmd(null);
-      showToast(tr("Commande supprimée"));
-    } else {
-      showToast(tr("Suppression impossible"),"error");
-      setConfirmDeleteCmd(null);
-    }
-  };
+    },
+  });
+  useEffect(() => { if (confirmDeleteCmd) { supprimerCommande(confirmDeleteCmd); setConfirmDeleteCmd(null); } }, [confirmDeleteCmd]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Styles originaux inchangés
   const card = { backgroundColor:"var(--d-bg3)", borderRadius:18, border:"1px solid #FFD70018", padding:24, transition:"all 0.3s ease" };
@@ -2361,24 +2344,7 @@ function DashboardAdmin() {
       )}
 
       {/* MODAL CONFIRM DELETE USER */}
-      {confirmDelete && (
-        <Modal onClose={()=>setConfirmDelete(null)}>
-          <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDelete.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
-          </p>
-          <div style={{ display:"flex",gap:12 }}>
-            <button onClick={()=>setConfirmDelete(null)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
-            <button onClick={()=>deleteUser(confirmDelete.id,confirmDelete.nom)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
-                backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
-                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
       {/* MODAL AJOUTER / MODIFIER ADMIN */}
       {adminModal && (
@@ -2421,24 +2387,7 @@ function DashboardAdmin() {
       )}
 
       {/* MODAL CONFIRM DELETE ADMIN */}
-      {confirmDeleteAdmin && (
-        <Modal onClose={()=>setConfirmDeleteAdmin(null)}>
-          <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer l'admin")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDeleteAdmin.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
-          </p>
-          <div style={{ display:"flex",gap:12 }}>
-            <button onClick={()=>setConfirmDeleteAdmin(null)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
-            <button onClick={()=>supprimerAdmin(confirmDeleteAdmin.id,confirmDeleteAdmin.nom)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
-                backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
-                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
       {/* MODAL AJOUTER / MODIFIER MOYEN DE TRANSPORT */}
       {moyenModal && (
@@ -2478,24 +2427,7 @@ function DashboardAdmin() {
       )}
 
       {/* MODAL CONFIRM DELETE MOYEN DE TRANSPORT */}
-      {confirmDeleteMoyen && (
-        <Modal onClose={()=>setConfirmDeleteMoyen(null)}>
-          <h5 style={{ color:"#ef4444",marginBottom:12,fontWeight:800,display:"flex",alignItems:"center",gap:8 }}>
-            <MdDelete style={{ fontSize:22 }}/>{" "}{tr("Confirmer la suppression")}</h5>
-          <p style={{ color:"var(--d-c-aaa)",fontSize:14,marginBottom:24,lineHeight:1.6 }}>{tr("Supprimer le moyen de transport")}{" "}<strong style={{ color:"var(--d-text)" }}>{confirmDeleteMoyen.nom}</strong>{" "}{tr("? Cette action est")}{" "}<span style={{ color:"#ef4444" }}>{tr("irréversible")}</span>.
-          </p>
-          <div style={{ display:"flex",gap:12 }}>
-            <button onClick={()=>setConfirmDeleteMoyen(null)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"1px solid #ffffff20",
-                backgroundColor:"transparent",color:"var(--d-text)",cursor:"pointer",fontWeight:700 }}>{tr("Annuler")}</button>
-            <button onClick={()=>supprimerMoyen(confirmDeleteMoyen.id,confirmDeleteMoyen.nom)}
-              style={{ flex:1,padding:"12px",borderRadius:12,border:"none",
-                backgroundColor:"#ef4444",color:"#fff",cursor:"pointer",fontWeight:700,
-                display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-              <MdDelete style={{ fontSize:18 }}/>{" "}{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
     {/* MODAL CONFIRM DELETE NOTIF */}
       {confirmNotifDel !== null && (
@@ -2825,17 +2757,7 @@ function DashboardAdmin() {
       )}
 
       {/* ═══ CONFIRMATION SUPPRESSION COMMANDE ═══ */}
-      {confirmDeleteCmd && (
-        <Modal titre={tr("Confirmer la suppression")} onClose={()=>setConfirmDeleteCmd(null)}>
-          <p style={{ color:"var(--d-c-ccc)",marginBottom:20 }}>{tr("Supprimer la commande")}{" "}<strong style={{ color:"var(--d-text)" }}>#{confirmDeleteCmd}</strong>{" "}{tr("? Cette action est irréversible.")}</p>
-          <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
-            <button onClick={()=>setConfirmDeleteCmd(null)}
-              style={{ background:"var(--d-card3)",color:"var(--d-c-aaa)",border:"1px solid #ffffff15",borderRadius:8,padding:"8px 16px",cursor:"pointer" }}>{tr("Annuler")}</button>
-            <button onClick={()=>supprimerCommande(confirmDeleteCmd)}
-              style={{ background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",fontWeight:700,cursor:"pointer" }}>{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
       <style>{`
         @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }

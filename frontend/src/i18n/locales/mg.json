@@ -963,5 +963,21 @@
   "Aucune donnée pour le moment.": "Tsy mbola misy angona.",
   "Plus de missions (coursier)": "Iraka be indrindra (coursier)",
   "Plus de commandes (client)": "Baiko be indrindra (mpanjifa)",
-  "Filtrer": "Sivano"
+  "Filtrer": "Sivano",
+  "Succès": "Nahomby",
+  "Supprimé": "Voafafa",
+  "Erreur": "Hadisoana",
+  "cet élément": "ity zavatra ity",
+  "cette commande": "ity baiko ity",
+  "cette notification": "ity fampandrenesana ity",
+  "Voulez-vous vraiment supprimer {{objet}} ?": "Tena hofafanao ve {{objet}}?",
+  "Cette action est définitive.": "Tsy azo averina ity hetsika ity.",
+  "Oui, supprimer": "Eny, fafao",
+  "La suppression a échoué.": "Tsy nahomby ny famafana.",
+  "Supprimé avec succès.": "Voafafa soa aman-tsara.",
+  "Utilisateur supprimé avec succès.": "Voafafa soa aman-tsara ny mpampiasa.",
+  "Admin supprimé avec succès.": "Voafafa soa aman-tsara ny mpandrindra.",
+  "Moyen de transport supprimé avec succès.": "Voafafa soa aman-tsara ny fitaterana.",
+  "Commande supprimée avec succès.": "Voafafa soa aman-tsara ny baiko.",
+  "Notification supprimée avec succès.": "Voafafa soa aman-tsara ny fampandrenesana."
 }

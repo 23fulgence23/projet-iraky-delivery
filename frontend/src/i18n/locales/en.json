@@ -963,5 +963,21 @@
   "Aucune donnée pour le moment.": "No data yet.",
   "Plus de missions (coursier)": "Most missions (courier)",
   "Plus de commandes (client)": "Most orders (client)",
-  "Filtrer": "Filter"
+  "Filtrer": "Filter",
+  "Succès": "Success",
+  "Supprimé": "Deleted",
+  "Erreur": "Error",
+  "cet élément": "this item",
+  "cette commande": "this order",
+  "cette notification": "this notification",
+  "Voulez-vous vraiment supprimer {{objet}} ?": "Do you really want to delete {{objet}}?",
+  "Cette action est définitive.": "This action is permanent.",
+  "Oui, supprimer": "Yes, delete",
+  "La suppression a échoué.": "The deletion failed.",
+  "Supprimé avec succès.": "Deleted successfully.",
+  "Utilisateur supprimé avec succès.": "User deleted successfully.",
+  "Admin supprimé avec succès.": "Admin deleted successfully.",
+  "Moyen de transport supprimé avec succès.": "Transport method deleted successfully.",
+  "Commande supprimée avec succès.": "Order deleted successfully.",
+  "Notification supprimée avec succès.": "Notification deleted successfully."
 }

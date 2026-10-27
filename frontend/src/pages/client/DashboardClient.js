@@ -1,3 +1,4 @@
+import supprimerUnifie from "../../utils/supprimer";
 import { EvaluationChoix, EvaluationBadge } from "../../components/Evaluation";
 import EtoilesAvecTrophees from "../etoiles/EtoilesAvecTrophees";
 import CoursierPicker from "../../components/CoursierPicker";
@@ -867,20 +868,19 @@ useEffect(() => {
     setLoading(false);
   };
 
-const supprimer = async (id) => {
-  try {
+const supprimer = (id) => supprimerUnifie({
+  libelle: tr("cette commande"), texteSucces: tr("Commande supprimée avec succès."),
+  action: async () => {
     const token = localStorage.getItem("token");
-    await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${id}`, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` },
+    const r = await fetch(`https://projet-iraky-delivery.onrender.com/api/commandes/${id}`, {
+      method: "DELETE", headers: { "Authorization": `Bearer ${token}` },
     });
+    if (!r.ok) throw new Error(tr("Erreur lors de la suppression"));
     setCommandes(prev => prev.filter(c => c.id !== id));
     setDetailCmd(null); setConfirmDel(null);
-    showToast(tr("Commande supprimée"));
-  } catch {
-    showToast(tr("Erreur lors de la suppression"), "error");
-  }
-};
+  },
+});
+useEffect(() => { if (confirmDel) { supprimer(confirmDel); setConfirmDel(null); } }, [confirmDel]); // eslint-disable-line react-hooks/exhaustive-deps
 
 const noterCoursier = async (id, note) => {
   try {
@@ -2666,21 +2666,7 @@ const noterCoursier = async (id, note) => {
   </Modal>
 )}
 
-      {/* MODAL SUPPRESSION */}
-      {confirmDel && (
-        <Modal onClose={()=>setConfirmDel(null)}>
-          <h5 style={{ color:"#ef4444", marginBottom:12, fontWeight:800 }}>{tr("🗑 Confirmer la suppression")}</h5>
-          <p style={{ color:"var(--d-c-aaa)", fontSize:14, marginBottom:24, lineHeight:1.6 }}>{tr("Voulez-vous vraiment supprimer cette commande ? Cette action est irréversible.")}</p>
-          <div style={{ display:"flex", gap:12 }}>
-            <button onClick={()=>setConfirmDel(null)}
-              style={{ flex:1, padding:"12px", borderRadius:12, border:"1px solid #ffffff20",
-                backgroundColor:"transparent", color:"var(--d-text)", cursor:"pointer", fontWeight:700 }}>{tr("Annuler")}</button>
-            <button onClick={()=>supprimer(confirmDel)}
-              style={{ flex:1, padding:"12px", borderRadius:12, border:"none",
-                backgroundColor:"#ef4444", color:"#fff", cursor:"pointer", fontWeight:700 }}>{tr("Supprimer")}</button>
-          </div>
-        </Modal>
-      )}
+      
 
 
  <style>{`
