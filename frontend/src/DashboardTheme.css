@@ -36,3 +36,7 @@
   --d-c-ddd: #5C5C72;
   --d-c-999: #707085;
 }
+
+/* mobile-1 */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+.leaflet-container { position: relative; z-index: 0; isolation: isolate; }
