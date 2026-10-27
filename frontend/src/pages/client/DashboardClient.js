@@ -1154,7 +1154,7 @@ const noterCoursier = async (id, note) => {
 
                 
                {/* stats colorées */}
-                <div className="stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:28 }}>
+                <div className="stats-grid cartes-kpi" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:28 }}>
                   {[
                     { label:"TOTAL",     val:commandes.length,                                                                            Icon:FaBox,         color:"#3b82f6" },
                     { label:"EN COURS",  val:commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length,        Icon:FaClock,       color:"#f59e0b" },
@@ -1894,7 +1894,7 @@ const noterCoursier = async (id, note) => {
         {/* ✅ Input — envoyerChatMsg + chatMsg */}
         <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018", display:"flex", gap:8 }}>
           <input value={chatMsg} onChange={e=>setChatMsg(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&chatMsg.trim()&&envoyerChatMsg()}
+            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&chatMsg.trim()&&envoyerChatMsg()}
             placeholder={tr("Écrire au coursier...")}
             style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030",
               color:"var(--d-text)", borderRadius:12, padding:"9px 14px", fontSize:13, outline:"none" }}
@@ -2191,7 +2191,7 @@ const noterCoursier = async (id, note) => {
                       </div>
                       <span style={{ color:"var(--d-gold)", fontWeight:700, fontSize:15 }}>{tr("Mes statistiques")}</span>
                     </div>
-                        <div className="stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16 }}>
+                        <div className="stats-grid cartes-kpi" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16 }}>
                           {[
                             { label:"TOTAL",     val:commandes.length,                                                                            Icon:FaBox,         color:"#3b82f6" },
                             { label:"EN COURS",  val:commandes.filter(c=>["en_attente","negociable","accepte"].includes(c.statut)).length,        Icon:FaClock,       color:"#f59e0b" },
@@ -2465,7 +2465,7 @@ const noterCoursier = async (id, note) => {
                           <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
                             display:"flex", gap:10 }}>
                             <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
-                              onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
+                              onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportMsg.trim()&&envoyerSupportMsg()}
                               placeholder={tr("Écrivez votre message au support...")}
                               style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
                                 color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",

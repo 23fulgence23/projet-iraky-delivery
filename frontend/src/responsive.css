@@ -300,3 +300,24 @@ body {
     flex-direction: column;
   }
 }
+
+/* mobile-2 */
+@media (max-width: 767px) {
+  /* Barre du haut de l'admin */
+  .admin-barre-droite { gap: 8px !important; }
+  .admin-barre-droite > div:last-child { padding: 6px 8px !important; gap: 0 !important; }
+  .admin-barre-droite > div:last-child > span { display: none !important; }
+
+  /* Cartes du tableau de bord : 2 colonnes, plus compactes */
+  .stats-grid.cartes-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; margin-bottom: 14px !important; }
+  .stats-grid.cartes-kpi > div { padding: 10px 12px !important; gap: 10px !important; min-width: 0; }
+  .stats-grid.cartes-kpi > div > div:first-child:has(> svg) { width: 36px !important; height: 36px !important; border-radius: 10px !important; }
+  .stats-grid.cartes-kpi > div svg { font-size: 19px !important; }
+  .stats-grid.cartes-kpi > div > div:not(:has(> svg)) { min-width: 0; }
+  .stats-grid.cartes-kpi > div > div:not(:has(> svg)) > div:nth-child(1) { font-size: 19px !important; }
+  .stats-grid.cartes-kpi > div > div:not(:has(> svg)) > div:nth-child(2) { font-size: 9px !important; letter-spacing: 0.4px !important; line-height: 1.25 !important; }
+  .stats-grid.cartes-kpi > div > div:not(:has(> svg)) > div:nth-child(3) { font-size: 10px !important; }
+}
+@media (max-width: 420px) {
+  .admin-barre-droite > div:first-child button > span:last-of-type { display: none !important; }
+}

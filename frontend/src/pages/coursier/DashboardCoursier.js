@@ -1840,7 +1840,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
                       display:"flex", gap:10 }}>
                       <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
-                        onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportMsg.trim()&&envoyerSupportMsg()}
+                        onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportMsg.trim()&&envoyerSupportMsg()}
                         placeholder={tr("Écrivez votre message au support...")}
                         style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
                           color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",

@@ -826,7 +826,7 @@ function DashboardAdmin() {
             <div style={{ color:"#555", fontSize:11 }}>{tr("Panneau de contrôle")}</div>
           </div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+        <div className="admin-barre-droite" style={{ display:"flex", alignItems:"center", gap:18 }}>
           <LanguageSwitcher />
           {/* Cloche notifs — polling 2s */}
           <ThemeToggle size={38} />
@@ -1017,7 +1017,7 @@ function DashboardAdmin() {
                     CORRIGÉ : chaque champ pointe vers la bonne
                     clé renvoyée par /api/admin/stats
                 ──────────────────────────────────────────── */}
-                <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:20 }}>
+                <div className="stats-grid cartes-kpi" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:20 }}>
                   {[
                     {
                       label:"CLIENTS ACTIFS",
@@ -1076,7 +1076,7 @@ function DashboardAdmin() {
                     • "COURSIERS EN ATTENTE" → stats.coursiers_en_attente  (nouveau champ)
                     • "ABONNEMENTS IMPAYÉS"  → stats.abonnes_impayes
                 ──────────────────────────────────────────── */}
-                <div className="stats-grid" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24 }}>
+                <div className="stats-grid cartes-kpi" style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24 }}>
                   {[
                     {
                       label:"CLIENTS INACTIFS",
@@ -2133,7 +2133,7 @@ function DashboardAdmin() {
                         <div style={{ padding:"12px 16px", borderTop:"1px solid #FFD70018",
                           display:"flex", gap:10 }}>
                           <input value={supportReply} onChange={e=>setSupportReply(e.target.value)}
-                            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&supportReply.trim()&&envoyerReponseSupport()}
+                            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportReply.trim()&&envoyerReponseSupport()}
                             placeholder={tr("Répondre au client...")}
                             style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70033",
                               color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>
