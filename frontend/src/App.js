@@ -5,6 +5,7 @@ import APropos from "./components/APropos";
 import NosServices from "./components/NosServices";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import SeoRoute from "./components/SeoRoute";
 import AbonnesStats from "./components/AbonnesStats";
 import FloatingSubscribe from "./components/FloatingSubscribe";
 import Connexion from "./pages/auth/Connexion";
@@ -34,6 +35,7 @@ function Portail() {
 function App() {
   return (
     <BrowserRouter>
+      <SeoRoute />
       <Routes>
         <Route path="/" element={<Portail />} />
         <Route path="/connexion" element={<Connexion />} />

@@ -1,3 +1,8 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard-admin
+Disallow: /dashboard-client
+Disallow: /dashboard-coursier
+Disallow: /oubli-mot-de-passe
+
+Sitemap: https://iraky-delivery.vercel.app/sitemap.xml
