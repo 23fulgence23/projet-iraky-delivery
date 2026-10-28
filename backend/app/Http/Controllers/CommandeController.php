@@ -379,6 +379,10 @@ public function terminer(Request $request, $id)
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
+        if (!in_array($commande->statut, ['en_attente', 'refuse'], true)) {
+            return response()->json(['message' => 'Seules les commandes en attente ou refusées peuvent être supprimées.'], 422);
+        }
+
         $commande->delete();
         return response()->json(['message' => 'Commande supprimée']);
     }

@@ -1,4 +1,5 @@
-import supprimerUnifie, { supprimerNotification } from "../../utils/supprimer";
+import supprimerUnifie, { supprimerNotification, supprimerPlusieurs, supprimerNotificationsGroupe } from "../../utils/supprimer";
+import { useSelection, BarreSelection, CaseSelection } from "../../components/SelectionListe";
 import { EvaluationChoix, EvaluationBadge } from "../../components/Evaluation";
 import EtoilesAvecTrophees from "../etoiles/EtoilesAvecTrophees";
 import CoursierPicker from "../../components/CoursierPicker";
@@ -362,6 +363,28 @@ const [notifs, setNotifs] = useState([]);
   const [detailCmd, setDetailCmd]     = useState(null);
   const [noteCmd, setNoteCmd]         = useState(null);
   const [signalCmd, setSignalCmd] = useState(null);
+
+  const selNotif = useSelection();
+  const selMsg = useSelection();
+  const supprimerNotifs = (ids, tout) => supprimerNotificationsGroupe({
+    ids, tout, nb: tout ? notifs.length : ids.length,
+    url: "https://projet-iraky-delivery.onrender.com/api/notifications",
+    headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
+    onSuccess: () => { setNotifs(p => tout ? [] : p.filter(n => !ids.includes(n.id))); selNotif.arreter(); },
+  });
+  const idsConversations = () => commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).map(c => c.id);
+  const retirerConversations = (ids, tout) => supprimerPlusieurs({
+    n: ids.length, tout, libelle: tr("conversations"),
+    action: async () => {
+      setMessagesMasques(prev => {
+        const next = [...new Set([...prev, ...ids])];
+        try { localStorage.setItem("messages_masques", JSON.stringify(next)); } catch {}
+        return next;
+      });
+      return { ok: ids.length, echecs: 0 };
+    },
+    onSuccess: () => selMsg.arreter(),
+  });
   const [noteTmp, setNoteTmp]         = useState(0);
   const [evalChoix, setEvalChoix] = useState({});
   const [confirmDel, setConfirmDel]   = useState(null);
@@ -1012,7 +1035,8 @@ const noterCoursier = async (id, note) => {
         </span>
       </div>
 
-      {/* Liste */}
+      {notifs.length > 0 && (<div style={{ padding:"8px 14px", borderBottom:"1px solid #ffffff08" }}><BarreSelection sel={selNotif} tous={notifs.map(n=>n.id)} onSupprimer={(ids)=>supprimerNotifs(ids,false)} onSupprimerTout={()=>supprimerNotifs([],true)} /></div>)}
+{/* Liste */}
       <div style={{ overflowY:"auto", flex:1 }}>
         {notifs.length === 0 && (
           <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>{tr("Aucune notification")}</div>
@@ -1023,6 +1047,8 @@ const noterCoursier = async (id, note) => {
             backgroundColor: n.lu ? "transparent" : "#FFD70008",
           }}>
             <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+<CaseSelection sel={selNotif} id={n.id} />
+
               {/* Point non lu */}
               <div style={{ paddingTop:5, flexShrink:0 }}>
                 <div style={{
@@ -1644,6 +1670,7 @@ const noterCoursier = async (id, note) => {
         <MdChat style={{ color:"#3b82f6", fontSize:22 }}/>
       </div>{tr("Mes messages")}</h4>
     <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>{tr("Vos conversations avec les coursiers")}</p>
+    <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
     {commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).length === 0 ? (
       <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
@@ -1654,7 +1681,7 @@ const noterCoursier = async (id, note) => {
     ) : (
       commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).map(cmd => (
         <div key={cmd.id}
-          onClick={() => { setChatCommande(cmd); setChatMessages([]); }}
+          onClick={() => { if (selMsg.actif) { selMsg.basculer(cmd.id); return; } setChatCommande(cmd); setChatMessages([]); }}
           style={{ ...card, marginBottom:14, cursor:"pointer",
             borderLeft:`4px solid ${STATUT_CONFIG[cmd.statut]?.color||"var(--d-gold)"}`,
             transition:"all 0.2s" }}
@@ -1662,6 +1689,7 @@ const noterCoursier = async (id, note) => {
           onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+<CaseSelection sel={selMsg} id={cmd.id} />
               <div style={{ width:46, height:46, borderRadius:"50%",
                 background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
                 display:"flex", alignItems:"center", justifyContent:"center",

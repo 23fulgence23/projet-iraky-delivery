@@ -994,5 +994,6 @@
   "Tout sélectionner": "Select all",
   "Tout désélectionner": "Deselect all",
   "{{n}} sélectionné(s)": "{{n}} selected",
-  "Tout supprimer": "Delete all"
+  "Tout supprimer": "Delete all",
+  "conversations": "conversations"
 }

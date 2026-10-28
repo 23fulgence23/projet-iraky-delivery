@@ -1,4 +1,5 @@
-import { supprimerNotification } from "../../utils/supprimer";
+import { supprimerNotification, supprimerPlusieurs, supprimerNotificationsGroupe } from "../../utils/supprimer";
+import { useSelection, BarreSelection, CaseSelection } from "../../components/SelectionListe";
 import PiecesIdentite from "../../components/PiecesIdentite";
 import { EvaluationBadge } from "../../components/Evaluation";
 import ThemeToggle from "../../components/ThemeToggle";
@@ -268,6 +269,28 @@ function DashboardCoursier() {
   });
   const [profilLoading, setProfilLoading] = useState(true);
   const [signalCmd, setSignalCmd] = useState(null);
+
+  const selNotif = useSelection();
+  const selMsg = useSelection();
+  const supprimerNotifs = (ids, tout) => supprimerNotificationsGroupe({
+    ids, tout, nb: tout ? notifs.length : ids.length,
+    url: `${BASE_URL}/api/notifications`,
+    headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
+    onSuccess: () => { setNotifs(p => tout ? [] : p.filter(n => !ids.includes(n.id))); selNotif.arreter(); },
+  });
+  const idsConversations = () => missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(m => m.id);
+  const retirerConversations = (ids, tout) => supprimerPlusieurs({
+    n: ids.length, tout, libelle: tr("conversations"),
+    action: async () => {
+      setMessagesMasquesCoursier(prev => {
+        const next = [...new Set([...prev, ...ids])];
+        try { localStorage.setItem("coursier_messages_masques", JSON.stringify(next)); } catch {}
+        return next;
+      });
+      return { ok: ids.length, echecs: 0 };
+    },
+    onSuccess: () => selMsg.arreter(),
+  });
 
   // ── Aide & Support (identique au dashboard client, contenu adapté coursier) ──
   const [aideVue, setAideVue]                 = useState("menu"); // menu | chat | guide
@@ -876,7 +899,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                           <span style={{ color:"#666", fontSize:12 }}>{nbNonLus} non lues</span>
                         </div>
 
-                        {/* Liste */}
+                        {notifs.length > 0 && (<div style={{ padding:"8px 14px", borderBottom:"1px solid #ffffff08" }}><BarreSelection sel={selNotif} tous={notifs.map(n=>n.id)} onSupprimer={(ids)=>supprimerNotifs(ids,false)} onSupprimerTout={()=>supprimerNotifs([],true)} /></div>)}
+{/* Liste */}
                         <div style={{ overflowY:"auto", flex:1 }}>
                           {notifs.length === 0 && (
                             <div style={{ padding:24, textAlign:"center", color:"#555", fontSize:13 }}>{tr("Aucune notification")}</div>
@@ -887,6 +911,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                               backgroundColor: n.lu ? "transparent" : "#FFD70008",
                             }}>
                               <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+<CaseSelection sel={selNotif} id={n.id} />
+
                                 <div style={{ paddingTop:5, flexShrink:0 }}>
                                   <div style={{ width:8, height:8, borderRadius:"50%",
                                     backgroundColor: n.lu ? "transparent" : "var(--d-gold)" }}/>
@@ -1244,6 +1270,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       <MdChat style={{ color:"#3b82f6", fontSize:22 }}/>
                     </div>{tr("Mes messages")}</h4>
                   <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>{tr("Vos conversations avec les clients")}</p>
+                  <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
                   {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
                     <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
@@ -1253,7 +1280,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   ) : (
                     missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(mission => (
                       <div key={mission.id}
-                        onClick={() => { ouvrirChat(mission); }}
+                        onClick={() => { if (selMsg.actif) { selMsg.basculer(mission.id); return; } ouvrirChat(mission); }}
                         style={{ ...card, marginBottom:14, cursor:"pointer",
                           borderLeft:`4px solid ${STATUT_CONFIG[mission.statut]?.color||"var(--d-gold)"}`,
                           transition:"all 0.2s" }}
@@ -1261,6 +1288,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
                           <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+<CaseSelection sel={selMsg} id={mission.id} />
                             <div style={{ width:46, height:46, borderRadius:"50%",
                               background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                               display:"flex", alignItems:"center", justifyContent:"center",
