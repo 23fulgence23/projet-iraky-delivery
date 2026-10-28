@@ -982,5 +982,12 @@
   "Notification supprimée avec succès.": "Voafafa soa aman-tsara ny fampandrenesana.",
   "Générer un mot de passe fort": "Hamorona tenimiafina matanjaka",
   "Notez-le ou copiez-le avant de continuer :": "Soraty na adikao alohan'ny hanohizana :",
-  "Copier": "Adikao"
+  "Copier": "Adikao",
+  "Voulez-vous vraiment supprimer tout : {{libelle}} ({{n}}) ?": "Tena hofafanao ve ny rehetra : {{libelle}} ({{n}})?",
+  "Voulez-vous vraiment supprimer la sélection ({{n}}) : {{libelle}} ?": "Tena hofafanao ve ny voafidy ({{n}}) : {{libelle}}?",
+  "Oui, tout supprimer": "Eny, fafao daholo",
+  "Suppression partielle": "Famafana tsy feno",
+  "{{ok}} supprimé(s), {{echecs}} échec(s).": "{{ok}} voafafa, {{echecs}} tsy nahomby.",
+  "{{n}} élément(s) supprimé(s) avec succès.": "{{n}} voafafa soa aman-tsara.",
+  "notifications": "fampandrenesana"
 }

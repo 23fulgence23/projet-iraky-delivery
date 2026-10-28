@@ -982,5 +982,12 @@
   "Notification supprimée avec succès.": "Notification deleted successfully.",
   "Générer un mot de passe fort": "Generate a strong password",
   "Notez-le ou copiez-le avant de continuer :": "Write it down or copy it before continuing:",
-  "Copier": "Copy"
+  "Copier": "Copy",
+  "Voulez-vous vraiment supprimer tout : {{libelle}} ({{n}}) ?": "Do you really want to delete everything: {{libelle}} ({{n}})?",
+  "Voulez-vous vraiment supprimer la sélection ({{n}}) : {{libelle}} ?": "Do you really want to delete the selection ({{n}}): {{libelle}}?",
+  "Oui, tout supprimer": "Yes, delete all",
+  "Suppression partielle": "Partial deletion",
+  "{{ok}} supprimé(s), {{echecs}} échec(s).": "{{ok}} deleted, {{echecs}} failed.",
+  "{{n}} élément(s) supprimé(s) avec succès.": "{{n}} item(s) deleted successfully.",
+  "notifications": "notifications"
 }

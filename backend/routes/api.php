@@ -148,4 +148,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get   ('/notifications',           [NotificationController::class, 'index']);
     Route::post  ('/notifications/{id}/lu',   [NotificationController::class, 'marquerLu']);
     Route::delete('/notifications/{id}',      [NotificationController::class, 'destroy']);
+    Route::post  ('/notifications/supprimer-selection', [NotificationController::class, 'supprimerSelection']);
+    Route::post  ('/notifications/supprimer-tout',      [NotificationController::class, 'supprimerTout']);
 });

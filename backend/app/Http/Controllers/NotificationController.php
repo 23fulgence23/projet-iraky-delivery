@@ -41,6 +41,24 @@ public function index()
         return response()->json(['message' => 'Tout marqué comme lu']);
     }
 
+    public function supprimerSelection(\Illuminate\Http\Request $request)
+    {
+        $user = JWTAuth::user();
+        $data = $request->validate([
+            'ids'   => 'required|array|min:1|max:500',
+            'ids.*' => 'integer',
+        ]);
+        $n = Notification::where('user_id', $user->id)->whereIn('id', $data['ids'])->delete();
+        return response()->json(['message' => 'Notifications supprimées', 'supprimees' => $n]);
+    }
+
+    public function supprimerTout()
+    {
+        $user = JWTAuth::user();
+        $n = Notification::where('user_id', $user->id)->delete();
+        return response()->json(['message' => 'Notifications supprimées', 'supprimees' => $n]);
+    }
+
     public function destroy($id)
     {
         $user  = JWTAuth::user();
