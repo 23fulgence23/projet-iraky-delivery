@@ -14,6 +14,7 @@ import {
   MdForum,
 } from "react-icons/md";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import ChampMessage from "../../components/ChampMessage";
 import SignalementsAdmin from "../../components/SignalementsAdmin";
 import LocalisationAdmin from "../../components/LocalisationAdmin";
 import TopUtilisateursAdmin from "../../components/TopUtilisateursAdmin";
@@ -2131,9 +2132,8 @@ function DashboardAdmin() {
 
                         {/* Répondre */}
                         <div style={{ padding:"12px 16px", borderTop:"1px solid #FFD70018",
-                          display:"flex", gap:10 }}>
-                          <input value={supportReply} onChange={e=>setSupportReply(e.target.value)}
-                            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportReply.trim()&&envoyerReponseSupport()}
+                          alignItems:"flex-end", display:"flex", gap:10 }}>
+                          <ChampMessage onEnvoyer={envoyerReponseSupport} value={supportReply} onChange={e=>setSupportReply(e.target.value)}
                             placeholder={tr("Répondre au client...")}
                             style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70033",
                               color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none" }}/>

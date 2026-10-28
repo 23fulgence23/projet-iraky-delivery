@@ -45,6 +45,33 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
+  <style id="iraky-splash-style">
+      html, body { background: #080820; }
+      #iraky-splash { position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+        background: radial-gradient(circle at 50% 38%, #14143d 0%, #080820 62%, #04040f 100%); color: #fff;
+        font-family: "Segoe UI", Roboto, system-ui, sans-serif; transition: opacity .45s ease, transform .45s ease; }
+      #iraky-splash.isp-clair { background: radial-gradient(circle at 50% 38%, #ffffff 0%, #eef1fb 70%, #e3e8f7 100%); color: #1a1a3a; }
+      #iraky-splash.isp-sortie { opacity: 0; transform: scale(1.04); pointer-events: none; }
+      .isp-zone { position: relative; width: 132px; height: 132px; display: flex; align-items: center; justify-content: center; }
+      .isp-onde { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255,215,0,.55); opacity: 0; animation: isp-onde 2.2s ease-out infinite; }
+      .isp-onde:nth-child(2) { animation-delay: .7s; }
+      .isp-onde:nth-child(3) { animation-delay: 1.4s; }
+      .isp-logo { position: relative; width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+        box-shadow: 0 0 34px rgba(255,215,0,.35), 0 10px 30px rgba(0,0,0,.45);
+        animation: isp-entree .8s cubic-bezier(.2,.9,.3,1.25) both, isp-flotte 2.6s ease-in-out .8s infinite; }
+      .isp-nom { font-size: 26px; font-weight: 800; letter-spacing: .5px; animation: isp-monte .7s ease .45s both; }
+      .isp-nom span { color: #FFD700; }
+      .isp-clair .isp-nom span { color: #d97706; }
+      .isp-barre { width: 150px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; animation: isp-monte .7s ease .8s both; }
+      .isp-clair .isp-barre { background: rgba(0,0,0,.1); }
+      .isp-barre span { display: block; width: 45%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #FFD700, #ff9500); animation: isp-course 1.3s ease-in-out infinite; }
+      @keyframes isp-entree { from { opacity: 0; transform: scale(.55) rotate(-12deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+      @keyframes isp-flotte { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+      @keyframes isp-onde { 0% { opacity: .7; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.7); } }
+      @keyframes isp-monte { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes isp-course { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+      @media (prefers-reduced-motion: reduce) { #iraky-splash, #iraky-splash * { animation: none !important; transition: none !important; } }
+    </style>
   </head>
   <body>
     <noscript>
@@ -52,6 +79,42 @@
       <p>IRAKY Delivery : coursiers vérifiés à Toliara pour livraison de colis, facture JIRAMA, légalisation CIN, banque et achats. À partir de 5 000 Ar. Activez JavaScript pour utiliser IRAKY Delivery.</p>
     </noscript>
     <div id="root"></div>
+    <div id="iraky-splash" role="status" aria-live="polite" aria-label="Chargement">
+      <div class="isp-zone"><span class="isp-onde"></span><span class="isp-onde"></span><span class="isp-onde"></span>
+        <img class="isp-logo" src="%PUBLIC_URL%/logo192.png" alt="" width="104" height="104"></div>
+      <div class="isp-nom">IRAKY <span>Delivery</span></div>
+      <div class="isp-barre"><span></span></div>
+    </div>
+    <script>
+      (function () {
+        var s = document.getElementById("iraky-splash");
+        if (!s) return;
+        try { if (/^(light|clair)$/i.test(localStorage.getItem("iraky-theme") || "")) s.className = "isp-clair"; } catch (e) {}
+        var appli = false;
+        try {
+          appli = window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches ||
+            window.navigator.standalone === true || (document.referrer || "").indexOf("android-app://") === 0;
+        } catch (e) {}
+        var debut = Date.now(), fini = false;
+        function masquer() {
+          if (fini) return; fini = true;
+          var reste = appli ? Math.max(0, 1200 - (Date.now() - debut)) : 0;
+          setTimeout(function () {
+            s.className += " isp-sortie";
+            setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 500);
+          }, reste);
+        }
+        var racine = document.getElementById("root");
+        if (racine) {
+          if (racine.childNodes.length) masquer();
+          else new MutationObserver(function (m, o) {
+            if (racine.childNodes.length) { o.disconnect(); requestAnimationFrame(function () { requestAnimationFrame(masquer); }); }
+          }).observe(racine, { childList: true });
+        }
+        setTimeout(masquer, 10000);
+        window.irakyMasquerSplash = masquer;
+      })();
+    </script>
 
     <!-- MDB JS -->
     <script

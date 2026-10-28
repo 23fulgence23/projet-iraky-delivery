@@ -8,6 +8,7 @@ import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import ApercuCoursierModal, { LienCoursier } from "../../components/ApercuCoursierModal";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import ChampMessage from "../../components/ChampMessage";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
@@ -1892,9 +1893,8 @@ const noterCoursier = async (id, note) => {
         </div>
 
         {/* ✅ Input — envoyerChatMsg + chatMsg */}
-        <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018", display:"flex", gap:8 }}>
-          <input value={chatMsg} onChange={e=>setChatMsg(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&chatMsg.trim()&&envoyerChatMsg()}
+        <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018", alignItems:"flex-end", display:"flex", gap:8 }}>
+          <ChampMessage onEnvoyer={envoyerChatMsg} value={chatMsg} onChange={e=>setChatMsg(e.target.value)}
             placeholder={tr("Écrire au coursier...")}
             style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030",
               color:"var(--d-text)", borderRadius:12, padding:"9px 14px", fontSize:13, outline:"none" }}
@@ -2463,9 +2463,8 @@ const noterCoursier = async (id, note) => {
 
                           {/* Input */}
                           <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
-                            display:"flex", gap:10 }}>
-                            <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
-                              onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportMsg.trim()&&envoyerSupportMsg()}
+                            alignItems:"flex-end", display:"flex", gap:10 }}>
+                            <ChampMessage onEnvoyer={envoyerSupportMsg} value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
                               placeholder={tr("Écrivez votre message au support...")}
                               style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
                                 color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",

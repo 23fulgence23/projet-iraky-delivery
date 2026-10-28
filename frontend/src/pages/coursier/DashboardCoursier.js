@@ -6,6 +6,7 @@ import { useState, useEffect, useRef  } from "react";
 import { formatDateHeure } from "../../utils/formatDateHeure";
 import { AvatarProfilEditable, AvatarRond } from "../../components/AvatarProfil";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import ChampMessage from "../../components/ChampMessage";
 import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
@@ -1516,9 +1517,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
 
                       {/* Input — ✅ corrigé : newMsg + envoyerMessage */}
                       <div style={{ padding:"10px 14px", borderTop:"1px solid #FFD70018",
-                        display:"flex", gap:8 }}>
-                        <input value={newMsg} onChange={e => setNewMsg(e.target.value)}
-                          onKeyDown={e => e.key==="Enter" && newMsg.trim() && envoyerMessage()}
+                        alignItems:"flex-end", display:"flex", gap:8 }}>
+                        <ChampMessage onEnvoyer={envoyerMessage} value={newMsg} onChange={e => setNewMsg(e.target.value)}
                           placeholder={tr("Écrire au client...")}
                           style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #FFD70030",
                             color:"var(--d-text)", borderRadius:12, padding:"9px 14px",
@@ -1838,9 +1838,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     </div>
 
                     <div style={{ padding:"12px 16px", borderTop:"1px solid #3b82f620",
-                      display:"flex", gap:10 }}>
-                      <input value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
-                        onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&!(e.target.tagName==="TEXTAREA"&&window.matchMedia("(pointer: coarse)").matches)&&supportMsg.trim()&&envoyerSupportMsg()}
+                      alignItems:"flex-end", display:"flex", gap:10 }}>
+                      <ChampMessage onEnvoyer={envoyerSupportMsg} value={supportMsg} onChange={e=>setSupportMsg(e.target.value)}
                         placeholder={tr("Écrivez votre message au support...")}
                         style={{ flex:1, backgroundColor:"var(--d-bg2)", border:"1px solid #3b82f640",
                           color:"var(--d-text)", borderRadius:12, padding:"10px 14px", fontSize:13, outline:"none",

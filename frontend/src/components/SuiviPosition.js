@@ -13,6 +13,18 @@ export default function SuiviPosition({ apiUrl, role }) {
   const [essai, setEssai] = useState(0);
   const derniere = useRef(null);
   const dernierEnvoi = useRef(0);
+  const [clavier, setClavier] = useState(false);
+
+  // Sur telephone : la pastille ne doit jamais masquer la zone de saisie
+  useEffect(() => {
+    if (!window.matchMedia || !window.matchMedia("(pointer: coarse)").matches) return undefined;
+    const champ = (el) => !!el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+    const dedans = (e) => { if (champ(e.target)) setClavier(true); };
+    const dehors = () => setTimeout(() => { if (!champ(document.activeElement)) setClavier(false); }, 150);
+    document.addEventListener("focusin", dedans);
+    document.addEventListener("focusout", dehors);
+    return () => { document.removeEventListener("focusin", dedans); document.removeEventListener("focusout", dehors); };
+  }, []);
 
   const entetes = () => ({
     "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -113,14 +125,16 @@ export default function SuiviPosition({ apiUrl, role }) {
     background: "linear-gradient(135deg,#FFD700,#ff9500)", color: "#000",
   };
 
-  const puce = (couleur, contenu, onClick) => (
-    <div onClick={onClick} style={{ position: "fixed", left: 12, bottom: 12, zIndex: 700, display: "flex",
+  const puce = (couleur, contenu, onClick) => (clavier ? null : (
+    <div onClick={onClick} className="pos-puce" style={{ position: "fixed", left: 12,
+      bottom: "calc(12px + env(safe-area-inset-bottom, 0px))", zIndex: 700, display: "flex",
       alignItems: "center", gap: 6, padding: "5px 11px", borderRadius: 20, fontSize: 11, fontWeight: 700,
       backgroundColor: "var(--d-card, #131330)", color: couleur, border: `1px solid ${couleur}66`,
-      cursor: onClick ? "pointer" : "default", boxShadow: "0 4px 14px rgba(0,0,0,0.4)" }}>
+      cursor: onClick ? "pointer" : "default", boxShadow: "0 4px 14px rgba(0,0,0,0.4)", opacity: 0.92 }}>
+      <style>{"@media (max-width: 767px) { .pos-puce { padding: 7px !important; } .pos-puce .pos-txt { display: none; } }"}</style>
       {contenu}
     </div>
-  );
+  ));
 
   return (
     <>
@@ -168,13 +182,13 @@ export default function SuiviPosition({ apiUrl, role }) {
 
       {!bloque && actif && permission === "accordee" && createPortal(
         obligatoire
-          ? puce("#10b981", <><MdMyLocation style={{ fontSize: 14 }} /> {t("Localisation active")}</>)
-          : puce("#10b981", <><MdMyLocation style={{ fontSize: 14 }} /> {t("Position partagée")}</>, arreter),
+          ? puce("#10b981", <><MdMyLocation style={{ fontSize: 14 }} /> <span className="pos-txt">{t("Localisation active")}</span></>)
+          : puce("#10b981", <><MdMyLocation style={{ fontSize: 14 }} /> <span className="pos-txt">{t("Position partagée")}</span></>, arreter),
         document.body
       )}
 
       {!obligatoire && consentement === false && createPortal(
-        puce("#9ca3af", <><MdLocationOff style={{ fontSize: 14 }} /> {t("Partager ma position")}</>, () => repondre(true)),
+        puce("#9ca3af", <><MdLocationOff style={{ fontSize: 14 }} /> <span className="pos-txt">{t("Partager ma position")}</span></>, () => repondre(true)),
         document.body
       )}
     </>
