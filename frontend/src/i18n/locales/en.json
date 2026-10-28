@@ -989,5 +989,10 @@
   "Suppression partielle": "Partial deletion",
   "{{ok}} supprimé(s), {{echecs}} échec(s).": "{{ok}} deleted, {{echecs}} failed.",
   "{{n}} élément(s) supprimé(s) avec succès.": "{{n}} item(s) deleted successfully.",
-  "notifications": "notifications"
+  "notifications": "notifications",
+  "Sélectionner": "Select",
+  "Tout sélectionner": "Select all",
+  "Tout désélectionner": "Deselect all",
+  "{{n}} sélectionné(s)": "{{n}} selected",
+  "Tout supprimer": "Delete all"
 }

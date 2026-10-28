@@ -989,5 +989,10 @@
   "Suppression partielle": "Famafana tsy feno",
   "{{ok}} supprimé(s), {{echecs}} échec(s).": "{{ok}} voafafa, {{echecs}} tsy nahomby.",
   "{{n}} élément(s) supprimé(s) avec succès.": "{{n}} voafafa soa aman-tsara.",
-  "notifications": "fampandrenesana"
+  "notifications": "fampandrenesana",
+  "Sélectionner": "Fidio",
+  "Tout sélectionner": "Fidio daholo",
+  "Tout désélectionner": "Esory ny fidiana rehetra",
+  "{{n}} sélectionné(s)": "{{n}} voafidy",
+  "Tout supprimer": "Fafao daholo"
 }

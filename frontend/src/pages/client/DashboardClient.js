@@ -1593,7 +1593,7 @@ const noterCoursier = async (id, note) => {
                       </div>
 
                       {/* signaler */}
-                      {cmd.coursier_id && (
+                      {cmd.coursier_id && cmd.statut !== "termine" && (
                         <div style={{ marginTop:10, textAlign:"right" }}>
                           <button onClick={e=>{ e.stopPropagation(); setSignalCmd(cmd); }}
                             style={{ background:"#ef444415", border:"1px solid #ef444430", color:"#ef6666",

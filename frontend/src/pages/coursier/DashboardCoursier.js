@@ -1160,11 +1160,11 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                         </div>
                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                           <StatutBadge statut={mission.statut}/>
-                          <><button onClick={e=>{ e.stopPropagation(); setSignalCmd(mission); }}
+                          <>{mission.statut !== "termine" && (<button onClick={e=>{ e.stopPropagation(); setSignalCmd(mission); }}
                             title={tr("Signaler un problème")}
                             style={{ background:"#ef444415", border:"1px solid #ef444430", color:"#ef6666", borderRadius:8,
                               padding:"4px 10px", cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", gap:4 }}>
-                            🚩 {tr("Signaler")}</button>
+                            🚩 {tr("Signaler")}</button>)}
                           <button
                             onClick={()=>demanderRetraitMission(mission.id)}
                             title={tr("Retirer de mes missions (reste visible côté admin)")}
