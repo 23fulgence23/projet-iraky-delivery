@@ -995,5 +995,8 @@
   "Tout désélectionner": "Esory ny fidiana rehetra",
   "{{n}} sélectionné(s)": "{{n}} voafidy",
   "Tout supprimer": "Fafao daholo",
-  "conversations": "resaka"
+  "conversations": "resaka",
+  "Rien à supprimer": "Tsy misy fafana",
+  "Aucune commande terminée ou refusée.": "Tsy misy baiko vita na lavina.",
+  "Aucune mission terminée.": "Tsy misy iraka vita."
 }

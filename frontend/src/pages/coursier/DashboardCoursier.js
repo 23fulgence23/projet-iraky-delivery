@@ -272,6 +272,28 @@ function DashboardCoursier() {
 
   const selNotif = useSelection();
   const selMsg = useSelection();
+  const selMiss = useSelection();
+  const idsMiss = () => missions.filter(m => !missionsMasques.includes(m.id)).map(m => m.id);
+  const idsMissTerminees = () => missions.filter(m => !missionsMasques.includes(m.id) && m.statut === "termine").map(m => m.id);
+  const retirerMissions = (ids, tout) => {
+    if (ids.length === 0) {
+      Swal.fire({ icon: "info", title: tr("Rien à supprimer"), text: tr("Aucune mission terminée."),
+        background: "var(--d-card)", color: "var(--d-text)", confirmButtonColor: "#FFD700", customClass: { popup: "swal-iraky" } });
+      return;
+    }
+    return supprimerPlusieurs({
+      n: ids.length, tout, libelle: tr("missions"),
+      action: async () => {
+        setMissionsMasques(prev => {
+          const next = [...new Set([...prev, ...ids])];
+          try { localStorage.setItem("coursier_missions_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        return { ok: ids.length, echecs: 0 };
+      },
+      onSuccess: () => selMiss.arreter(),
+    });
+  };
   const supprimerNotifs = (ids, tout) => supprimerNotificationsGroupe({
     ids, tout, nb: tout ? notifs.length : ids.length,
     url: `${BASE_URL}/api/notifications`,
@@ -1164,11 +1186,13 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   </div>
                 )}
 
+                <BarreSelection sel={selMiss} tous={idsMiss()} onSupprimer={(ids)=>retirerMissions(ids,false)} onSupprimerTout={()=>retirerMissions(idsMissTerminees(),true)} />
                 {missions.filter(m=>!missionsMasques.includes(m.id)).map(mission => {
                   const steps = ["en_attente","negociable","accepte","termine"];
                   const idx   = steps.indexOf(mission.statut);
                   return (
-                    <div key={mission.id} style={{ ...card, marginBottom: 20 }}>
+                    <div key={mission.id} onClick={() => { if (selMiss.actif) selMiss.basculer(mission.id); }} style={{ ...card, marginBottom: 20, cursor: selMiss.actif ? "pointer" : "default" }}>
+                      {selMiss.actif && (<div style={{ marginBottom: 10 }}><CaseSelection sel={selMiss} id={mission.id} /></div>)}
                       <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ color: "var(--d-text)", fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{mission.service}</div>

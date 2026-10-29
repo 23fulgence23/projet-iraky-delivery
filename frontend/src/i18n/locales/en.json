@@ -995,5 +995,8 @@
   "Tout désélectionner": "Deselect all",
   "{{n}} sélectionné(s)": "{{n}} selected",
   "Tout supprimer": "Delete all",
-  "conversations": "conversations"
+  "conversations": "conversations",
+  "Rien à supprimer": "Nothing to delete",
+  "Aucune commande terminée ou refusée.": "No completed or declined orders.",
+  "Aucune mission terminée.": "No completed missions."
 }

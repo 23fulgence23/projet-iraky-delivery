@@ -367,6 +367,28 @@ const [notifs, setNotifs] = useState([]);
   const selNotif = useSelection();
   const selMsg = useSelection();
   const selSuivi = useSelection();
+  const selCmd = useSelection();
+  const idsCmd = () => commandes.filter(c => !historiqueMasques.includes(c.id)).map(c => c.id);
+  const idsCmdTerminees = () => commandes.filter(c => !historiqueMasques.includes(c.id) && ["termine","refuse"].includes(c.statut)).map(c => c.id);
+  const retirerCommandes = (ids, tout) => {
+    if (ids.length === 0) {
+      Swal.fire({ icon: "info", title: tr("Rien à supprimer"), text: tr("Aucune commande terminée ou refusée."),
+        background: "var(--d-card)", color: "var(--d-text)", confirmButtonColor: "#FFD700", customClass: { popup: "swal-iraky" } });
+      return;
+    }
+    return supprimerPlusieurs({
+      n: ids.length, tout, libelle: tr("commandes"),
+      action: async () => {
+        setHistoriqueMasques(prev => {
+          const next = [...new Set([...prev, ...ids])];
+          try { localStorage.setItem("historique_masques", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        return { ok: ids.length, echecs: 0 };
+      },
+      onSuccess: () => selCmd.arreter(),
+    });
+  };
   const idsSuivi = () => commandes.filter(c => ["en_attente","negociable","accepte"].includes(c.statut) && !suiviMasques.includes(c.id)).map(c => c.id);
   const retirerSuivi = (ids, tout) => supprimerPlusieurs({
     n: ids.length, tout, libelle: tr("commandes"),
@@ -1560,15 +1582,17 @@ const noterCoursier = async (id, note) => {
                   </div>
                 )}
 
+                <BarreSelection sel={selCmd} tous={idsCmd()} onSupprimer={(ids)=>retirerCommandes(ids,false)} onSupprimerTout={()=>retirerCommandes(idsCmdTerminees(),true)} />
                 {commandes.filter(c=>!historiqueMasques.includes(c.id)).map(cmd => {
                   const svc = SERVICES.find(s=>s.label===cmd.service);
                   const moy = moyens.find(m=>m.label===cmd.moyen);
                   return (
                     <div key={cmd.id} style={{ ...card, marginBottom:14, cursor:"pointer",
                       transition:"all 0.2s" }}
-                      onClick={()=>setDetailCmd(cmd)}
+                      onClick={()=>{ if (selCmd.actif) { selCmd.basculer(cmd.id); return; } setDetailCmd(cmd); }}
                       onMouseEnter={e=>{ e.currentTarget.style.borderColor="#FFD70033"; e.currentTarget.style.transform="translateY(-1px)"; }}
                       onMouseLeave={e=>{ e.currentTarget.style.borderColor="#FFD70018"; e.currentTarget.style.transform="translateY(0)"; }}>
+                      {selCmd.actif && (<div style={{ marginBottom:10 }}><CaseSelection sel={selCmd} id={cmd.id} /></div>)}
 
                       <div style={{ display:"flex", justifyContent:"space-between",
                         alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
