@@ -215,4 +215,44 @@ export function SkeletonAdmin({ onglet }) {
   return <SkeletonPage forme={forme} />;
 }
 
+// Bulles de discussion
+export function SkeletonMessages({ n = 4 }) {
+  const { t } = useTranslation();
+  return (
+    <div role="status" aria-busy="true" aria-label={t("Chargement des données...")}
+      style={{ display: "flex", flexDirection: "column", gap: 12, padding: "8px 4px" }}>
+      {Array.from({ length: n }, (_, i) => (
+        <Skeleton key={i} w={(40 + ((i * 17) % 30)) + "%"} h={i % 2 ? 34 : 46} r={14}
+          style={{ alignSelf: i % 2 ? "flex-end" : "flex-start" }} />
+      ))}
+    </div>
+  );
+}
+
+// Profil : avatar + champs
+export function SkeletonProfil() {
+  const { t } = useTranslation();
+  return (
+    <div role="status" aria-busy="true" aria-label={t("Chargement des données...")}>
+      <SkeletonCarte style={{ display: "flex", gap: 18, alignItems: "center", marginBottom: 16 }}>
+        <Skeleton w={84} h={84} r={42} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+          <Skeleton w="40%" h={20} />
+          <Skeleton w="25%" h={12} />
+        </div>
+      </SkeletonCarte>
+      <SkeletonCarte>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Skeleton w="30%" h={10} />
+              <Skeleton w="100%" h={40} r={10} />
+            </div>
+          ))}
+        </div>
+      </SkeletonCarte>
+    </div>
+  );
+}
+
 export default Skeleton;

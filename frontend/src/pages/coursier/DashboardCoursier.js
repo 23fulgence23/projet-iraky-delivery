@@ -11,6 +11,7 @@ import ChampMessage from "../../components/ChampMessage";
 import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
+import { SkeletonPage, SkeletonMessages, SkeletonProfil } from "../../components/Skeleton";
 import AbonnementImpaye from "../../components/AbonnementImpaye";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
@@ -268,6 +269,8 @@ function DashboardCoursier() {
     note: 0, nb_missions: 0, nb_terminees: 0,
   });
   const [profilLoading, setProfilLoading] = useState(true);
+  const [chargeInitial, setChargeInitial] = useState(false);
+  useEffect(() => { const to = setTimeout(() => setChargeInitial(true), 20000); return () => clearTimeout(to); }, []);
   const [signalCmd, setSignalCmd] = useState(null);
 
   const selNotif = useSelection();
@@ -520,6 +523,7 @@ useEffect(() => {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
       if (!Array.isArray(data)) return;
+      setChargeInitial(true);
       setMissions(data.map(c => ({
         ...c,
         client: c.client ? `${c.client.prenom} ${c.client.nom[0]}.` : "Client",
@@ -1036,7 +1040,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
             {/* ═══ TABLEAU DE BORD ═══ */}
-            {onglet === "accueil" && (
+            {onglet === "accueil" && !chargeInitial && <SkeletonPage forme="accueil" />}
+
+            {onglet === "accueil" && chargeInitial && (
               <div>
                 <div style={{ marginBottom: 28 }}>
                   <h3 style={{ color: "var(--d-text)", fontWeight: 800, margin: 0, fontSize: 22 }}>{tr("Bonjour,")}{" "}<span style={{ color: "var(--d-gold)" }}>{profil.prenom}</span> 👋
@@ -1114,7 +1120,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             )}
 
             {/* ═══ MISSIONS DISPONIBLES ═══ */}
-            {onglet === "missions" && (
+            {onglet === "missions" && !chargeInitial && <SkeletonPage forme="liste" />}
+
+            {onglet === "missions" && chargeInitial && (
               <div>
                 <h4 style={{ color: "var(--d-gold)", marginBottom: 6, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
@@ -1168,7 +1176,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
             )}
 
             {/* ═══ MES MISSIONS ═══ */}
-            {onglet === "mes_missions" && (
+            {onglet === "mes_missions" && !chargeInitial && <SkeletonPage forme="liste" />}
+
+            {onglet === "mes_missions" && chargeInitial && (
               <div>
                 <h4 style={{ color: "var(--d-gold)", marginBottom: 6, fontWeight: 800, fontSize: 20,
                   display: "flex", alignItems: "center", gap: 12 }}>
@@ -1285,7 +1295,9 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
               </div>
             )}
               {/* ═══ MESSAGES COURSIER ═══ */}
-              {onglet === "messages" && (
+              {onglet === "messages" && !chargeInitial && <SkeletonPage forme="liste" />}
+
+              {onglet === "messages" && chargeInitial && (
                 <div>
                   <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
                     display:"flex", alignItems:"center", gap:12 }}>
@@ -1822,11 +1834,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                     <div style={{ height:320, overflowY:"auto", padding:16,
                       display:"flex", flexDirection:"column", gap:10 }}>
                       {supportLoading && supportMessages.length === 0 && (
-                        <div style={{ margin:"auto", color:"#555", fontSize:13, display:"flex",
-                          flexDirection:"column", alignItems:"center", gap:10 }}>
-                          <div style={{ width:22, height:22, border:"3px solid #3b82f640",
-                            borderTop:"3px solid #3b82f6", borderRadius:"50%",
-                            animation:"spin 0.7s linear infinite" }}/>{tr("Chargement de la conversation...")}</div>
+                        <SkeletonMessages />
                       )}
                       {!supportLoading && supportMessages.length === 0 && (
                         <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>

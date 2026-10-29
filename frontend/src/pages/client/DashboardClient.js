@@ -12,6 +12,7 @@ import LanguageSwitcher from "../../components/LanguageSwitcher";
 import ChampMessage from "../../components/ChampMessage";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
+import { SkeletonPage, SkeletonMessages } from "../../components/Skeleton";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
 import achatImg from "../../images/achat.jpg";
@@ -534,6 +535,8 @@ const [notifs, setNotifs] = useState([]);
   const [moyenHov, setMoyenHov]       = useState(null);
   const [moyens, setMoyens]           = useState([]); // ✅ chargé depuis la BDD
   const [loading, setLoading]         = useState(false);
+  const [chargeInitial, setChargeInitial] = useState(false);
+  useEffect(() => { const to = setTimeout(() => setChargeInitial(true), 20000); return () => clearTimeout(to); }, []);
   const [chatCommande, setChatCommande] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatMsg, setChatMsg]           = useState("");
@@ -825,6 +828,7 @@ useEffect(() => {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
       if (!Array.isArray(data)) return;
+      setChargeInitial(true);
       setCommandes(data.map(c => ({
         ...c,
         coursier: c.coursier ? `${c.coursier.prenom} ${c.coursier.nom}` : null,
@@ -1207,7 +1211,9 @@ const noterCoursier = async (id, note) => {
           <div style={{ maxWidth:920, margin:"0 auto" }}>
 
             {/* ═══ TABLEAU DE BORD ═══ */}
-            {onglet==="accueil" && (
+            {onglet==="accueil" && !chargeInitial && <SkeletonPage forme="accueil" />}
+
+            {onglet==="accueil" && chargeInitial && (
               <div>
                 <div style={{ marginBottom:28 }}>
                   <h3 style={{ color:"var(--d-text)", fontWeight:800, margin:0, fontSize:22 }}>{tr("Bonjour,")}{" "}<span style={{ color:"var(--d-gold)" }}>{profil.prenom}</span> 👋
@@ -1564,7 +1570,9 @@ const noterCoursier = async (id, note) => {
             )}
 
             {/* ═══ HISTORIQUE ═══ */}
-            {onglet==="historique" && (
+            {onglet==="historique" && !chargeInitial && <SkeletonPage forme="liste" />}
+
+            {onglet==="historique" && chargeInitial && (
               <div>
                             <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
               display:"flex", alignItems:"center", gap:12 }}>
@@ -1991,7 +1999,9 @@ const noterCoursier = async (id, note) => {
 )}
             {/* ═══ SUIVI ═══ */}
 {/* ═══ SUIVI ═══ */}
-{onglet === "suivi" && (
+{onglet === "suivi" && !chargeInitial && <SkeletonPage forme="liste" />}
+
+{onglet === "suivi" && chargeInitial && (
   <div>
     <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
       display:"flex", alignItems:"center", gap:12 }}>
@@ -2461,11 +2471,7 @@ const noterCoursier = async (id, note) => {
                           <div style={{ height:320, overflowY:"auto", padding:16,
                             display:"flex", flexDirection:"column", gap:10 }}>
                             {supportLoading && supportMessages.length === 0 && (
-                              <div style={{ margin:"auto", color:"#555", fontSize:13, display:"flex",
-                                flexDirection:"column", alignItems:"center", gap:10 }}>
-                                <div style={{ width:22, height:22, border:"3px solid #3b82f640",
-                                  borderTop:"3px solid #3b82f6", borderRadius:"50%",
-                                  animation:"spin 0.7s linear infinite" }}/>{tr("Chargement de la conversation...")}</div>
+                              <SkeletonMessages />
                             )}
                             {!supportLoading && supportMessages.length === 0 && (
                               <div style={{ margin:"auto", textAlign:"center", color:"#555" }}>
