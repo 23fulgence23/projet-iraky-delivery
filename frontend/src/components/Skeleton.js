@@ -255,4 +255,23 @@ export function SkeletonProfil() {
   );
 }
 
+// Champs du profil (cartes icone + libelle + valeur), sans avatar
+export function SkeletonChamps({ n = 6 }) {
+  const { t } = useTranslation();
+  return (
+    <div role="status" aria-busy="true" aria-label={t("Chargement des données...")}
+      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginBottom: 24 }}>
+      {Array.from({ length: n }, (_, i) => (
+        <SkeletonCarte key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14 }}>
+          <Skeleton w={38} h={38} r={10} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+            <Skeleton w="35%" h={10} />
+            <Skeleton w="70%" h={14} />
+          </div>
+        </SkeletonCarte>
+      ))}
+    </div>
+  );
+}
+
 export default Skeleton;

@@ -11,7 +11,7 @@ import ChampMessage from "../../components/ChampMessage";
 import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
-import { SkeletonPage, SkeletonMessages, SkeletonProfil } from "../../components/Skeleton";
+import { SkeletonPage, SkeletonMessages, SkeletonChamps } from "../../components/Skeleton";
 import AbonnementImpaye from "../../components/AbonnementImpaye";
 import Swal from "sweetalert2";
 import logo from "../../images/logo.png";
@@ -1639,10 +1639,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   </div>
 
                   {profilLoading ? (
-                    <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
-                      <MdAccessTime style={{ fontSize: 40, marginBottom: 10 }}/>
-                      <p>{tr("Chargement du profil...")}</p>
-                    </div>
+                    <SkeletonChamps />
                   ) : (
                     <>
                       {/* Infos personnelles */}
