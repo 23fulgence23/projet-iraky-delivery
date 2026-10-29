@@ -1713,50 +1713,75 @@ function DashboardAdmin() {
                 <PaiementsAbonnementAdmin apiUrl={BASE_URL} onChange={fetchAll} />
 
                 {/* Liste coursiers paginée BDD */}
-                {coursiersPage.map(c=>(
-                  <div key={c.id} style={{ ...card,marginBottom:14 }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:12,alignItems:"center" }}>
-                      <div style={{ display:"flex",alignItems:"center",gap:14 }}>
-                        <div style={{ width:44,height:44,borderRadius:"50%",
-                          background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
-                          display:"flex",alignItems:"center",justifyContent:"center",
-                          fontWeight:800,color:"#000",fontSize:16 }}>
-                          {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
-                        </div>
-                        <div>
-                          <div style={{ color:"var(--d-text)",fontWeight:700,fontSize:15 }}>{c.prenom} {c.nom}</div>
-                          <div style={{ color:"#888",fontSize:12 }}>{c.email}</div>
-                          <div style={{ color:"#555",fontSize:11,marginTop:2 }}>{c.missions} missions · {c.nb_terminees||0} ⭐</div>
-                        </div>
-                      </div>
-                      <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                        {c.statut==="suspendu"
-                          ? <span style={{ padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:700,
-                              backgroundColor:"#f59e0b18",color:"#f59e0b",border:"1px solid #f59e0b44" }}>{tr("Suspendu")}</span>
-                          : <StatutBadge statut={c.statut==="actif"?"paye":"impaye"}/>}
-                        {c.statut==="inactif" && (
-                          <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                            style={{ ...btnY,padding:"8px 16px",fontSize:12,
-                              display:"flex",alignItems:"center",gap:6 }}>
-                            <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Valider & Activer")}</button>
-                        )}
-                        {c.statut==="actif" && (
-                          <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                            style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
-                              color:"#ef4444",borderRadius:10,padding:"8px 16px",cursor:"pointer",
-                              fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
-                            <MdBlock style={{ fontSize:16 }}/>{" "}{tr("Suspendre")}</button>
-                        )}
-                        {c.statut==="suspendu" && (
-                          <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
-                            style={{ ...btnY,padding:"8px 16px",fontSize:12,
-                              display:"flex",alignItems:"center",gap:6 }}>
-                            <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Réactiver le compte")}</button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                <div style={{ overflowX:"auto",marginBottom:14 }}>
+                  <table className="responsive-table" style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
+                    <thead>
+                      <tr style={{ borderBottom:"1px solid #FFD70018" }}>
+                        {[tr("Nom"),tr("Téléphone"),tr("Missions"),tr("Terminées"),tr("Statut"),tr("Actions")].map(h=>(
+                          <th key={h} style={{ color:"#555",fontWeight:600,padding:"10px 14px",
+                            textAlign:"left",fontSize:11,letterSpacing:1,whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coursiersPage.map(c=>(
+                        <tr key={c.id} style={{ borderBottom:"1px solid #ffffff06" }}
+                          onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FFD70005"}
+                          onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}>
+                          <td data-label={tr("Nom")} className="td-nom" style={{ padding:"12px 14px" }}>
+                            <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+                              <div style={{ width:34,height:34,borderRadius:"50%",
+                                background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
+                                display:"flex",alignItems:"center",justifyContent:"center",
+                                fontWeight:800,color:"#000",fontSize:13,flexShrink:0 }}>
+                                {(c.prenom||"?")[0]}{(c.nom||"?")[0]}
+                              </div>
+                              <div>
+                                <div style={{ color:"var(--d-text)",fontWeight:600 }}>{c.prenom} {c.nom}</div>
+                                <div style={{ color:"#555",fontSize:11 }}>{c.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td data-label={tr("Téléphone")} style={{ padding:"12px 14px",color:"var(--d-c-aaa)" }}>{c.telephone}</td>
+                          <td data-label={tr("Missions")} style={{ padding:"12px 14px",color:"var(--d-gold)",fontWeight:700 }}>{c.missions||0}</td>
+                          <td data-label={tr("Terminées")} style={{ padding:"12px 14px",color:"#10b981",fontWeight:700 }}>{c.nb_terminees||0}</td>
+                          <td data-label={tr("Statut")} style={{ padding:"12px 14px" }}>
+                            {c.statut==="suspendu"
+                              ? <span style={{ padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:700,
+                                  backgroundColor:"#f59e0b18",color:"#f59e0b",border:"1px solid #f59e0b44" }}>{tr("Suspendu")}</span>
+                              : <StatutBadge statut={c.statut==="actif"?"paye":"impaye"}/>}
+                          </td>
+                          <td style={{ padding:"12px 14px" }}>
+                            <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
+                              {c.statut==="inactif" && (
+                                <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
+                                  style={{ ...btnY,padding:"8px 16px",fontSize:12,
+                                    display:"flex",alignItems:"center",gap:6 }}>
+                                  <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Valider & Activer")}</button>
+                              )}
+                              {c.statut==="actif" && (
+                                <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
+                                  style={{ backgroundColor:"#ef444418",border:"1px solid #ef444433",
+                                    color:"#ef4444",borderRadius:10,padding:"8px 16px",cursor:"pointer",
+                                    fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6 }}>
+                                  <MdBlock style={{ fontSize:16 }}/>{" "}{tr("Suspendre")}</button>
+                              )}
+                              {c.statut==="suspendu" && (
+                                <button onClick={()=>toggleStatut(c.id,`${c.prenom} ${c.nom}`)}
+                                  style={{ ...btnY,padding:"8px 16px",fontSize:12,
+                                    display:"flex",alignItems:"center",gap:6 }}>
+                                  <MdVerified style={{ fontSize:16 }}/>{" "}{tr("Réactiver le compte")}</button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {coursiersPage.length===0 && (
+                        <tr><td colSpan={6} style={{ padding:24,textAlign:"center",color:"#555" }}>{tr("Aucun coursier")}</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
                 {/* Pagination */}
                 {totalAbonnPages>1 && (
