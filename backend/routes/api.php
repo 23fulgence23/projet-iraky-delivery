@@ -36,6 +36,11 @@ Route::middleware('auth:api')->group(function () {
 
     // ── Localisation (utilisateurs connectes, avec consentement) ──
     Route::get ('/position/etat',         [PositionController::class, 'etat']);
+    Route::get ('/tenues/mes',                [\App\Http\Controllers\TenueController::class, 'mes']);
+    Route::post('/tenues',                    [\App\Http\Controllers\TenueController::class, 'commander']);
+    Route::get ('/admin/tenues',              [\App\Http\Controllers\TenueController::class, 'adminListe']);
+    Route::post('/admin/tenues/{id}/valider', [\App\Http\Controllers\TenueController::class, 'valider']);
+    Route::post('/admin/tenues/{id}/refuser', [\App\Http\Controllers\TenueController::class, 'refuser']);
     Route::get ('/mes-pieces',              [\App\Http\Controllers\PiecesController::class, 'miennes']);
     Route::get ('/admin/users/{id}/pieces', [\App\Http\Controllers\PiecesController::class, 'duUtilisateur']);
     Route::post('/position/consentement', [PositionController::class, 'consentement']);
