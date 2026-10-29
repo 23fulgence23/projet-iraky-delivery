@@ -87,3 +87,7 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+/* Logo RAIKY du footer : texte blanc invisible sur fond clair -> inverse en mode clair */
+:root[data-theme="light"] .footer-raiky-logo {
+  filter: invert(1) hue-rotate(180deg);
+}

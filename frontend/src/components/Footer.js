@@ -168,7 +168,7 @@ function Footer() {
           <div className="d-flex align-items-center gap-3" style={{ flexWrap: "wrap" }}>
             <small style={{ fontFamily: "var(--f-mono)", color: "var(--iraky-muted-dim)", fontSize: "11px", letterSpacing: "0.5px" }}>{t("RÉALISÉ PAR")}</small>
             <a href="https://raiky.mg/" target="_blank" rel="noopener noreferrer" title="RAIKY" style={{ display: "flex", alignItems: "center" }}>
-              <img src={raikyLogo} alt="RAIKY" style={{ height: "64px", width: "auto", maxWidth: "150px", objectFit: "contain", flexShrink: 0 }} />
+              <img className="footer-raiky-logo" src={raikyLogo} alt="RAIKY" style={{ height: "64px", width: "auto", maxWidth: "150px", objectFit: "contain", flexShrink: 0 }} />
             </a>
             <span style={{ fontFamily: "var(--f-body)", fontSize: "13.5px", color: "var(--iraky-muted)", display: "inline-flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               {t("Développeur web")}
