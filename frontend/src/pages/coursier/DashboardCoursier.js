@@ -11,6 +11,9 @@ import ChampMessage from "../../components/ChampMessage";
 import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
+import TenuesCoursier from "../../components/TenuesCoursier";
+import TenueBandeau from "../../components/TenueBandeau";
+import { MdCheckroom as IconeTenue } from "react-icons/md";
 import { SkeletonPage, SkeletonMessages, SkeletonChamps } from "../../components/Skeleton";
 import AbonnementImpaye from "../../components/AbonnementImpaye";
 import Swal from "sweetalert2";
@@ -174,6 +177,7 @@ function SidebarContent({ onglet, setOnglet, profil, missions }) {
     { id: "missions",     Icon: MdDeliveryDining, label: "Missions disponibles" },
     { id: "mes_missions", Icon: MdWork,           label: "Mes missions"         },
     { id: "messages",     Icon: MdChat,           label: "Messages"             },
+    { id: "tenue",        Icon: IconeTenue,       label: "Ma tenue"             },
     { id: "profil",       Icon: MdPerson,         label: "Mon profil"           },
     { id: "aide",         Icon: MdHelp,           label: "Aide & Support"       },
   ];
@@ -1040,6 +1044,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
           <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
             {/* ═══ TABLEAU DE BORD ═══ */}
+            {onglet === "accueil" && <TenueBandeau apiUrl={BASE_URL} onAller={() => setOnglet("tenue")} />}
             {onglet === "accueil" && !chargeInitial && <SkeletonPage forme="accueil" />}
 
             {onglet === "accueil" && chargeInitial && (
@@ -1607,6 +1612,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   )}
                 </div>
               )}
+            {onglet === "tenue" && <TenuesCoursier apiUrl={BASE_URL} />}
+
             {/* ═══ PROFIL ═══ */}
             {onglet === "profil" && (
               <div>

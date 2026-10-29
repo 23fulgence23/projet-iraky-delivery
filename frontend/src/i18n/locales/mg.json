@@ -1037,5 +1037,13 @@
   "Action impossible.": "Tsy azo atao ny hetsika.",
   "Cette commande a déjà été traitée.": "Efa voatanisa ity baiko ity.",
   "Aucun coursier dans cette catégorie.": "Tsy misy coursier amin'ity sokajy ity.",
-  "{{n}} commande(s)": "{{n}} baiko"
+  "{{n}} commande(s)": "{{n}} baiko",
+  "Commander ma tenue": "Alaharo ny fitafiako",
+  "coursiers actifs": "coursier mavitrika",
+  "à valider": "hamarina",
+  "tenue validée": "fitafiana voamarina",
+  "à équiper": "hafaka fitafiana",
+  "Article": "Entana",
+  "Total": "Totaliny",
+  "État": "Toe-javatra"
 }

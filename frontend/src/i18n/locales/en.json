@@ -1037,5 +1037,13 @@
   "Action impossible.": "Action not possible.",
   "Cette commande a déjà été traitée.": "This order has already been processed.",
   "Aucun coursier dans cette catégorie.": "No courier in this category.",
-  "{{n}} commande(s)": "{{n}} order(s)"
+  "{{n}} commande(s)": "{{n}} order(s)",
+  "Commander ma tenue": "Order my uniform",
+  "coursiers actifs": "active couriers",
+  "à valider": "to validate",
+  "tenue validée": "uniform validated",
+  "à équiper": "to equip",
+  "Article": "Item",
+  "Total": "Total",
+  "État": "State"
 }
