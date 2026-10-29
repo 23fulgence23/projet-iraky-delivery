@@ -21,6 +21,7 @@ import LocalisationAdmin from "../../components/LocalisationAdmin";
 import TenuesAdmin from "../../components/TenuesAdmin";
 import { MdCheckroom as IconeTenue } from "react-icons/md";
 import TopUtilisateursAdmin from "../../components/TopUtilisateursAdmin";
+import { SkeletonAdmin } from "../../components/Skeleton";
 import { MdMyLocation as IconeLocalisation } from "react-icons/md";
 import { MdReportProblem as IconeSignalement } from "react-icons/md";
 import PaiementsAbonnementAdmin from "../../components/PaiementsAbonnementAdmin";
@@ -1002,10 +1003,7 @@ function DashboardAdmin() {
           <div style={{ maxWidth:1100,margin:"0 auto" }}>
 
             {loading && (
-              <div style={{ textAlign:"center",padding:80,color:"#555" }}>
-                <div style={{ width:40,height:40,border:"3px solid #FFD70033",
-                  borderTop:"3px solid var(--d-gold)",borderRadius:"50%",
-                  animation:"spin 1s linear infinite",margin:"0 auto 16px" }}/>{tr("Chargement des données...")}</div>
+              <SkeletonAdmin onglet={onglet} />
             )}
 
             {onglet==="tenues" && (
