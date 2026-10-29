@@ -81,6 +81,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get   ('/notifications',          [AdminController::class, 'notificationsAdmin']);
         Route::post  ('/notifications/tous-lus', [AdminController::class, 'marquerTousLusAdmin']);
         Route::delete('/notifications/{id}',     [AdminController::class, 'deleteNotif']);
+        Route::post  ('/notifications/supprimer-selection', [AdminController::class, 'supprimerNotifsSelection']);
+        Route::post  ('/notifications/supprimer-tout',      [AdminController::class, 'supprimerNotifsTout']);
 
         // Coursiers en attente
         Route::get ('/coursiers-en-attente',     [AdminController::class, 'coursiersEnAttente']);

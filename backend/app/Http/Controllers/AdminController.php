@@ -219,6 +219,21 @@ public function commandesMensuelles()
     }
 
     // ── Supprimer notif admin ──────────────────────
+    public function supprimerNotifsSelection(\Illuminate\Http\Request $request)
+    {
+        $admin = $this->checkAdmin();
+        $data = $request->validate(['ids' => 'required|array|min:1|max:500', 'ids.*' => 'integer']);
+        $n = Notification::where('user_id', $admin->id)->whereIn('id', $data['ids'])->delete();
+        return response()->json(['message' => 'Supprimées', 'supprimees' => $n]);
+    }
+
+    public function supprimerNotifsTout()
+    {
+        $admin = $this->checkAdmin();
+        $n = Notification::where('user_id', $admin->id)->delete();
+        return response()->json(['message' => 'Supprimées', 'supprimees' => $n]);
+    }
+
     public function deleteNotif($id)
     {
         $admin = $this->checkAdmin();

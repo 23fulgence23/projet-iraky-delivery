@@ -1,4 +1,5 @@
-import supprimer, { notifierSucces, supprimerNotification } from "../../utils/supprimer";
+import supprimer, { notifierSucces, supprimerNotification, supprimerNotificationsGroupe } from "../../utils/supprimer";
+import { useSelection, BarreSelection, CaseSelection } from "../../components/SelectionListe";
 import PiecesIdentite from "../../components/PiecesIdentite";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useState, useEffect } from "react";
@@ -244,6 +245,12 @@ function DashboardAdmin() {
   const [filtreStatut, setFiltreStatut]   = useState("tous");
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmNotifDel, setConfirmNotifDel] = useState(null);
+  const selNotif = useSelection();
+  const supprimerNotifs = (ids, tout) => supprimerNotificationsGroupe({
+    ids, tout, nb: tout ? notifs.length : ids.length,
+    url: BASE_URL + "/api/admin/notifications", headers: getHeaders(),
+    onSuccess: () => { setNotifs(p => tout ? [] : p.filter(n => !ids.includes(n.id))); selNotif.arreter(); },
+  });
   const [abonnPage, setAbonnPage]         = useState(1);
   const ABONNES_PAR_PAGE = 6;
   const [coursierVerif, setCoursierVerif] = useState(null); // ✅ modal vérification
@@ -877,6 +884,7 @@ function DashboardAdmin() {
                   cursor:"pointer",fontSize:11,display:"flex",alignItems:"center",gap:4 }}>
                 <MdDoneAll style={{ fontSize:14 }}/>{" "}{tr("Tout lire")}</button>
             </div>
+            {notifs.length > 0 && (<div style={{ padding:"8px 14px", borderBottom:"1px solid #ffffff08" }}><BarreSelection sel={selNotif} tous={notifs.map(n=>n.id)} onSupprimer={(ids)=>supprimerNotifs(ids,false)} onSupprimerTout={()=>supprimerNotifs([],true)} /></div>)}
             <div style={{ overflowY:"auto",flex:1 }}>
               {notifs.length===0 && (
                 <div style={{ padding:24,textAlign:"center",color:"#555",fontSize:13 }}>{tr("Aucune notification")}</div>
@@ -889,6 +897,7 @@ function DashboardAdmin() {
                     :n.type==="success"?"3px solid #10b981":"3px solid #3b82f6",
                 }}>
                   <div style={{ display:"flex",gap:8,alignItems:"flex-start" }}>
+<CaseSelection sel={selNotif} id={n.id} />
                     <div style={{ paddingTop:4,flexShrink:0 }}>
                       <div style={{ width:7,height:7,borderRadius:"50%",
                         backgroundColor:n.lu?"transparent":"var(--d-gold)" }}/>

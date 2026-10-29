@@ -366,6 +366,20 @@ const [notifs, setNotifs] = useState([]);
 
   const selNotif = useSelection();
   const selMsg = useSelection();
+  const selSuivi = useSelection();
+  const idsSuivi = () => commandes.filter(c => ["en_attente","negociable","accepte"].includes(c.statut) && !suiviMasques.includes(c.id)).map(c => c.id);
+  const retirerSuivi = (ids, tout) => supprimerPlusieurs({
+    n: ids.length, tout, libelle: tr("commandes"),
+    action: async () => {
+      setSuiviMasques(prev => {
+        const next = [...new Set([...prev, ...ids])];
+        try { localStorage.setItem("suivi_masques", JSON.stringify(next)); } catch {}
+        return next;
+      });
+      return { ok: ids.length, echecs: 0 };
+    },
+    onSuccess: () => selSuivi.arreter(),
+  });
   const supprimerNotifs = (ids, tout) => supprimerNotificationsGroupe({
     ids, tout, nb: tout ? notifs.length : ids.length,
     url: "https://projet-iraky-delivery.onrender.com/api/notifications",
@@ -1963,6 +1977,7 @@ const noterCoursier = async (id, note) => {
         <MdLocationOn style={{ color:"var(--d-gold)", fontSize:22 }}/>
       </div>{tr("Suivi en temps réel")}</h4>
     <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>{tr("Commandes actives en ce moment")}</p>
+    <BarreSelection sel={selSuivi} tous={idsSuivi()} onSupprimer={(ids)=>retirerSuivi(ids,false)} onSupprimerTout={()=>retirerSuivi(idsSuivi(),true)} />
 
     {(() => {
       // ✅ Exclut aussi les commandes masquées localement par le client
@@ -1979,6 +1994,7 @@ const noterCoursier = async (id, note) => {
         const idx   = steps.indexOf(cmd.statut);
         return (
           <div key={cmd.id} style={{ ...card, marginBottom:20 }}>
+            {selSuivi.actif && (<div style={{ marginBottom:12 }}><CaseSelection sel={selSuivi} id={cmd.id} /></div>)}
             <div style={{ display:"flex", justifyContent:"space-between",
               flexWrap:"wrap", gap:10, marginBottom:20 }}>
               <div>
