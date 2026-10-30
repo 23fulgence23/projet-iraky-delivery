@@ -1045,5 +1045,9 @@
   "à équiper": "to equip",
   "Article": "Item",
   "Total": "Total",
-  "État": "State"
+  "État": "State",
+  "Sélectionnez une conversation pour afficher les messages": "Select a conversation to view the messages",
+  "Aujourd'hui": "Today",
+  "Hier": "Yesterday",
+  "il y a {{n}} jours": "{{n}} days ago"
 }

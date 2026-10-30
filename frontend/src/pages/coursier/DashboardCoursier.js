@@ -11,6 +11,7 @@ import ChampMessage from "../../components/ChampMessage";
 import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
+import ListeConversations from "../../components/ListeConversations";
 import TenuesCoursier from "../../components/TenuesCoursier";
 import TenueBandeau from "../../components/TenueBandeau";
 import { MdCheckroom as IconeTenue } from "react-icons/md";
@@ -1313,65 +1314,48 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>{tr("Vos conversations avec les clients")}</p>
                   <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
-                  {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
+                  <div className="msg-layout">
+    <div className={"msg-liste" + (chatModal ? " msg-ouvert" : "")}>
+    {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
                     <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
                       <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
                       <p>{tr("Aucune conversation active.")}</p>
                     </div>
                   ) : (
-                    missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(mission => (
-                      <div key={mission.id}
-                        onClick={() => { if (selMsg.actif) { selMsg.basculer(mission.id); return; } ouvrirChat(mission); }}
-                        style={{ ...card, marginBottom:14, cursor:"pointer",
-                          borderLeft:`4px solid ${STATUT_CONFIG[mission.statut]?.color||"var(--d-gold)"}`,
-                          transition:"all 0.2s" }}
-                        onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
-                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-<CaseSelection sel={selMsg} id={mission.id} />
-                            <div style={{ width:46, height:46, borderRadius:"50%",
-                              background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
-                              display:"flex", alignItems:"center", justifyContent:"center",
-                              fontWeight:800, color:"var(--d-text)", fontSize:16, flexShrink:0 }}>
-                              {mission.client?.[0]}
-                            </div>
-                            <div>
-                              <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:15 }}>{mission.client}</div>
-                              <div style={{ color:"#888", fontSize:12 }}>{mission.service} · {mission.date}</div>
-                            </div>
-                          </div>
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                            <StatutBadge statut={mission.statut}/>
-                            <button
-                              onClick={e=>{ e.stopPropagation(); demanderRetraitMessageCoursier(mission.id); }}
-                              title={tr("Retirer de mes messages (reste visible côté admin)")}
-                              style={{ background:"#ef444415", border:"1px solid #ef444430",
-                                color:"#ef6666", borderRadius:8, width:30, height:30, cursor:"pointer",
-                                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                              <MdDelete style={{ fontSize:15 }}/>
-                            </button>
-                            <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
-                              color:"#3b82f6", borderRadius:10, padding:"7px 16px",
-                              fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
-                              <MdChat style={{ fontSize:16 }}/>{" "}{tr("Ouvrir")}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    <ListeConversations
+      sel={selMsg}
+      actifId={chatModal ? chatModal.id : null}
+      couleurAvatar="linear-gradient(135deg,#3b82f6,#1d4ed8)"
+      titreSupprimer={tr("Retirer de mes messages (reste visible côté admin)")}
+      items={missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).map(mission => ({
+        id: mission.id, nom: mission.client, sousTitre: mission.service, apercu: mission.detail, date: mission.date,
+        accord: !!(mission.accord_client && mission.accord_coursier), statut: STATUT_CONFIG[mission.statut]?.label, brut: mission,
+      }))}
+      renderCase={(it) => <CaseSelection sel={selMsg} id={it.id} />}
+      onOuvrir={(it) => ouvrirChat(it.brut)}
+      onSupprimer={(id) => demanderRetraitMessageCoursier(id)}
+    />
+    )}
 
-                  {/* Fenêtre chat fixe en bas */}
-                  {chatModal && (
-                    <div className="chat-panel" style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
-                      backgroundColor:"var(--d-card)", border:"1px solid #FFD70030",
-                      borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
+                  </div>
+    <div className={"msg-detail" + (chatModal ? " msg-ouvert" : "")}>
+      {!chatModal && (
+        <div className="msg-vide">
+          <MdChat style={{ fontSize:56, color:"#555", marginBottom:12 }}/>
+          <p>{tr("Sélectionnez une conversation pour afficher les messages")}</p>
+        </div>
+      )}
+      {chatModal && (
+      <div className="msg-chat">
 
                       {/* Header */}
                       <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
                         display:"flex", justifyContent:"space-between", alignItems:"center",
                         background:"linear-gradient(135deg,#FFD70015,#ff950008)" }}>
                         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <button type="button" className="msg-retour" aria-label={tr("Retour")}
+              onClick={() => { setChatModal(null); setMessages([]); }}
+              style={{ background:"transparent", border:"none", color:"var(--d-gold)", fontSize:22, cursor:"pointer", padding:"0 6px 0 0" }}>←</button>
                           <div style={{ width:34, height:34, borderRadius:"50%",
                             background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",
                             display:"flex", alignItems:"center", justifyContent:"center",
@@ -1386,7 +1370,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                             </div>
                           </div>
                         </div>
-                        <button onClick={() => { setChatModal(null); setMessages([]); }}
+                        <button className="msg-fermer" onClick={() => { setChatModal(null); setMessages([]); }}
                           style={{ background:"transparent", border:"none", color:"#666",
                             fontSize:20, cursor:"pointer" }}
                           onMouseEnter={e=>e.target.style.color="var(--d-text)"}
@@ -1610,6 +1594,8 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                       </div>
                     </div>
                   )}
+    </div>
+    </div>
                 </div>
               )}
             {onglet === "tenue" && <TenuesCoursier apiUrl={BASE_URL} />}

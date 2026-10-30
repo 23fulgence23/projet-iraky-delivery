@@ -12,6 +12,7 @@ import LanguageSwitcher from "../../components/LanguageSwitcher";
 import ChampMessage from "../../components/ChampMessage";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
+import ListeConversations from "../../components/ListeConversations";
 import { SkeletonPage, SkeletonMessages } from "../../components/Skeleton";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
@@ -1707,7 +1708,9 @@ const noterCoursier = async (id, note) => {
 
             {/* ═══ MESSAGES ═══ */}
 {/* ═══ MESSAGES CLIENT ═══ */}
-{onglet === "messages" && (
+{onglet === "messages" && !chargeInitial && <SkeletonPage forme="discussion" />}
+
+{onglet === "messages" && chargeInitial && (
   <div>
     <h4 style={{ color:"var(--d-gold)", marginBottom:6, fontWeight:800, fontSize:20,
       display:"flex", alignItems:"center", gap:12 }}>
@@ -1718,6 +1721,8 @@ const noterCoursier = async (id, note) => {
     <p style={{ color:"#555", marginBottom:24, fontSize:14 }}>{tr("Vos conversations avec les coursiers")}</p>
     <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
+    <div className="msg-layout">
+    <div className={"msg-liste" + (chatCommande ? " msg-ouvert" : "")}>
     {commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).length === 0 ? (
       <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
         <MdChat style={{ fontSize:56, color:"#333", marginBottom:12 }}/>
@@ -1725,65 +1730,41 @@ const noterCoursier = async (id, note) => {
         <p style={{ fontSize:13 }}>{tr("Vos messages apparaîtront ici lorsqu'un coursier prend votre commande.")}</p>
       </div>
     ) : (
-      commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).map(cmd => (
-        <div key={cmd.id}
-          onClick={() => { if (selMsg.actif) { selMsg.basculer(cmd.id); return; } setChatCommande(cmd); setChatMessages([]); }}
-          style={{ ...card, marginBottom:14, cursor:"pointer",
-            borderLeft:`4px solid ${STATUT_CONFIG[cmd.statut]?.color||"var(--d-gold)"}`,
-            transition:"all 0.2s" }}
-          onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(255,215,0,0.1)"; }}
-          onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="none"; }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-<CaseSelection sel={selMsg} id={cmd.id} />
-              <div style={{ width:46, height:46, borderRadius:"50%",
-                background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontWeight:800, color:"#000", fontSize:16, flexShrink:0 }}>
-                {cmd.coursier?.[0]}
-              </div>
-              <div>
-                <div style={{ color:"var(--d-text)", fontWeight:700, fontSize:15 }}><LienCoursier nom={cmd.coursier} id={cmd.coursier_id} onOpen={setApercuCoursierId} /></div>
-                <div style={{ color:"#888", fontSize:12 }}>{cmd.service} · {cmd.date}</div>
-              </div>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <span style={{ backgroundColor:STATUT_CONFIG[cmd.statut]?.bg,
-                color:STATUT_CONFIG[cmd.statut]?.color,
-                borderRadius:20, padding:"3px 12px", fontSize:11, fontWeight:700,
-                border:`1px solid ${STATUT_CONFIG[cmd.statut]?.color}44` }}>
-                {STATUT_CONFIG[cmd.statut]?.icon} {STATUT_CONFIG[cmd.statut]?.label}
-              </span>
-              <div style={{ backgroundColor:"#3b82f618", border:"1px solid #3b82f633",
-                color:"#3b82f6", borderRadius:10, padding:"7px 16px",
-                fontWeight:700, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
-                <MdChat style={{ fontSize:16 }}/>{" "}{tr("Ouvrir")}</div>
-              {/* supprimer */}
-              <button
-                onClick={e=>{ e.stopPropagation(); demanderRetraitMessage(cmd.id); }}
-                title={tr("Supprimer cette conversation (reste visible côté admin)")}
-                style={{ background:"#ef444415", border:"1px solid #ef444430",
-                  color:"#ef6666", borderRadius:8, width:28, height:28, cursor:"pointer",
-                  display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <MdDelete style={{ fontSize:14 }}/>
-              </button>
-            </div>
-          </div>
-        </div>
-      ))
+      <ListeConversations
+      sel={selMsg}
+      actifId={chatCommande ? chatCommande.id : null}
+      couleurAvatar="linear-gradient(135deg,var(--d-gold),#ff8c00)"
+      titreSupprimer={tr("Supprimer cette conversation (reste visible côté admin)")}
+      items={commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).map(cmd => ({
+        id: cmd.id, nom: cmd.coursier, sousTitre: cmd.service, apercu: cmd.detail, date: cmd.date,
+        accord: !!(cmd.accord_client && cmd.accord_coursier), statut: STATUT_CONFIG[cmd.statut]?.label, brut: cmd,
+      }))}
+      renderCase={(it) => <CaseSelection sel={selMsg} id={it.id} />}
+      renderNom={(it) => <LienCoursier nom={it.nom} id={it.brut.coursier_id} onOpen={setApercuCoursierId} />}
+      onOuvrir={(it) => { setChatCommande(it.brut); setChatMessages([]); }}
+      onSupprimer={(id) => demanderRetraitMessage(id)}
+    />
     )}
 
-    {/* Fenêtre chat fixe en bas — même style coursier */}
-    {chatCommande && (
-      <div className="chat-panel" style={{ position:"fixed", bottom:0, right:20, width:400, zIndex:300,
-        backgroundColor:"var(--d-card)", border:"1px solid #FFD70030",
-        borderRadius:"16px 16px 0 0", boxShadow:"0 -8px 40px rgba(0,0,0,0.6)" }}>
+    </div>
+    <div className={"msg-detail" + (chatCommande ? " msg-ouvert" : "")}>
+      {!chatCommande && (
+        <div className="msg-vide">
+          <MdChat style={{ fontSize:56, color:"#555", marginBottom:12 }}/>
+          <p>{tr("Sélectionnez une conversation pour afficher les messages")}</p>
+        </div>
+      )}
+      {chatCommande && (
+      <div className="msg-chat">
 
         {/* Header */}
         <div style={{ padding:"14px 18px", borderBottom:"1px solid #FFD70018",
           display:"flex", justifyContent:"space-between", alignItems:"center",
           background:"linear-gradient(135deg,#FFD70015,#ff950008)" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <button type="button" className="msg-retour" aria-label={tr("Retour")}
+              onClick={() => { setChatCommande(null); setChatMessages([]); }}
+              style={{ background:"transparent", border:"none", color:"var(--d-gold)", fontSize:22, cursor:"pointer", padding:"0 6px 0 0" }}>←</button>
             <div style={{ width:34, height:34, borderRadius:"50%",
               background:"linear-gradient(135deg,var(--d-gold),#ff8c00)",
               display:"flex", alignItems:"center", justifyContent:"center",
@@ -1798,7 +1779,7 @@ const noterCoursier = async (id, note) => {
               </div>
             </div>
           </div>
-          <button onClick={() => { setChatCommande(null); setChatMessages([]); }}
+          <button className="msg-fermer" onClick={() => { setChatCommande(null); setChatMessages([]); }}
             style={{ background:"transparent", border:"none", color:"#666", fontSize:20, cursor:"pointer" }}
             onMouseEnter={e=>e.target.style.color="var(--d-text)"}
             onMouseLeave={e=>e.target.style.color="#666"}>✕</button>
@@ -1995,6 +1976,8 @@ const noterCoursier = async (id, note) => {
         </div>
       </div>
     )}
+    </div>
+    </div>
   </div>
 )}
             {/* ═══ SUIVI ═══ */}
