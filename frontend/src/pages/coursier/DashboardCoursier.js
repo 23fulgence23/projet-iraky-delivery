@@ -546,7 +546,7 @@ useEffect(() => {
   const token = localStorage.getItem("token");
   if (!token) return;
   const rafraichir = () => {
-    fetch(BASE_URL + "/api/me", {
+    fetch(BASE_URL + "/api/me?leger=1", {
       headers: { "Authorization": "Bearer " + token, "Accept": "application/json" },
     })
       .then(r => (r.ok ? r.json() : null))
@@ -559,7 +559,6 @@ useEffect(() => {
           nb_terminees: d.nb_terminees || 0,
           trophees: d.trophees || 0,
           etoiles_actuelles: d.etoiles_actuelles || 0,
-          photo_profil: d.photo_profil || null,
           statut: d.statut || p.statut,
           abonnement_expire: d.abonnement_expire || null,
         }));

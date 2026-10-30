@@ -393,12 +393,12 @@ function DashboardAdmin() {
         .then(r=>r.json()).then(d=>{ if(Array.isArray(d)) setNotifs(d); }).catch(()=>{});
       fetch(`${BASE_URL}/api/admin/stats`, {headers:h})
         .then(r=>r.json()).then(d=>setStats(d)).catch(()=>{});
-    }, 2000);
+    }, 10000);
     // Liste des coursiers (missions, terminees, etoiles) rafraichie toutes les 5 s
     const iv2 = setInterval(() => {
       fetch(`${BASE_URL}/api/admin/coursiers`, {headers:getHeaders()})
         .then(r=>r.ok?r.json():null).then(d=>{ if(Array.isArray(d)) setCoursiers(d); }).catch(()=>{});
-    }, 5000);
+    }, 20000);
     return () => { clearInterval(iv); clearInterval(iv2); };
   }, []);
 
@@ -504,7 +504,7 @@ function DashboardAdmin() {
     const iv = setInterval(() => {
       fetchSupportConvs();
       if (supportSelected) fetchSupportMessages(supportSelected, true);
-    }, 3000);
+    }, 5000);
     return () => clearInterval(iv);
   }, [onglet, supportSelected]);
 
@@ -2810,3 +2810,4 @@ function DashboardAdmin() {
 }
 
 export default DashboardAdmin;
+/* perf2 */

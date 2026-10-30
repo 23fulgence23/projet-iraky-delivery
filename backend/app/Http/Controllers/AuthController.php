@@ -207,6 +207,10 @@ public function login(Request $request)
                 $user->refresh();
             }
 
+            if (request()->boolean('leger')) {
+                $user->makeHidden('photo_profil');
+            }
+
             return response()->json($user);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Token invalide'], 401);
