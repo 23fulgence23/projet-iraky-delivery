@@ -571,7 +571,7 @@ const [notifs, setNotifs] = useState([]);
     if (aideVue !== "chat") return;
     setSupportLoading(true);
     chargerSupportMessages();
-    const interval = setInterval(chargerSupportMessages, 3000); // ✅ polling temps réel
+    const interval = setInterval(chargerSupportMessages, 5000); // ✅ polling temps réel
     return () => clearInterval(interval);
   }, [aideVue]);
 
@@ -822,7 +822,7 @@ useEffect(() => {
     // Notifs
     fetch("https://projet-iraky-delivery.onrender.com/api/notifications", {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
-    }).then(r => r.json()).then(data => setNotifs(Array.isArray(data) ? data : [])).catch(()=>{});
+    }).then(r => r.json()).then(data => setNotifs(prev => { const n = Array.isArray(data) ? data : []; return JSON.stringify(prev) === JSON.stringify(n) ? prev : n; })).catch(()=>{});
 
     // Commandes
     fetch("https://projet-iraky-delivery.onrender.com/api/commandes/mes-commandes", {
@@ -830,15 +830,13 @@ useEffect(() => {
     }).then(r => r.json()).then(data => {
       if (!Array.isArray(data)) return;
       setChargeInitial(true);
-      setCommandes(data.map(c => ({
-        ...c,
-        coursier: c.coursier ? `${c.coursier.prenom} ${c.coursier.nom}` : null,
-      })));
+      const suivant = data.map(c => ({ ...c, coursier: c.coursier ? `${c.coursier.prenom} ${c.coursier.nom}` : null }));
+      setCommandes(prev => (JSON.stringify(prev) === JSON.stringify(suivant) ? prev : suivant));
     }).catch(()=>{});
   };
 
   fetchAll();
-  const interval = setInterval(fetchAll, 5000); // ✅ toutes les 2s
+  const interval = setInterval(fetchAll, 10000); // ✅ toutes les 2s
   return () => clearInterval(interval);
 }, []);
 
@@ -875,7 +873,7 @@ useEffect(() => {
   };
 
   fetchMessages();
-  const interval = setInterval(fetchMessages, 2000); // ✅ toutes les 2s
+  const interval = setInterval(fetchMessages, 3000); // ✅ toutes les 2s
   return () => clearInterval(interval);
 }, [chatCommande, messagesEffaces]);
 

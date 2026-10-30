@@ -351,7 +351,7 @@ function DashboardCoursier() {
     if (aideVue !== "chat") return;
     setSupportLoading(true);
     chargerSupportMessages();
-    const interval = setInterval(chargerSupportMessages, 3000);
+    const interval = setInterval(chargerSupportMessages, 5000);
     return () => clearInterval(interval);
   }, [aideVue]);
 
@@ -537,7 +537,7 @@ useEffect(() => {
   };
 
   fetchAll();
-  const interval = setInterval(fetchAll, 5000);
+  const interval = setInterval(fetchAll, 10000);
   return () => clearInterval(interval);
 }, []);
 
@@ -566,7 +566,7 @@ useEffect(() => {
       })
       .catch(() => {});
   };
-  const interval = setInterval(rafraichir, 5000);
+  const interval = setInterval(rafraichir, 15000);
   return () => clearInterval(interval);
 }, []);
 
@@ -584,7 +584,7 @@ useEffect(() => {
   };
 
   fetchMessages();
-  const interval = setInterval(fetchMessages, 2000);
+  const interval = setInterval(fetchMessages, 3000);
   return () => clearInterval(interval);
 }, [chatModal]);
 

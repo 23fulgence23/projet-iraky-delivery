@@ -51,7 +51,7 @@ export default function SignalementsAdmin({ apiUrl, onChange }) {
 
   useEffect(() => {
     charger();
-    const iv = setInterval(charger, 5000);
+    const iv = setInterval(charger, 10000);
     return () => clearInterval(iv);
   }, [charger]);
 

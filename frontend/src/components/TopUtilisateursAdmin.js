@@ -54,7 +54,7 @@ export default function TopUtilisateursAdmin({ apiUrl }) {
         .catch(() => {});
     };
     charger();
-    const iv = setInterval(charger, 5000);
+    const iv = setInterval(charger, 20000);
     return () => clearInterval(iv);
   }, [apiUrl]);
 

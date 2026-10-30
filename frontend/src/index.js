@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import "./responsive.css";
 import "./DashboardTheme.css";
+import "./utils/reseau";
 try {
   document.documentElement.setAttribute("data-theme", localStorage.getItem("iraky-theme") === "light" ? "light" : "dark");
 } catch {}

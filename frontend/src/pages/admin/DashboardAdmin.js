@@ -412,7 +412,7 @@ function DashboardAdmin() {
   };
   useEffect(() => {
     chargerSigNouveaux();
-    const ivSig = setInterval(chargerSigNouveaux, 5000);
+    const ivSig = setInterval(chargerSigNouveaux, 20000);
     return () => clearInterval(ivSig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
