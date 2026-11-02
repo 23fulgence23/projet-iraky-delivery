@@ -13,6 +13,7 @@ import ChampMessage from "../../components/ChampMessage";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
 import ListeConversations from "../../components/ListeConversations";
+import AjusteHauteur from "../../components/AjusteHauteur";
 import { SkeletonPage, SkeletonMessages } from "../../components/Skeleton";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
@@ -744,6 +745,20 @@ useEffect(() => {
 }, []);
 
 // Ouvrir le chat d'une commande
+// Accords : la conversation ouverte suit la liste des commandes (rafraichie automatiquement)
+useEffect(() => {
+  if (!chatCommande) return;
+  const live = commandes.find((c) => String(c.id) === String(chatCommande.id));
+  if (!live) return;
+  const reset = live.statut === "en_attente";
+  const ac = reset ? false : (!!chatCommande.accord_client || !!live.accord_client);
+  const aco = reset ? false : (!!chatCommande.accord_coursier || !!live.accord_coursier);
+  const st = live.statut === "termine" ? "termine" : (ac && aco ? "accepte" : live.statut);
+  if (ac !== !!chatCommande.accord_client || aco !== !!chatCommande.accord_coursier || st !== chatCommande.statut) {
+    setChatCommande((prev) => (prev && String(prev.id) === String(live.id) ? { ...prev, accord_client: ac, accord_coursier: aco, statut: st } : prev));
+  }
+}, [commandes, chatCommande]);
+
 const ouvrirChat = async (cmd) => {
   setChatCommande(cmd);
   setChatMessages([]);
@@ -1720,6 +1735,7 @@ const noterCoursier = async (id, note) => {
     <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
     <div className="msg-layout">
+    <AjusteHauteur />
     <div className={"msg-liste" + (chatCommande ? " msg-ouvert" : "")}>
     {commandes.filter(c => c.coursier && c.statut !== "en_attente" && !messagesMasques.includes(c.id)).length === 0 ? (
       <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>
@@ -1798,6 +1814,7 @@ const noterCoursier = async (id, note) => {
                 const data = await res.json();
                 if (res.ok) {
                   setChatCommande(prev => ({...prev, accord_client:true, statut:data.commande?.statut||prev.statut}));
+                  setCommandes(prev => prev.map(c => c.id === chatCommande.id ? {...c, accord_client:true, statut:data.commande?.statut||c.statut} : c));
                   showToast(tr("✅ Vous avez accepté l'accord !"));
                 } else {
                   showToast(data.message||"Erreur", "error");
@@ -1819,6 +1836,7 @@ const noterCoursier = async (id, note) => {
                 );
                 if (res.ok) {
                   setChatCommande(prev => ({...prev, statut:"en_attente", accord_client:false, accord_coursier:false}));
+                  setCommandes(prev => prev.map(c => c.id === chatCommande.id ? {...c, statut:"en_attente", accord_client:false, accord_coursier:false} : c));
                   showToast(tr("❌ Accord refusé"), "error");
                 }
               }}

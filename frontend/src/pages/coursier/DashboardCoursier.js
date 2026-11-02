@@ -12,6 +12,7 @@ import RappelAbonnement from "../../components/RappelAbonnement";
 import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
 import ListeConversations from "../../components/ListeConversations";
+import AjusteHauteur from "../../components/AjusteHauteur";
 import TenuesCoursier from "../../components/TenuesCoursier";
 import TenueBandeau from "../../components/TenueBandeau";
 import { MdCheckroom as IconeTenue } from "react-icons/md";
@@ -697,6 +698,20 @@ const prendreMission = async (pub) => {
 const messagesEndRef = useRef(null);
 
 // ✅ Charger les messages quand on ouvre le chat
+// Accords : la conversation ouverte suit la liste des missions (rafraichie automatiquement)
+useEffect(() => {
+  if (!chatModal) return;
+  const live = missions.find((m) => String(m.id) === String(chatModal.id));
+  if (!live) return;
+  const reset = live.statut === "en_attente";
+  const ac = reset ? false : (!!chatModal.accord_client || !!live.accord_client);
+  const aco = reset ? false : (!!chatModal.accord_coursier || !!live.accord_coursier);
+  const st = live.statut === "termine" ? "termine" : (ac && aco ? "accepte" : live.statut);
+  if (ac !== !!chatModal.accord_client || aco !== !!chatModal.accord_coursier || st !== chatModal.statut) {
+    setChatModal((prev) => (prev && String(prev.id) === String(live.id) ? { ...prev, accord_client: ac, accord_coursier: aco, statut: st } : prev));
+  }
+}, [missions, chatModal]);
+
 const ouvrirChat = async (mission) => {
   setChatModal(mission);
   setMessages([]);
@@ -1314,6 +1329,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                   <BarreSelection sel={selMsg} tous={idsConversations()} onSupprimer={(ids)=>retirerConversations(ids,false)} onSupprimerTout={()=>retirerConversations(idsConversations(),true)} />
 
                   <div className="msg-layout">
+    <AjusteHauteur />
     <div className={"msg-liste" + (chatModal ? " msg-ouvert" : "")}>
     {missions.filter(m => m.statut !== "en_attente" && !messagesMasquesCoursier.includes(m.id)).length === 0 ? (
                     <div style={{ ...card, textAlign:"center", color:"#555", padding:48 }}>

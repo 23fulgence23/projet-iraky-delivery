@@ -375,3 +375,11 @@ body {
   .msg-retour { display: inline-flex; align-items: center; }
   .msg-fermer { display: none !important; }
 }
+
+/* messagerie-2 */
+.msg-liste, .msg-chat > div:nth-child(4) { scrollbar-width: thin; scrollbar-color: rgba(255, 215, 0, .35) transparent; }
+.msg-liste::-webkit-scrollbar, .msg-chat > div:nth-child(4)::-webkit-scrollbar { width: 5px; }
+.msg-liste::-webkit-scrollbar-track, .msg-chat > div:nth-child(4)::-webkit-scrollbar-track { background: transparent; }
+.msg-liste::-webkit-scrollbar-thumb, .msg-chat > div:nth-child(4)::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, .35); border-radius: 4px; }
+.msg-liste::-webkit-scrollbar-thumb:hover, .msg-chat > div:nth-child(4)::-webkit-scrollbar-thumb:hover { background: rgba(255, 215, 0, .6); }
+@media (min-width: 768px) { .msg-layout { min-height: 300px; } }
