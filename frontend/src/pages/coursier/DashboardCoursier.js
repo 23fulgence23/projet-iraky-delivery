@@ -13,6 +13,8 @@ import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
 import ListeConversations from "../../components/ListeConversations";
 import AjusteHauteur from "../../components/AjusteHauteur";
+import EtatMessage from "../../components/EtatMessage";
+import { fusionnerEnvois } from "../../utils/messagesEnvoi";
 import TenuesCoursier from "../../components/TenuesCoursier";
 import TenueBandeau from "../../components/TenueBandeau";
 import { MdCheckroom as IconeTenue } from "react-icons/md";
@@ -579,7 +581,7 @@ useEffect(() => {
     fetch(`${BASE_URL}/api/commandes/${chatModal.id}/messages`, {
       headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
     }).then(r => r.json()).then(data => {
-      if (Array.isArray(data)) setMessages(data);
+      if (Array.isArray(data)) setMessages(prev => fusionnerEnvois(prev, data, chatModal.id));
     }).catch(() => {});
   };
 
@@ -741,7 +743,7 @@ const envoyerMessage = async () => {
     lu:          false,
     time:        new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
     created_at:  new Date().toISOString(),
-    _sending:    true,
+    _sending:    true, _cmd: chatModal.id,
   };
   setMessages(prev => [...prev, msgTemp]);
   const texteEnvoi = newMsg;
@@ -1575,6 +1577,7 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
                                   {m.time || (m.created_at
                                     ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
                                     : "")}
+                                  {isCoursier && <EtatMessage m={m} />}
                                 </div>
                               </div>
                             </div>

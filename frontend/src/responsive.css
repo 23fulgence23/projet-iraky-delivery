@@ -383,3 +383,8 @@ body {
 .msg-liste::-webkit-scrollbar-thumb, .msg-chat > div:nth-child(4)::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, .35); border-radius: 4px; }
 .msg-liste::-webkit-scrollbar-thumb:hover, .msg-chat > div:nth-child(4)::-webkit-scrollbar-thumb:hover { background: rgba(255, 215, 0, .6); }
 @media (min-width: 768px) { .msg-layout { min-height: 300px; } }
+
+/* messagerie-3 */
+.msg-envoi { display: inline-block; width: 11px; height: 11px; flex-shrink: 0; border: 2px solid rgba(255, 215, 0, .8);
+  border-top-color: transparent; border-radius: 50%; animation: msg-tourne .7s linear infinite; }
+@keyframes msg-tourne { to { transform: rotate(360deg); } }

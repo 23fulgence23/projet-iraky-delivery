@@ -14,6 +14,7 @@ import SignalerProbleme from "../../components/SignalerProbleme";
 import SuiviPosition from "../../components/SuiviPosition";
 import ListeConversations from "../../components/ListeConversations";
 import AjusteHauteur from "../../components/AjusteHauteur";
+import EtatMessage from "../../components/EtatMessage";
 import { SkeletonPage, SkeletonMessages } from "../../components/Skeleton";
 import CoursierInfoCard from "../../components/CoursierInfoCard";
 import Swal from "sweetalert2";
@@ -788,7 +789,7 @@ const envoyerChatMsg = async () => {
     lu:          false,
     time:        new Date().toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"}),
     created_at:  new Date().toISOString(),
-    _sending:    true,  // flag temporaire
+    _sending:    true, _cmd: chatCommande.id,  // flag temporaire
   };
   setChatMessages(prev => [...prev, msgTemp]);
   const texteEnvoi = chatMsg;
@@ -1955,6 +1956,7 @@ const noterCoursier = async (id, note) => {
                     {m.time || (m.created_at
                       ? new Date(m.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})
                       : "")}
+                    {isClient && <EtatMessage m={m} />}
                   </div>
                 </div>
               </div>
