@@ -30,9 +30,9 @@ function Tableau({ colonnes, lignes, texteVide, largeur = 640 }) {
   });
 
   return (
-    <div style={{ ...carte, padding: 0, overflow: "hidden" }}>
+    <div className="tenues-wrap" style={{ ...carte, padding: 0, overflow: "hidden" }}>
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", minWidth: largeur, borderCollapse: "collapse" }}>
+        <table className="responsive-table" style={{ width: "100%", minWidth: largeur, borderCollapse: "collapse" }}>
           <thead>
             <tr>
               {colonnes.map((c) => (
@@ -49,7 +49,7 @@ function Tableau({ colonnes, lignes, texteVide, largeur = 640 }) {
             ) : visibles.map((l) => (
               <tr key={l.key}>
                 {l.cells.map((cell, i) => (
-                  <td key={i} style={{ padding: "12px 14px", fontSize: 14, borderTop: "1px solid var(--d-border)", verticalAlign: "middle" }}>{cell}</td>
+                  <td key={i} data-label={colonnes[i] === "Actions" ? undefined : t(colonnes[i])} style={{ padding: "12px 14px", fontSize: 14, borderTop: "1px solid var(--d-border)", verticalAlign: "middle" }}>{cell}</td>
                 ))}
               </tr>
             ))}

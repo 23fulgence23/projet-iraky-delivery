@@ -878,26 +878,27 @@ const changerStatutAccord = async (commandeId, nouveauStatut) => {
       )}
 
       {/* NAVBAR */}
-      <nav style={{
+      <nav className="dash-nav" style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         backgroundColor: "var(--d-glass)", backdropFilter: "blur(16px)",
         borderBottom: "1px solid #FFD70020", padding: "0 24px", height: 66,
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <button className="d-lg-none" onClick={() => setSidebarOpen(!sidebarOpen)}
-          style={{ background: "transparent", border: "1px solid #FFD70044", borderRadius: 10, padding: "7px 10px", cursor: "pointer" }}>
-          {[0,1,2].map(i => (
-            <div key={i} style={{ width: 20, height: 2, backgroundColor: "var(--d-gold)", margin: i < 2 ? "0 0 4px 0" : "0" }}/>
-          ))}
-        </button>
-
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img className="d-none d-lg-block" src={logo} alt={tr("IRAKY")} style={{ width: 60, height: 60, borderRadius: "50%" }}/>
           <span style={{ color: "var(--d-gold)", fontWeight: 800, fontSize: 19 }} className="d-none d-sm-inline">{tr("IRAKY Delivery")}</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <ThemeToggle size={38} />
+          <button className="d-lg-none" onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{ background: "transparent", border: "1px solid #FFD70044", borderRadius: 10, padding: "7px 10px", cursor: "pointer" }}>
+          {[0,1,2].map(i => (
+            <div key={i} style={{ width: 20, height: 2, backgroundColor: "var(--d-gold)", margin: i < 2 ? "0 0 4px 0" : "0" }}/>
+          ))}
+        </button>
+        </div>
           <div style={{ position: "relative", cursor: "pointer" }}
             onClick={() => { setNotifOpen(!notifOpen); setNotifs(p => p.map(n => ({ ...n, lu: true }))); }}>
             <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: "#FFD70015",
