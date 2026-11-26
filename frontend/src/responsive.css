@@ -391,3 +391,20 @@ body {
 
 /* Client/coursier : le hamburger passe devant (a gauche de) l'icone clair/sombre */
 .dash-nav button.d-lg-none { order: -1; }
+
+/* Barre du haut client/coursier : espacement resserre sur mobile */
+@media (max-width: 576px) {
+  .dash-nav { padding: 0 12px !important; }
+  .dash-nav > div:last-child { gap: 10px !important; }
+}
+
+/* Tenues (admin) : tableaux en cartes sur mobile */
+@media (max-width: 768px) {
+  .tenues-wrap { background: transparent !important; border: none !important; overflow: visible !important; }
+  table.responsive-table { min-width: 0 !important; }
+  table.responsive-table td { border-top: 0 !important; }
+}
+/* Boites de statistiques Tenues : 1 colonne sur petit ecran */
+@media (max-width: 480px) {
+  div[style*="minmax(150px"] { grid-template-columns: 1fr !important; }
+}
