@@ -388,3 +388,6 @@ body {
 .msg-envoi { display: inline-block; width: 11px; height: 11px; flex-shrink: 0; border: 2px solid rgba(255, 215, 0, .8);
   border-top-color: transparent; border-radius: 50%; animation: msg-tourne .7s linear infinite; }
 @keyframes msg-tourne { to { transform: rotate(360deg); } }
+
+/* Client/coursier : le hamburger passe devant (a gauche de) l'icone clair/sombre */
+.dash-nav button.d-lg-none { order: -1; }
